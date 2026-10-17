@@ -75,6 +75,24 @@ jobs:
       - name: Tests (Pest)
         run: vendor/bin/pest
 
+  # Builds the production image from exactly what is in git, the same way Render does.
+  # Catches files that exist on a laptop but were never committed.
+  api-image:
+    name: API Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t courtku-api:ci apps/api
+
+      - name: Image starts and caches config, routes and views
+        run: |
+          docker run --rm \
+            -e APP_KEY=base64:$(openssl rand -base64 32) \
+            -e AUTORUN_LARAVEL_MIGRATION=false \
+            courtku-api:ci php artisan optimize
+
   web:
     name: Web
     runs-on: ubuntu-latest
