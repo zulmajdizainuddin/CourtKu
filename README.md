@@ -2,8 +2,15 @@
 
 Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a multi-tenant SaaS: each venue gets its own booking page, players see live availability and pay online, and owners run their day from a dashboard.
 
-> **Status:** M0 Foundation. Accounts work (register, verify email, log in, log out, reset password). Venues and bookings come next.
-> Live demo: _coming at the end of M0_
+> **Status:** M0 Foundation is live. Accounts work (register, verify email, log in, log out, reset password). Venues and bookings come next.
+
+## Live demo
+
+**https://courtku.vercel.app**
+
+Log in with the demo account `player@example.com` / `CourtKu-Demo-2026`, or register your own.
+
+The API runs on a free plan that sleeps when nobody uses it, so the first request after a quiet period can take up to a minute.
 
 ## Tech stack
 
@@ -12,7 +19,8 @@ Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a 
 | API | Laravel 13 (PHP 8.4), Sanctum + Fortify for auth, Pest for tests, Larastan + Pint for code quality |
 | Web | Next.js 16 (TypeScript, App Router), Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form + Zod, Vitest |
 | Data | MySQL 8.4, Valkey (Redis-compatible) for cache and queues |
-| CI | GitHub Actions: lint, static analysis, tests and build on every pull request |
+| CI | GitHub Actions: lint, static analysis, tests, build and the production Docker image on every pull request |
+| Hosting | Vercel (web), Render (API, Docker), Aiven (MySQL), all in or near Singapore |
 
 ## How it fits together
 
@@ -64,7 +72,7 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 4. Open http://localhost:3000. Emails (verification, password reset) appear in Mailpit at http://localhost:8025.
 
-**Demo account** (created by `--seed`): `player@example.com` / `CourtKu-Demo-2026`
+**Local demo account** (created by `--seed`): `player@example.com` / `CourtKu-Demo-2026`
 
 ## Tests and checks
 
