@@ -1,0 +1,45 @@
+# Local services for CourtKu: the database, cache/queue, and a fake email inbox.
+# The Laravel and Next.js apps themselves run directly on your computer (see ADR-011).
+#
+#   docker compose up -d     start everything in the background
+#   docker compose down      stop (your data is kept)
+#   docker compose down -v   stop and DELETE all local data
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: courtku
+      MYSQL_USER: courtku
+      MYSQL_PASSWORD: secret
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Creates the separate courtku_test database the tests use.
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      retries: 10
+
+  # Valkey is the open-source fork of Redis; Laravel talks to it exactly like Redis.
+  redis:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Catches every email the app sends. Open http://localhost:8025 to read them.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025" # SMTP: Laravel sends here
+      - "8025:8025" # Web inbox
+
+volumes:
+  mysql-data:
+  redis-data:

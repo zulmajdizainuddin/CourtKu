@@ -1,0 +1,10 @@
+# Each app has its own .gitignore (apps/api, apps/web). These are for the repo root.
+
+# Personal planning documents stay on your laptop, not on public GitHub.
+*.pdf
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

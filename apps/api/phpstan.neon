@@ -1,0 +1,10 @@
+# Larastan reads the code without running it and reports type mistakes (NFR-11).
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - bootstrap/app.php
+        - routes/
+    level: 6
