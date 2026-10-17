@@ -78,6 +78,10 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 The same checks run in GitHub Actions on every pull request.
 
+## Deployment
+
+How the live demo is hosted and every production setting: [docs/deploy.md](docs/deploy.md).
+
 ## Decisions
 
 Every important design decision has a short write-up in [docs/adr](docs/adr/README.md).
