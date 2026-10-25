@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        // "Is the app running?" for the host's health check. Never touches the database,
+        // so a database outage doesn't make the host restart a working API.
+        // The full check (database + cache) is /api/health, used by the uptime monitor.
+        health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Lets the Next.js app log in with Sanctum's session cookie instead of tokens.

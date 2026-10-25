@@ -15,6 +15,12 @@ export default function Home() {
         See live availability for badminton, futsal and pickleball courts, pay online, and get your
         booking code instantly.
       </p>
+      {/* Honest about what works today. Remove once players can book (M3). */}
+      <p className="max-w-xl rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Booking is coming soon.</span> Venues are being
+        set up. You can already create an account so you&apos;re ready when the first courts go
+        live.
+      </p>
     </div>
   );
 }

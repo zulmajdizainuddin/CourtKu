@@ -20,7 +20,7 @@ The API runs on a free plan that sleeps when nobody uses it, so the first reques
 | Web | Next.js 16 (TypeScript, App Router), Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form + Zod, Vitest |
 | Data | MySQL 8.4, Valkey (Redis-compatible) for cache and queues |
 | CI | GitHub Actions: lint, static analysis, tests, build and the production Docker image on every pull request |
-| Hosting | Vercel (web), Render (API, Docker), Aiven (MySQL), all in or near Singapore |
+| Hosting | Vercel (web), Render (API, Docker), Aiven (MySQL), Brevo (email), UptimeRobot (monitoring) |
 
 ## How it fits together
 
