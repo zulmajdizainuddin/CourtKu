@@ -8,19 +8,25 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
- * Answers "is the API alive?" for the uptime monitor.
+ * GET /api/health: the full check for the uptime monitor.
  * Returns 200 when the database and cache both respond, 503 when either is down.
+ * (GET /up only says "the app is running" and is what the host's health check uses.)
  */
 class HealthController extends Controller
 {
     public function __invoke(): JsonResponse
     {
-        $checks = [
-            'database' => $this->check(fn () => DB::select('select 1')),
-            'cache' => $this->check(fn () => Cache::store()->get('health-check')),
-        ];
+        $database = $this->check(fn () => DB::select('select 1'));
 
-        $healthy = ! in_array(false, $checks, true);
+        // When the cache is stored in the database, a dead database means a dead cache.
+        // Skip asking again, so the answer comes back in seconds instead of timing out.
+        $cacheUsesDatabase = config('cache.stores.'.config('cache.default').'.driver') === 'database';
+        $cache = ($cacheUsesDatabase && ! $database)
+            ? false
+            : $this->check(fn () => Cache::store()->get('health-check'));
+
+        $checks = ['database' => $database, 'cache' => $cache];
+        $healthy = $database && $cache;
 
         return response()->json(
             ['status' => $healthy ? 'ok' : 'down', 'checks' => $checks],

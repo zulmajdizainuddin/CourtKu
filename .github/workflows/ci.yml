@@ -86,12 +86,27 @@ jobs:
       - name: Build image
         run: docker build -t courtku-api:ci apps/api
 
-      - name: Image starts and caches config, routes and views
+      # 10.255.255.1 never answers, like a database that has been powered off.
+      # The API must still start, answer /up, and report the database as down.
+      - name: API starts even when the database is down
         run: |
-          docker run --rm \
+          docker run -d --name api -p 8080:8080 \
             -e APP_KEY=base64:$(openssl rand -base64 32) \
-            -e AUTORUN_LARAVEL_MIGRATION=false \
-            courtku-api:ci php artisan optimize
+            -e DB_CONNECTION=mysql -e DB_HOST=10.255.255.1 \
+            -e DB_CONNECT_TIMEOUT=2 -e COURTKU_MIGRATE_TIMEOUT=10 \
+            courtku-api:ci
+          for i in $(seq 1 60); do
+            curl -fs http://localhost:8080/up > /dev/null && break
+            sleep 2
+          done
+          curl -fs http://localhost:8080/up > /dev/null
+          status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/health)
+          echo "/api/health returned $status"
+          test "$status" = "503"
+
+      - name: Container logs
+        if: always()
+        run: docker logs api || true
 
   web:
     name: Web

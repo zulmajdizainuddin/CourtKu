@@ -61,6 +61,9 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Give up connecting after a few seconds instead of about a minute, so a
+                // database that is down gives a quick error instead of a hanging page.
+                PDO::ATTR_TIMEOUT => (int) env('DB_CONNECT_TIMEOUT', 3),
             ]) : [],
         ],
 
