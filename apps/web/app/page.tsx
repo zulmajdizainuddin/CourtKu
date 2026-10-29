@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { VerifiedNotice } from "@/components/auth/verified-notice";
 
@@ -20,6 +21,13 @@ export default function Home() {
         <span className="font-medium text-foreground">Booking is coming soon.</span> Venues are being
         set up. You can already create an account so you&apos;re ready when the first courts go
         live.
+      </p>
+      <p className="max-w-xl text-sm text-muted-foreground">
+        Run a venue?{" "}
+        <Link href="/venues/new" className="font-medium text-foreground underline">
+          List it on CourtKu
+        </Link>{" "}
+        and take bookings online.
       </p>
     </div>
   );

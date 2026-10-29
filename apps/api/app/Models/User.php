@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -34,5 +35,18 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_platform_admin' => 'boolean',
         ];
+    }
+
+    /**
+     * The venues this user works at; their role at each is on ->pivot->role.
+     *
+     * @return BelongsToMany<Venue, $this, VenueMember>
+     */
+    public function venues(): BelongsToMany
+    {
+        return $this->belongsToMany(Venue::class, 'venue_members')
+            ->using(VenueMember::class)
+            ->withPivot('role')
+            ->withTimestamps();
     }
 }
