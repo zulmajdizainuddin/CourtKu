@@ -73,6 +73,14 @@ class Venue extends Model
     }
 
     /**
+     * @return HasMany<Court, $this>
+     */
+    public function courts(): HasMany
+    {
+        return $this->hasMany(Court::class);
+    }
+
+    /**
      * @return HasMany<OperatingHour, $this>
      */
     public function operatingHours(): HasMany

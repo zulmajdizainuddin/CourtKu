@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
+use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
@@ -32,6 +33,19 @@ Route::prefix('v1')->group(function () {
             Route::post('/venues/{venue}/closures', [VenueClosureController::class, 'store'])->can('update', 'venue');
             // scopeBindings: {closure} must belong to {venue}, otherwise 404.
             Route::delete('/venues/{venue}/closures/{closure}', [VenueClosureController::class, 'destroy'])
+                ->scopeBindings()
+                ->can('update', 'venue');
+
+            Route::get('/venues/{venue}/courts', [CourtController::class, 'index'])->can('view', 'venue');
+            Route::post('/venues/{venue}/courts', [CourtController::class, 'store'])->can('update', 'venue');
+            Route::put('/venues/{venue}/courts/order', [CourtController::class, 'reorder'])->can('update', 'venue');
+            // whereNumber: "order" above is never mistaken for a court id.
+            Route::put('/venues/{venue}/courts/{court}', [CourtController::class, 'update'])
+                ->whereNumber('court')
+                ->scopeBindings()
+                ->can('update', 'venue');
+            Route::delete('/venues/{venue}/courts/{court}', [CourtController::class, 'destroy'])
+                ->whereNumber('court')
                 ->scopeBindings()
                 ->can('update', 'venue');
         });

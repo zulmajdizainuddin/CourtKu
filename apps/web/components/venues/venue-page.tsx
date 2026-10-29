@@ -82,6 +82,7 @@ function VenueMenu({ venueId }: { venueId: string }) {
     { href: base, label: "Overview" },
     { href: `${base}/profile`, label: "Profile" },
     { href: `${base}/hours`, label: "Hours" },
+    { href: `${base}/courts`, label: "Courts" },
   ];
 
   return (
