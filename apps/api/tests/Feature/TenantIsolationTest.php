@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Court;
 use App\Models\User;
 use App\Models\Venue;
 
@@ -19,11 +20,19 @@ dataset('manage endpoints', [
     'list closures' => ['GET', '/api/v1/manage/venues/{venue}/closures'],
     'add closure' => ['POST', '/api/v1/manage/venues/{venue}/closures'],
     'remove closure' => ['DELETE', '/api/v1/manage/venues/{venue}/closures/{closure}'],
+    'list courts' => ['GET', '/api/v1/manage/venues/{venue}/courts'],
+    'add court' => ['POST', '/api/v1/manage/venues/{venue}/courts'],
+    'reorder courts' => ['PUT', '/api/v1/manage/venues/{venue}/courts/order'],
+    'change court' => ['PUT', '/api/v1/manage/venues/{venue}/courts/{court}'],
+    'remove court' => ['DELETE', '/api/v1/manage/venues/{venue}/courts/{court}'],
 ]);
 
-/** Fills in {venue}, and {closure} with one of that venue's own closures. */
+/** Fills in {venue}, and {closure} or {court} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
+    if (str_contains($path, '{court}')) {
+        $path = str_replace('{court}', (string) Court::factory()->for($venue)->create()->id, $path);
+    }
     if (str_contains($path, '{closure}')) {
         $closure = $venue->closures()->create(['starts_on' => '2099-01-01', 'ends_on' => '2099-01-02', 'reason' => 'Test']);
         $path = str_replace('{closure}', (string) $closure->id, $path);
@@ -65,4 +74,19 @@ it('ADR-002 never reaches venue B\'s closure through venue A\'s address', functi
         ->assertNotFound();
 
     expect($closureOfB->fresh())->not->toBeNull();
+});
+
+it('ADR-002 never reaches venue B\'s court through venue A\'s address', function () {
+    $ownerOfA = User::factory()->withTwoFactor()->create();
+    $venueA = Venue::factory()->active()->ownedBy($ownerOfA)->create();
+    $courtOfB = Court::factory()->for(Venue::factory()->create())->offering('badminton')->create(['name' => 'Court B']);
+
+    $this->actingAs($ownerOfA)
+        ->putJson("/api/v1/manage/venues/{$venueA->id}/courts/{$courtOfB->id}", [
+            'name' => 'Taken over', 'is_indoor' => true, 'sports' => ['badminton'],
+        ])
+        ->assertNotFound();
+    $this->actingAs($ownerOfA)->deleteJson("/api/v1/manage/venues/{$venueA->id}/courts/{$courtOfB->id}")->assertNotFound();
+
+    expect($courtOfB->fresh()->name)->toBe('Court B');
 });
