@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { VerifyEmailFirst } from "@/components/auth/verify-email-first";
 import { FormAlert, FormField, SelectField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,20 @@ import { MALAYSIAN_STATES } from "@/lib/states";
 
 /** "List your venue": the first step for a venue owner (FR-04). */
 export default function NewVenuePage() {
-  return <RequireUser>{(user) => (user.email_verified ? <NewVenueForm /> : <VerifyEmailFirst />)}</RequireUser>;
+  return (
+    <RequireUser>
+      {(user) =>
+        user.email_verified ? (
+          // Listing a venue makes you its owner, and owners must use two-factor login.
+          <TwoFactorGate user={user} always>
+            <NewVenueForm />
+          </TwoFactorGate>
+        ) : (
+          <VerifyEmailFirst />
+        )
+      }
+    </RequireUser>
+  );
 }
 
 function NewVenueForm() {

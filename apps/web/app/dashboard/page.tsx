@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { VerifyEmailFirst } from "@/components/auth/verify-email-first";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VenueStatusBadge } from "@/components/venues/venue-status-badge";
 import { RequireUser } from "@/features/auth/require-user";
@@ -11,7 +12,19 @@ import { stateLabel } from "@/lib/states";
 
 /** The venue picker for owners and staff: every venue this user works at. */
 export default function DashboardPage() {
-  return <RequireUser>{(user) => (user.email_verified ? <VenuePicker /> : <VerifyEmailFirst />)}</RequireUser>;
+  return (
+    <RequireUser>
+      {(user) =>
+        user.email_verified ? (
+          <TwoFactorGate user={user}>
+            <VenuePicker />
+          </TwoFactorGate>
+        ) : (
+          <VerifyEmailFirst />
+        )
+      }
+    </RequireUser>
+  );
 }
 
 function VenuePicker() {
@@ -21,9 +34,9 @@ function VenuePicker() {
     <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Your venues</h1>
-        <Button render={<Link href="/venues/new" />} nativeButton={false}>
+        <ButtonLink href="/venues/new">
           List a venue
-        </Button>
+        </ButtonLink>
       </div>
 
       {isPending && <p className="text-sm text-muted-foreground">Loading...</p>}

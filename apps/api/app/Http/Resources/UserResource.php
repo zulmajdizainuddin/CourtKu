@@ -27,6 +27,9 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'email_verified' => $this->email_verified_at !== null,
             'is_platform_admin' => $this->is_platform_admin,
+            // Two-factor is "enabled" only once the user confirmed it with a code from their app.
+            'two_factor_enabled' => $this->hasEnabledTwoFactorAuthentication(),
+            'two_factor_required' => $this->requiresTwoFactor(),
         ];
     }
 }

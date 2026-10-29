@@ -6,7 +6,7 @@ use App\Models\Venue;
 
 function admin(): User
 {
-    return User::factory()->create()->forceFill(['is_platform_admin' => true]);
+    return User::factory()->withTwoFactor()->create()->forceFill(['is_platform_admin' => true]);
 }
 
 it('FR-33 lists venues for the admin with their owners, newest first', function () {

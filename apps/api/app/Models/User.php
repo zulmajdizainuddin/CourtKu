@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\VenueRole;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -48,5 +49,15 @@ class User extends Authenticatable implements MustVerifyEmail
             ->using(VenueMember::class)
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * Owners and the platform admin must use two-factor login; staff and players may.
+     * Owning any venue counts, even one still waiting for approval.
+     */
+    public function requiresTwoFactor(): bool
+    {
+        return $this->is_platform_admin
+            || $this->venues()->wherePivot('role', VenueRole::Owner->value)->exists();
     }
 }

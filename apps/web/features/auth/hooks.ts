@@ -11,6 +11,10 @@ export type User = {
   phone: string | null;
   email_verified: boolean;
   is_platform_admin: boolean;
+  /** On only after the user confirmed it with a code from their authenticator app. */
+  two_factor_enabled: boolean;
+  /** Owners and the platform admin must turn two-factor on; the API refuses their dashboard until they do. */
+  two_factor_required: boolean;
 };
 
 const meKey = ["me"] as const;
@@ -37,7 +41,7 @@ export function useMe() {
 }
 
 /** After login, logout or register, ask the API again who is logged in. */
-function useRefreshMe() {
+export function useRefreshMe() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: meKey });
 }
@@ -45,8 +49,13 @@ function useRefreshMe() {
 export function useLogin() {
   const refreshMe = useRefreshMe();
   return useMutation({
-    mutationFn: (input: LoginInput) => api("/auth/login", { method: "POST", body: input }),
-    onSuccess: refreshMe,
+    // two_factor: true means the password was right, but the user must still enter
+    // the code from their authenticator app before they are logged in.
+    mutationFn: (input: LoginInput) =>
+      api<{ two_factor: boolean }>("/auth/login", { method: "POST", body: input }),
+    onSuccess: (result) => {
+      if (!result.two_factor) refreshMe();
+    },
   });
 }
 

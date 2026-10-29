@@ -4,7 +4,7 @@ use App\Models\User;
 use App\Models\Venue;
 
 it('lists only the venues the user works at, with their role at each', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->withTwoFactor()->create();
     Venue::factory()->active()->ownedBy($user)->create(['name' => 'B Arena']);
     Venue::factory()->active()->withStaff($user)->create(['name' => 'A Court']);
     Venue::factory()->active()->create(['name' => 'Someone Else']);
@@ -19,7 +19,7 @@ it('lists only the venues the user works at, with their role at each', function 
 });
 
 it('shows a venue to its owner and its staff', function () {
-    $owner = User::factory()->create();
+    $owner = User::factory()->withTwoFactor()->create();
     $staff = User::factory()->create();
     $venue = Venue::factory()->ownedBy($owner)->withStaff($staff)->create();
 

@@ -23,8 +23,10 @@ export default function LoginPage() {
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(undefined);
     try {
-      await login.mutateAsync(values);
-      router.push(safeNextPath(new URLSearchParams(window.location.search).get("next")));
+      const result = await login.mutateAsync(values);
+      const next = safeNextPath(new URLSearchParams(window.location.search).get("next"));
+      // Password was right, but this account also needs the code from the authenticator app.
+      router.push(result.two_factor ? `/two-factor?next=${encodeURIComponent(next)}` : next);
     } catch (e) {
       setFormError(applyApiErrors(e, form.setError));
     }

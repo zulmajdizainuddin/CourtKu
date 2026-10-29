@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequireUser } from "@/features/auth/require-user";
 
-/** The player's account page. M0 shows who is logged in; bookings are added in M3. */
+/** The player's account page: who is logged in and their security settings. Bookings are added in M3. */
 export default function AccountPage() {
   return (
     <RequireUser>
@@ -27,6 +27,13 @@ export default function AccountPage() {
                     (not verified yet)
                   </Link>
                 )}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Two-factor login:</span>{" "}
+                {user.two_factor_enabled ? "On" : "Off"}{" "}
+                <Link href="/me/security" className="underline">
+                  (manage)
+                </Link>
               </p>
             </CardContent>
           </Card>

@@ -1,6 +1,8 @@
 <?php
 
 use App\Exceptions\ApiException;
+use App\Http\Middleware\RequirePassword;
+use App\Http\Middleware\RequireTwoFactor;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -34,6 +36,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Logged-out visitors are sent to the web app's login page.
         $middleware->redirectGuestsTo('/login');
+
+        $middleware->alias([
+            'two-factor' => RequireTwoFactor::class,
+            // Replaces Laravel's own, only to answer in our standard error shape.
+            'password.confirm' => RequirePassword::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $isJson = fn (Request $request) => $request->is('api/*') || $request->expectsJson();
@@ -77,6 +85,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Any other HTTP error, e.g. 403 from a Policy (Laravel turns those into
         // HTTP exceptions first) or 419 when the CSRF cookie is missing.
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) use ($isJson, $error) {
+            // A verification link that expired, was changed or belongs to another account,
+            // opened in the browser: show the web app's page that offers a new link,
+            // instead of Laravel's bare "403 Forbidden" page.
+            if (! $isJson($request) && $request->routeIs('verification.verify') && $e->getStatusCode() === 403) {
+                return redirect(config('app.frontend_url').'/verify-email?link=invalid');
+            }
+
             if ($isJson($request)) {
                 $status = $e->getStatusCode();
                 $code = match ($status) {
