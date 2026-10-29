@@ -53,8 +53,10 @@ export function useLogin() {
     // the code from their authenticator app before they are logged in.
     mutationFn: (input: LoginInput) =>
       api<{ two_factor: boolean }>("/auth/login", { method: "POST", body: input }),
-    onSuccess: (result) => {
-      if (!result.two_factor) refreshMe();
+    // Waits until we know who is logged in before the login page moves on. Otherwise the
+    // next page still sees "nobody is logged in" and sends the user back to /login.
+    onSuccess: async (result) => {
+      if (!result.two_factor) await refreshMe();
     },
   });
 }
