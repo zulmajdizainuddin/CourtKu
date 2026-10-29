@@ -8,12 +8,12 @@ use App\Http\Requests\CourtRequest;
 use App\Http\Resources\CourtResource;
 use App\Models\Court;
 use App\Models\Venue;
+use App\Support\SortOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 /**
  * A venue's courts (FR-08). Owners add, change, reorder and remove them; staff can read them.
@@ -84,21 +84,7 @@ class CourtController extends Controller
             'court_ids' => ['required', 'array'],
             'court_ids.*' => ['integer', 'distinct'],
         ]);
-        $ids = array_map(intval(...), $data['court_ids']);
-
-        $venueCourtIds = $venue->courts()->pluck('id')->all();
-        sort($venueCourtIds);
-        $sent = $ids;
-        sort($sent);
-        if ($sent !== $venueCourtIds) {
-            throw ValidationException::withMessages(['court_ids' => 'Send every court of this venue exactly once.']);
-        }
-
-        DB::transaction(function () use ($venue, $ids) {
-            foreach ($ids as $position => $id) {
-                $venue->courts()->whereKey($id)->update(['sort_order' => $position]);
-            }
-        });
+        SortOrder::apply($venue->courts(), array_map(intval(...), $data['court_ids']), 'court_ids');
 
         return $this->index($venue);
     }

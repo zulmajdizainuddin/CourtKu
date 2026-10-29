@@ -50,11 +50,15 @@ async function ensureCsrfCookie(force = false): Promise<void> {
   await fetch("/sanctum/csrf-cookie", { credentials: "same-origin" });
 }
 
+/** body: an object is sent as JSON; FormData (e.g. a photo file) is sent as a file upload. */
 type RequestOptions = { method?: string; body?: unknown };
 
 export async function api<T = unknown>(path: string, options: RequestOptions = {}): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
   const changesData = method !== "GET" && method !== "HEAD";
+
+  // The browser writes a file upload's Content-Type itself (it includes a separator), so we don't.
+  const isUpload = options.body instanceof FormData;
 
   const send = async () => {
     if (changesData) await ensureCsrfCookie();
@@ -65,10 +69,10 @@ export async function api<T = unknown>(path: string, options: RequestOptions = {
       credentials: "same-origin",
       headers: {
         Accept: "application/json",
-        ...(options.body !== undefined && { "Content-Type": "application/json" }),
+        ...(options.body !== undefined && !isUpload && { "Content-Type": "application/json" }),
         ...(xsrf && { "X-XSRF-TOKEN": xsrf }),
       },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.body === undefined ? undefined : isUpload ? (options.body as FormData) : JSON.stringify(options.body),
     });
   };
 

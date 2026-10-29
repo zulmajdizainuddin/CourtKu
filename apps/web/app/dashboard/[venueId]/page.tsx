@@ -7,6 +7,7 @@ import { VenuePage } from "@/components/venues/venue-page";
 import { useCourts } from "@/features/venues/courts";
 import type { ManageVenue } from "@/features/venues/hooks";
 import { useOpeningHours } from "@/features/venues/hours";
+import { usePhotos } from "@/features/venues/photos";
 import { stateLabel } from "@/lib/states";
 import { setupChecklist } from "@/lib/venue-setup";
 
@@ -51,10 +52,15 @@ function SetupChecklist({ venue }: { venue: ManageVenue }) {
   const venueId = String(venue.id);
   const hours = useOpeningHours(venueId);
   const courts = useCourts(venueId);
+  const photos = usePhotos(venueId);
 
-  if (!hours.isSuccess || !courts.isSuccess) return null;
+  if (!hours.isSuccess || !courts.isSuccess || !photos.isSuccess) return null;
 
-  const items = setupChecklist(venue, hours.data.length, courts.data.length);
+  const items = setupChecklist(venue, {
+    hours: hours.data.length,
+    courts: courts.data.length,
+    photos: photos.data.length,
+  });
   const doneCount = items.filter((item) => item.done).length;
 
   return (

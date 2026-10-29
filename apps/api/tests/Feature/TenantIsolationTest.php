@@ -25,11 +25,19 @@ dataset('manage endpoints', [
     'reorder courts' => ['PUT', '/api/v1/manage/venues/{venue}/courts/order'],
     'change court' => ['PUT', '/api/v1/manage/venues/{venue}/courts/{court}'],
     'remove court' => ['DELETE', '/api/v1/manage/venues/{venue}/courts/{court}'],
+    'list photos' => ['GET', '/api/v1/manage/venues/{venue}/photos'],
+    'add photo' => ['POST', '/api/v1/manage/venues/{venue}/photos'],
+    'reorder photos' => ['PUT', '/api/v1/manage/venues/{venue}/photos/order'],
+    'remove photo' => ['DELETE', '/api/v1/manage/venues/{venue}/photos/{photo}'],
 ]);
 
-/** Fills in {venue}, and {closure} or {court} with one of that venue's own. */
+/** Fills in {venue}, and {closure}, {court} or {photo} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
+    if (str_contains($path, '{photo}')) {
+        $photo = $venue->photos()->create(['public_id' => 'tenant-test', 'width' => 800, 'height' => 600]);
+        $path = str_replace('{photo}', (string) $photo->id, $path);
+    }
     if (str_contains($path, '{court}')) {
         $path = str_replace('{court}', (string) Court::factory()->for($venue)->create()->id, $path);
     }

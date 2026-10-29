@@ -6,6 +6,7 @@ use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
+use App\Http\Controllers\V1\Manage\VenuePhotoController;
 use App\Http\Controllers\V1\MeController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,17 @@ Route::prefix('v1')->group(function () {
                 ->can('update', 'venue');
             Route::delete('/venues/{venue}/courts/{court}', [CourtController::class, 'destroy'])
                 ->whereNumber('court')
+                ->scopeBindings()
+                ->can('update', 'venue');
+
+            Route::get('/venues/{venue}/photos', [VenuePhotoController::class, 'index'])->can('view', 'venue');
+            // At most 10 uploads a minute per owner: each one is sent on to Cloudinary.
+            Route::post('/venues/{venue}/photos', [VenuePhotoController::class, 'store'])
+                ->middleware('throttle:10,1')
+                ->can('update', 'venue');
+            Route::put('/venues/{venue}/photos/order', [VenuePhotoController::class, 'reorder'])->can('update', 'venue');
+            Route::delete('/venues/{venue}/photos/{photo}', [VenuePhotoController::class, 'destroy'])
+                ->whereNumber('photo')
                 ->scopeBindings()
                 ->can('update', 'venue');
         });
