@@ -67,7 +67,7 @@ function VenueFrame({ venueId, children }: { venueId: string; children: (venue: 
             <h1 className="text-2xl font-semibold tracking-tight">{venue.name}</h1>
             <VenueStatusBadge status={venue.status} />
           </div>
-          <VenueMenu venueId={venueId} />
+          <VenueMenu venueId={venueId} isOwner={venue.role === "owner"} />
           {children(venue)}
         </>
       )}
@@ -75,7 +75,7 @@ function VenueFrame({ venueId, children }: { venueId: string; children: (venue: 
   );
 }
 
-function VenueMenu({ venueId }: { venueId: string }) {
+function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) {
   const pathname = usePathname();
   const base = `/dashboard/${venueId}`;
   const items = [
@@ -84,6 +84,8 @@ function VenueMenu({ venueId }: { venueId: string }) {
     { href: `${base}/hours`, label: "Hours" },
     { href: `${base}/courts`, label: "Courts" },
     { href: `${base}/photos`, label: "Photos" },
+    // Only owners manage staff; the API refuses everyone else anyway.
+    ...(isOwner ? [{ href: `${base}/staff`, label: "Staff" }] : []),
   ];
 
   return (

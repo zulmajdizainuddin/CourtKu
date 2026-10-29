@@ -26,7 +26,9 @@ export default function VenueOverviewPage() {
 }
 
 const statusHelp: Record<ManageVenue["status"], (venue: ManageVenue) => string> = {
-  pending: () => "CourtKu checks every new venue before players can see it. You can set everything up while you wait.",
+  pending: (venue) =>
+    "CourtKu checks every new venue before players can see it." +
+    (venue.role === "owner" ? " You can set everything up while you wait." : ""),
   active: (venue) => `Your venue is approved. Its public page is /v/${venue.slug}.`,
   suspended: () => "Your venue is hidden from players. Contact the CourtKu team to find out why.",
 };
