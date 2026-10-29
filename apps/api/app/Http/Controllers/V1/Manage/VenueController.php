@@ -7,6 +7,7 @@ use App\Enums\VenueStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVenueRequest;
+use App\Http\Requests\UpdateVenueRequest;
 use App\Http\Resources\ManageVenueResource;
 use App\Models\Venue;
 use Illuminate\Http\JsonResponse;
@@ -62,6 +63,14 @@ class VenueController extends Controller
     /** GET /api/v1/manage/venues/{venue}. The route checks VenuePolicy::view first. */
     public function show(Venue $venue): ManageVenueResource
     {
+        return new ManageVenueResource($venue);
+    }
+
+    /** PUT /api/v1/manage/venues/{venue}: save the profile (FR-06). Owners only (VenuePolicy::update). */
+    public function update(UpdateVenueRequest $request, Venue $venue): ManageVenueResource
+    {
+        $venue->update($request->venueData());
+
         return new ManageVenueResource($venue);
     }
 }

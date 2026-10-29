@@ -3,12 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthCard } from "@/components/auth/auth-card";
 import { FormAlert, FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
-import { useLogin } from "@/features/auth/hooks";
+import { useLogin, useMe } from "@/features/auth/hooks";
 import { applyApiErrors } from "@/lib/form-errors";
 import { safeNextPath } from "@/lib/safe-next-path";
 import { type LoginInput, loginSchema } from "@/lib/schemas/auth";
@@ -19,6 +19,13 @@ export default function LoginPage() {
   const [formError, setFormError] = useState<string>();
   const form = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
   const { errors, isSubmitting } = form.formState;
+  const { data: user } = useMe();
+
+  // Already logged in (e.g. came back to this tab, or pressed Log in twice)? Go on to the
+  // next page instead of showing the form; a second login would only confuse Laravel.
+  useEffect(() => {
+    if (user) router.replace(safeNextPath(new URLSearchParams(window.location.search).get("next")));
+  }, [user, router]);
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(undefined);

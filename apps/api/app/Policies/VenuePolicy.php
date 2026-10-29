@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\VenueRole;
 use App\Models\User;
 use App\Models\Venue;
 use Illuminate\Auth\Access\Response;
@@ -21,5 +22,18 @@ class VenuePolicy
         return $venue->roleOf($user) !== null
             ? Response::allow()
             : Response::denyAsNotFound();
+    }
+
+    /**
+     * Only owners change the profile (and later courts, hours and prices).
+     * Staff already know the venue exists, so they get a plain 403.
+     */
+    public function update(User $user, Venue $venue): Response
+    {
+        return match ($venue->roleOf($user)) {
+            VenueRole::Owner => Response::allow(),
+            VenueRole::Staff => Response::deny('Only the venue owner can change this.'),
+            null => Response::denyAsNotFound(),
+        };
     }
 }

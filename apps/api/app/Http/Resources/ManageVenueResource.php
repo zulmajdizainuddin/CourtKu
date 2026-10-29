@@ -31,6 +31,12 @@ class ManageVenueResource extends JsonResource
             'status' => $this->status,
             'state' => $this->state,
             'role' => $role,
+            'description' => $this->description,
+            'address_line' => $this->address_line,
+            'city' => $this->city,
+            'postcode' => $this->postcode,
+            'phone' => $this->phone,
+            'facilities' => $this->facilities ?? [],
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

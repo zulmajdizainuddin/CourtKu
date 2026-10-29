@@ -93,6 +93,34 @@ export function SelectField({
   );
 }
 
+/** The same as FormField, for longer text over several lines. */
+export function TextareaField({
+  label,
+  name,
+  error,
+  hint,
+  className,
+  ...textareaProps
+}: ComponentProps<"textarea"> & FieldProps) {
+  return (
+    <div className="grid gap-1.5">
+      <Label htmlFor={name}>{label}</Label>
+      <textarea
+        id={name}
+        name={name}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy(name, hint, error)}
+        className={cn(
+          "min-h-24 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30",
+          className,
+        )}
+        {...textareaProps}
+      />
+      <FieldMessages name={name} hint={hint} error={error} />
+    </div>
+  );
+}
+
 /** A message for errors that don't belong to one field, e.g. "Too many attempts". */
 export function FormAlert({ message, tone = "error" }: { message?: string; tone?: "error" | "success" }) {
   if (!message) return null;
