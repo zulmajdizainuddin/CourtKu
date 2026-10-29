@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRefreshPublicPage } from "@/features/venues/refresh-public-page";
 import { api } from "@/lib/api";
 import { resizeForUpload } from "@/lib/resize-image";
 
@@ -33,30 +34,42 @@ export function usePhotos(venueId: string) {
 /** Shrinks the photo in the browser, then uploads it as a file. */
 export function useUploadPhoto(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: async (file: File) => {
       const form = new FormData();
       form.append("photo", await resizeForUpload(file), "photo.jpg");
       return api(`/api/v1/manage/venues/${venueId}/photos`, { method: "POST", body: form });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: photosKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: photosKey(venueId) });
+    },
   });
 }
 
 export function useDeletePhoto(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: (photoId: number) => api(`/api/v1/manage/venues/${venueId}/photos/${photoId}`, { method: "DELETE" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: photosKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: photosKey(venueId) });
+    },
   });
 }
 
 /** Saves a new order: every photo id of the venue, first (the cover) to last. */
 export function useReorderPhotos(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: (photoIds: number[]) =>
       api(`/api/v1/manage/venues/${venueId}/photos/order`, { method: "PUT", body: { photo_ids: photoIds } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: photosKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: photosKey(venueId) });
+    },
   });
 }

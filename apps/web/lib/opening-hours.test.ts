@@ -33,6 +33,11 @@ describe("times", () => {
     expect(closesNextDay("08:00", "23:00")).toBe(false);
     expect(formatPeriod({ opens_at: "08:00", closes_at: "02:00" })).toBe("8:00 am – 2:00 am (next day)");
   });
+
+  it("says midnight and open 24 hours in plain words", () => {
+    expect(formatPeriod({ opens_at: "08:00", closes_at: "00:00" })).toBe("8:00 am – midnight");
+    expect(formatPeriod({ opens_at: "00:00", closes_at: "00:00" })).toBe("Open 24 hours");
+  });
 });
 
 describe("weekFromPeriods and periodsFromWeek", () => {

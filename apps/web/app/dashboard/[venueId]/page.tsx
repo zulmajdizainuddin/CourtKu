@@ -25,11 +25,19 @@ export default function VenueOverviewPage() {
   );
 }
 
-const statusHelp: Record<ManageVenue["status"], (venue: ManageVenue) => string> = {
+const statusHelp: Record<ManageVenue["status"], (venue: ManageVenue) => React.ReactNode> = {
   pending: (venue) =>
     "CourtKu checks every new venue before players can see it." +
     (venue.role === "owner" ? " You can set everything up while you wait." : ""),
-  active: (venue) => `Your venue is approved. Its public page is /v/${venue.slug}.`,
+  active: (venue) => (
+    <>
+      Your venue is approved. Players can see it at{" "}
+      <Link href={`/v/${venue.slug}`} className="font-medium underline">
+        /v/{venue.slug}
+      </Link>
+      .
+    </>
+  ),
   suspended: () => "Your venue is hidden from players. Contact the CourtKu team to find out why.",
 };
 

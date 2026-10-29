@@ -10,12 +10,20 @@ use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
 use App\Http\Controllers\V1\Manage\VenuePhotoController;
 use App\Http\Controllers\V1\MeController;
+use App\Http\Controllers\V1\PublicVenueController;
 use Illuminate\Support\Facades\Route;
 
 // Used by the uptime monitor (NFR-03). Not versioned: it is for machines, not apps.
 Route::get('/health', HealthController::class);
 
 Route::prefix('v1')->group(function () {
+    // Public: anyone can read an approved venue's page (plan: public reads 60 a minute).
+    // TODO(M5): a key of its own for the web app's server, which fetches from one IP for everyone.
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/venues/{venue:slug}', [PublicVenueController::class, 'show']);
+        Route::get('/venues/{venue:slug}/courts', [PublicVenueController::class, 'courts']);
+    });
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', MeController::class);
 

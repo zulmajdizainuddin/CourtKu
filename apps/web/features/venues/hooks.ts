@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRefreshPublicPage } from "@/features/venues/refresh-public-page";
 import { api } from "@/lib/api";
 import type { CreateVenueInput, VenueProfilePayload } from "@/lib/schemas/venue";
 
@@ -47,10 +48,14 @@ export function useManageVenue(venueId: string) {
 /** Saves the venue profile (FR-06). Owners only; the API refuses staff. */
 export function useUpdateVenue(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: async (input: VenueProfilePayload) =>
       (await api<{ data: ManageVenue }>(`/api/v1/manage/venues/${venueId}`, { method: "PUT", body: input })).data,
     onSuccess: (venue) => {
+      // The public page at the old address (before a pending venue's address changed) and the new one.
+      refreshPublicPage();
+      refreshPublicPage(venue.slug);
       // Show the saved version straight away, and refresh the venue picker (the name may have changed).
       queryClient.setQueryData([...myVenuesKey, venueId], venue);
       queryClient.invalidateQueries({ queryKey: myVenuesKey, exact: true });

@@ -22,5 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'player@example.com',
             'password' => 'CourtKu-Demo-2026',
         ]);
+
+        $this->call(DemoVenueSeeder::class);
     }
 }
