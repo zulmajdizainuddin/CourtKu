@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { FormAlert } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { VenueStatusBadge } from "@/components/venues/venue-status-badge";
@@ -17,7 +18,9 @@ export default function AdminPage() {
     <RequireUser>
       {(user) =>
         user.is_platform_admin ? (
-          <AdminVenues />
+          <TwoFactorGate user={user}>
+            <AdminVenues />
+          </TwoFactorGate>
         ) : (
           // The API refuses every admin request anyway; this only avoids showing an empty page.
           <p className="mx-auto w-full max-w-3xl px-4 py-10 text-sm text-muted-foreground">

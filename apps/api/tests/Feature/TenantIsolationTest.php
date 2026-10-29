@@ -16,7 +16,7 @@ dataset('manage endpoints', [
 ]);
 
 it('ADR-002 hides venue B from the owner of venue A', function (string $method, string $path) {
-    $ownerOfA = User::factory()->create();
+    $ownerOfA = User::factory()->withTwoFactor()->create();
     Venue::factory()->active()->ownedBy($ownerOfA)->create();
     $venueB = Venue::factory()->active()->ownedBy(User::factory()->create())->create();
 

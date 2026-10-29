@@ -4,6 +4,7 @@ import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { useLogout, useMe } from "@/features/auth/hooks";
 
 /** Top bar: logo on the left; log in / register, or the dashboard, account and log out, on the right. */
@@ -48,9 +49,9 @@ export function SiteHeader() {
               <Link href="/login" className="px-2 py-1 hover:underline">
                 Log in
               </Link>
-              <Button render={<Link href="/register" />} nativeButton={false}>
+              <ButtonLink href="/register">
                 Sign up
-              </Button>
+              </ButtonLink>
             </>
           )}
         </nav>

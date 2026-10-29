@@ -36,7 +36,14 @@ Free plan limits to know:
 The admin approves and suspends venues at `/admin`. No web page can make someone admin; only `php artisan courtku:make-admin`. Render's free plan has no shell, so run it from your own computer against the Aiven database:
 
 1. Register the account on the live site and verify its email.
-2. Download the CA certificate from the Aiven service overview (the same file as Render's `aiven-ca.pem`).
+2. Save Aiven's CA certificate (the same text as Render's `aiven-ca.pem`). In the Aiven console, open the service → **Overview** → **Connection information**, click **Show** next to **CA certificate** and copy all of it, from `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----`. Then in PowerShell:
+
+   ```powershell
+   Get-Clipboard | Set-Content -Encoding ascii "C:\path\to\aiven-ca.pem"
+   Get-Content "C:\path\to\aiven-ca.pem" -TotalCount 1   # should print -----BEGIN CERTIFICATE-----
+   ```
+
+   (The **Download** button can save the file somewhere unexpected; copying avoids that.)
 3. In PowerShell, from `apps/api`, set the database variables for this window only, then run the command. Variables set like this take priority over your local `.env`:
 
    ```powershell
@@ -47,6 +54,21 @@ The admin approves and suspends venues at `/admin`. No web page can make someone
    ```
 
 4. Close the PowerShell window afterwards, so later commands use your local database again.
+5. Log in on the live site (refresh if you were already logged in). The admin must turn on two-factor login at **My account → Two-factor login** before `/admin` opens.
+
+## Someone lost their phone and all their recovery codes
+
+Owners and the admin must use two-factor login. Someone who lost both their phone and every recovery code cannot log in, by design. `php artisan courtku:reset-two-factor` turns two-factor off for that one account so they can set it up again on a new phone. It works for your own admin account too.
+
+1. **Check it really is them.** A thief with a stolen password can also ask for this. Reply to the email address on their CourtKu account and wait for their answer from that address; never act on a message from a different address or a phone call alone.
+2. Open PowerShell and set the database variables exactly as in steps 2 and 3 of the admin section above, then run:
+
+   ```powershell
+   php artisan courtku:reset-two-factor owner@example.com
+   ```
+
+3. It asks whether you checked who is asking. Answer `yes` only after step 1.
+4. Close the PowerShell window. Tell them to log in with their password: their dashboard asks them to turn on two-factor login again, with new recovery codes.
 
 ## API environment variables (set in Render)
 

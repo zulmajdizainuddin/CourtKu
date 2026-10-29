@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /** Shown instead of the dashboard until the user has verified their email (the API requires it). */
@@ -14,9 +13,9 @@ export function VerifyEmailFirst() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button render={<Link href="/verify-email" />} nativeButton={false}>
+          <ButtonLink href="/verify-email">
             Get a new link
-          </Button>
+          </ButtonLink>
         </CardContent>
       </Card>
     </div>

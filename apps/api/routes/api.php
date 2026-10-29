@@ -15,14 +15,17 @@ Route::prefix('v1')->group(function () {
 
         // Owners and staff. Every route with a {venue} checks membership through
         // VenuePolicy (ADR-002), and tests/Feature/TenantIsolationTest.php proves it.
-        Route::prefix('manage')->middleware('verified')->group(function () {
+        // Owners must have two-factor login on (RequireTwoFactor); staff don't have to.
+        Route::prefix('manage')->middleware(['verified', 'two-factor'])->group(function () {
             Route::get('/venues', [ManageVenueController::class, 'index']);
-            Route::post('/venues', [ManageVenueController::class, 'store']);
+            // Listing a venue makes you its owner, so two-factor comes first.
+            Route::post('/venues', [ManageVenueController::class, 'store'])->middleware('two-factor:always');
             Route::get('/venues/{venue}', [ManageVenueController::class, 'show'])->can('view', 'venue');
         });
 
-        // The platform admin only (is_platform_admin, set with `php artisan courtku:make-admin`).
-        Route::prefix('admin')->middleware('can:admin')->group(function () {
+        // The platform admin only (is_platform_admin, set with `php artisan courtku:make-admin`),
+        // and only with two-factor login on.
+        Route::prefix('admin')->middleware(['can:admin', 'two-factor'])->group(function () {
             Route::get('/venues', [AdminVenueController::class, 'index']);
             Route::post('/venues/{venue}/approve', [AdminVenueController::class, 'approve']);
             Route::post('/venues/{venue}/suspend', [AdminVenueController::class, 'suspend']);

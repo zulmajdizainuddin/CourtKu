@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthCard } from "@/components/auth/auth-card";
 import { FormAlert, FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { useResetPassword } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form-errors";
@@ -49,9 +49,9 @@ function ResetPasswordForm() {
   if (!token || !email) {
     return (
       <AuthCard title="Link not valid" description="This reset link is incomplete. Please request a new one.">
-        <Button render={<Link href="/forgot-password" />} nativeButton={false} size="lg" className="h-11 w-full">
+        <ButtonLink href="/forgot-password" size="lg" className="h-11 w-full">
           Request a new link
-        </Button>
+        </ButtonLink>
       </AuthCard>
     );
   }
@@ -59,9 +59,9 @@ function ResetPasswordForm() {
   if (reset.isSuccess) {
     return (
       <AuthCard title="Password changed" description="You can now log in with your new password.">
-        <Button render={<Link href="/login" />} nativeButton={false} size="lg" className="h-11 w-full">
+        <ButtonLink href="/login" size="lg" className="h-11 w-full">
           Log in
-        </Button>
+        </ButtonLink>
       </AuthCard>
     );
   }

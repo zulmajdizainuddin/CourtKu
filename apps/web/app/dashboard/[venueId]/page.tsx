@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense } from "react";
+import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { VerifyEmailFirst } from "@/components/auth/verify-email-first";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VenueStatusBadge } from "@/components/venues/venue-status-badge";
@@ -24,7 +25,17 @@ export default function VenueHomePage() {
 function VenueHomeRoute() {
   const { venueId } = useParams<{ venueId: string }>();
   return (
-    <RequireUser>{(user) => (user.email_verified ? <VenueHome venueId={venueId} /> : <VerifyEmailFirst />)}</RequireUser>
+    <RequireUser>
+      {(user) =>
+        user.email_verified ? (
+          <TwoFactorGate user={user}>
+            <VenueHome venueId={venueId} />
+          </TwoFactorGate>
+        ) : (
+          <VerifyEmailFirst />
+        )
+      }
+    </RequireUser>
   );
 }
 
