@@ -47,7 +47,8 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          extensions: pdo_mysql, mbstring, intl, redis
+          # gd: the photo tests create fake images.
+          extensions: pdo_mysql, mbstring, intl, redis, gd
           coverage: none
 
       - name: Cache Composer packages

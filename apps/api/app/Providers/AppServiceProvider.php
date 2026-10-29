@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\Cloudinary;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +16,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // One Cloudinary client for the whole app, filled from config/services.php.
+        $this->app->singleton(Cloudinary::class, fn () => new Cloudinary(
+            config('services.cloudinary.cloud_name'),
+            config('services.cloudinary.api_key'),
+            config('services.cloudinary.api_secret'),
+            (string) config('services.cloudinary.folder'),
+        ));
+
+        // Local development on Windows (ADR-011): `php artisan serve` starts PHP without
+        // Windows' TEMP and TMP settings, so PHP has nowhere to put uploaded files and every
+        // photo upload fails with "unable to create a temporary file". Pass them on.
+        // Production runs PHP-FPM, not artisan serve, so this changes nothing there.
+        ServeCommand::$passthroughVariables = array_values(array_unique([...ServeCommand::$passthroughVariables, 'TEMP', 'TMP']));
     }
 
     /**

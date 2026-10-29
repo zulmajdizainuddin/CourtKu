@@ -13,6 +13,7 @@ Browser ──► courtku.vercel.app (Vercel, Singapore) ──► courtku-api.o
 | API (`apps/api`) | Render free web service, region Singapore, built from `apps/api/Dockerfile` | Every push to `main` |
 | MySQL 8 | Aiven free plan | Always on, except when Aiven powers it off (see below) |
 | Email | Brevo free plan (300 emails/day), SMTP on port 2525 | n/a |
+| Venue photos | Cloudinary free plan (25 credits/month), [ADR-018](adr/018-photos-on-cloudinary.md) | n/a |
 | Uptime | UptimeRobot, every 5 minutes on `/api/health` and the web home page | n/a |
 
 Free plan limits to know:
@@ -98,6 +99,10 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `MAIL_PASSWORD` | a Brevo **SMTP key** (not the account password) | Expires after 1 year, or after 90 days without sending |
 | `MAIL_FROM_ADDRESS` | the CourtKu Gmail address, verified as a sender in Brevo | A free-mail sender may land in spam; a domain of our own fixes that later |
 | `MAIL_FROM_NAME` | `CourtKu` | |
+| `CLOUDINARY_CLOUD_NAME` | from Cloudinary → **Settings → API Keys** | Venue photos ([ADR-018](adr/018-photos-on-cloudinary.md)) |
+| `CLOUDINARY_API_KEY` | from Cloudinary → **Settings → API Keys** | |
+| `CLOUDINARY_API_SECRET` | from Cloudinary → **Settings → API Keys** (click the eye to show it) | Signs every upload; never sent to the browser |
+| `CLOUDINARY_FOLDER` | `courtku` | Keeps live photos apart from local test photos (`courtku-local`) |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` | Logs show in Render; use `debug` only while reading emails from the log |
 | `PORT` | `8080` | The port nginx listens on inside the image |
 

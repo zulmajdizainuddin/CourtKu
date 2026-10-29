@@ -25,22 +25,24 @@ const summary = (items: ReturnType<typeof setupChecklist>) =>
 
 describe("setupChecklist", () => {
   it("shows a new venue everything to set up, needed items first", () => {
-    expect(summary(setupChecklist(venue({}), 0, 0))).toEqual([
+    expect(summary(setupChecklist(venue({}), { hours: 0, courts: 0, photos: 0 }))).toEqual([
       "✗ Address",
       "✗ Opening hours",
       "✗ Courts",
       "✗ Phone number (optional)",
       "✗ Facilities (optional)",
+      "✗ Photos (optional)",
     ]);
   });
 
   it("ticks each item on its own, e.g. facilities without an address", () => {
-    expect(summary(setupChecklist(venue({ facilities: ["parking"] }), 7, 0))).toEqual([
+    expect(summary(setupChecklist(venue({ facilities: ["parking"] }), { hours: 7, courts: 0, photos: 2 }))).toEqual([
       "✗ Address",
       "✓ Opening hours",
       "✗ Courts",
       "✗ Phone number (optional)",
       "✓ Facilities (optional)",
+      "✓ Photos (optional)",
     ]);
   });
 });

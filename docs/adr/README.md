@@ -22,3 +22,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [015](015-pricing-follows-business-day.md) | Pricing rules follow the venue's business day | 2026-10-17 |
 | [016](016-two-opening-periods.md) | Up to two opening periods per day | 2026-10-17 |
 | [017](017-price-steps.md) | Prices are set in 10-sen steps | 2026-10-17 |
+| [018](018-photos-on-cloudinary.md) | Venue photos are stored on Cloudinary | 2026-10-31 |
