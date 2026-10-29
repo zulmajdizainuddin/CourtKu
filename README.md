@@ -2,7 +2,7 @@
 
 Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a multi-tenant SaaS: each venue gets its own booking page, players see live availability and pay online, and owners run their day from a dashboard.
 
-> **Status:** M0 Foundation is live. Accounts work (register, verify email, log in, log out, reset password). Venues and bookings come next.
+> **Status:** M1 Venues and courts is live. Venue owners sign up (with two-factor login), wait for approval, and set up their profile, opening hours, courts, photos and staff; anyone can see an approved venue's page at `/v/<venue>`. Pricing and online booking come next (M2, M3).
 
 ## Live demo
 
@@ -72,7 +72,9 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 4. Open http://localhost:3000. Emails (verification, password reset) appear in Mailpit at http://localhost:8025.
 
-**Local demo account** (created by `--seed`): `player@example.com` / `CourtKu-Demo-2026`
+**Local demo data** (created by `--seed`): the account `player@example.com` / `CourtKu-Demo-2026`, and a fictional approved venue at http://localhost:3000/v/arena-demo
+
+**Photo uploads** need a free Cloudinary account; see the `CLOUDINARY_*` lines in `apps/api/.env.example` ([ADR-018](docs/adr/018-photos-on-cloudinary.md)). Everything else works without it.
 
 ## Tests and checks
 

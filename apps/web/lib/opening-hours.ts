@@ -36,8 +36,12 @@ export function formatTime(time: string): string {
   return `${hours % 12 === 0 ? 12 : hours % 12}:${String(mins).padStart(2, "0")} ${suffix}`;
 }
 
-/** "8:00 am – 2:00 am (next day)" */
+/** "8:00 am – 2:00 am (next day)", or "8:00 am – midnight" (clearer than "12:00 am (next day)") */
 export function formatPeriod(period: Pick<OpeningPeriod, "opens_at" | "closes_at">): string {
+  if (period.closes_at === "00:00" && period.opens_at !== "00:00") {
+    return `${formatTime(period.opens_at)} – midnight`;
+  }
+  if (period.opens_at === "00:00" && period.closes_at === "00:00") return "Open 24 hours";
   const nextDay = closesNextDay(period.opens_at, period.closes_at) ? " (next day)" : "";
   return `${formatTime(period.opens_at)} – ${formatTime(period.closes_at)}${nextDay}`;
 }

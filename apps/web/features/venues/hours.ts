@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRefreshPublicPage } from "@/features/venues/refresh-public-page";
 import { api } from "@/lib/api";
 import type { OpeningPeriod } from "@/lib/opening-hours";
 
@@ -28,6 +29,7 @@ export function useOpeningHours(venueId: string) {
 /** Saves the whole week at once. A day with no periods is closed. */
 export function useSaveOpeningHours(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: async (periods: OpeningPeriod[]) =>
       (
@@ -36,7 +38,10 @@ export function useSaveOpeningHours(venueId: string) {
           body: { periods },
         })
       ).data,
-    onSuccess: (saved) => queryClient.setQueryData(hoursKey(venueId), saved),
+    onSuccess: (saved) => {
+      refreshPublicPage();
+      queryClient.setQueryData(hoursKey(venueId), saved);
+    },
   });
 }
 
@@ -50,18 +55,26 @@ export function useClosures(venueId: string) {
 
 export function useAddClosure(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: (input: Omit<Closure, "id">) =>
       api(`/api/v1/manage/venues/${venueId}/closures`, { method: "POST", body: input }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: closuresKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: closuresKey(venueId) });
+    },
   });
 }
 
 export function useRemoveClosure(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: (closureId: number) =>
       api(`/api/v1/manage/venues/${venueId}/closures/${closureId}`, { method: "DELETE" }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: closuresKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: closuresKey(venueId) });
+    },
   });
 }

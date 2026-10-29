@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRefreshPublicPage } from "@/features/venues/refresh-public-page";
 import { api } from "@/lib/api";
 import type { CourtPayload } from "@/lib/schemas/court";
 
@@ -29,9 +30,13 @@ export function useCourts(venueId: string) {
 /** Every change reloads the list, so the order and the details always match the API. */
 function useCourtMutation<T>(venueId: string, mutationFn: (input: T) => Promise<unknown>) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: courtsKey(venueId) }),
+    onSuccess: () => {
+      refreshPublicPage();
+      return queryClient.invalidateQueries({ queryKey: courtsKey(venueId) });
+    },
   });
 }
 

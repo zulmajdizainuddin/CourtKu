@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { normalizePhone } from "./phone";
+import { formatPhone, normalizePhone } from "./phone";
+
+describe("formatPhone", () => {
+  it("shows stored numbers the way Malaysians write them", () => {
+    expect(formatPhone("+60123456789")).toBe("012-345 6789");
+    expect(formatPhone("+601123456789")).toBe("011-2345 6789");
+    expect(formatPhone("+60312345678")).toBe("03-1234 5678");
+    expect(formatPhone("+6041234567")).toBe("04-123 4567");
+  });
+});
 
 describe("normalizePhone", () => {
   it("turns any way of typing a Malaysian number into +60 format", () => {
