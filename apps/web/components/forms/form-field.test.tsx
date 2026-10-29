@@ -24,6 +24,21 @@ describe("FormField", () => {
   });
 });
 
+describe("field ids", () => {
+  it("keeps each label on its own field, even when two fields share a name", () => {
+    // e.g. the hidden login form's "email" and the staff invite form's "email" on one page.
+    render(
+      <>
+        <FormField label="Email" name="email" />
+        <FormField label="Invite staff by email" name="email" />
+      </>,
+    );
+
+    expect(screen.getByLabelText("Email")).not.toBe(screen.getByLabelText("Invite staff by email"));
+    expect(screen.getByLabelText("Invite staff by email")).toHaveAttribute("name", "email");
+  });
+});
+
 describe("SelectField", () => {
   it("offers the options under a label, with a placeholder first", () => {
     render(

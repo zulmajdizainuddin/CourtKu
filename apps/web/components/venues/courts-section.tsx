@@ -158,7 +158,6 @@ function CourtForm({
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-      {/* Only one court form is open at a time (editingId), so field ids never clash. */}
       <FormField label="Court name" error={errors.name?.message} {...form.register("name")} />
 
       <fieldset className="grid gap-2">

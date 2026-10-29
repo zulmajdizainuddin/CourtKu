@@ -81,6 +81,14 @@ class Venue extends Model
     }
 
     /**
+     * @return HasMany<VenueInvite, $this>
+     */
+    public function invites(): HasMany
+    {
+        return $this->hasMany(VenueInvite::class);
+    }
+
+    /**
      * @return HasMany<VenuePhoto, $this>
      */
     public function photos(): HasMany

@@ -29,11 +29,26 @@ dataset('manage endpoints', [
     'add photo' => ['POST', '/api/v1/manage/venues/{venue}/photos'],
     'reorder photos' => ['PUT', '/api/v1/manage/venues/{venue}/photos/order'],
     'remove photo' => ['DELETE', '/api/v1/manage/venues/{venue}/photos/{photo}'],
+    'list staff' => ['GET', '/api/v1/manage/venues/{venue}/staff'],
+    'invite staff' => ['POST', '/api/v1/manage/venues/{venue}/staff-invites'],
+    'cancel invite' => ['DELETE', '/api/v1/manage/venues/{venue}/staff-invites/{invite}'],
+    'remove staff' => ['DELETE', '/api/v1/manage/venues/{venue}/staff/{member}'],
 ]);
 
-/** Fills in {venue}, and {closure}, {court} or {photo} with one of that venue's own. */
+/** Fills in {venue}, and {closure}, {court}, {photo}, {invite} or {member} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
+    if (str_contains($path, '{invite}')) {
+        $invite = $venue->invites()->create([
+            'email' => 'tenant@example.com', 'role' => 'staff', 'token_hash' => hash('sha256', 'tenant'), 'expires_at' => now()->addDay(),
+        ]);
+        $path = str_replace('{invite}', (string) $invite->id, $path);
+    }
+    if (str_contains($path, '{member}')) {
+        $member = User::factory()->create();
+        $venue->members()->attach($member, ['role' => 'staff']);
+        $path = str_replace('{member}', (string) $member->id, $path);
+    }
     if (str_contains($path, '{photo}')) {
         $photo = $venue->photos()->create(['public_id' => 'tenant-test', 'width' => 800, 'height' => 600]);
         $path = str_replace('{photo}', (string) $photo->id, $path);

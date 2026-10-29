@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
+use App\Http\Controllers\V1\InviteController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
+use App\Http\Controllers\V1\Manage\StaffController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
 use App\Http\Controllers\V1\Manage\VenuePhotoController;
@@ -16,6 +18,12 @@ Route::get('/health', HealthController::class);
 Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', MeController::class);
+
+        // The invited person's side of a staff invite (FR-05). Limited, so codes can't be guessed.
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::get('/invites/{token}', [InviteController::class, 'show']);
+            Route::post('/invites/{token}/accept', [InviteController::class, 'accept'])->middleware('verified');
+        });
 
         // Owners and staff. Every route with a {venue} checks membership through
         // VenuePolicy (ADR-002), and tests/Feature/TenantIsolationTest.php proves it.
@@ -48,6 +56,19 @@ Route::prefix('v1')->group(function () {
             Route::delete('/venues/{venue}/courts/{court}', [CourtController::class, 'destroy'])
                 ->whereNumber('court')
                 ->scopeBindings()
+                ->can('update', 'venue');
+
+            // Staff (FR-05): owners only, including the list, since it shows people's emails.
+            Route::get('/venues/{venue}/staff', [StaffController::class, 'index'])->can('update', 'venue');
+            Route::post('/venues/{venue}/staff-invites', [StaffController::class, 'invite'])
+                ->middleware('throttle:10,1')
+                ->can('update', 'venue');
+            Route::delete('/venues/{venue}/staff-invites/{invite}', [StaffController::class, 'cancelInvite'])
+                ->whereNumber('invite')
+                ->scopeBindings()
+                ->can('update', 'venue');
+            Route::delete('/venues/{venue}/staff/{user}', [StaffController::class, 'remove'])
+                ->whereNumber('user')
                 ->can('update', 'venue');
 
             Route::get('/venues/{venue}/photos', [VenuePhotoController::class, 'index'])->can('view', 'venue');

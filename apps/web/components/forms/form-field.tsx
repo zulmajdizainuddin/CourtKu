@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "cn";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useId } from "react";
 
 type FieldProps = {
   label: string;
@@ -11,22 +11,30 @@ type FieldProps = {
   hint?: React.ReactNode;
 };
 
-/** Links the help line and the error to the input, so screen readers announce them. */
-function describedBy(name: string, hint: React.ReactNode, error?: string) {
-  const ids = [hint ? `${name}-hint` : null, error ? `${name}-error` : null].filter(Boolean);
-  return ids.length > 0 ? ids.join(" ") : undefined;
+/**
+ * Ids that link a field's label, help line and error together, unique on the whole page.
+ * Not just the field's name: Next.js keeps recently visited pages hidden in the page
+ * (cacheComponents), so the login form's "email" field may still be there, and a label
+ * pointing at "email" could find that hidden field instead of this one.
+ */
+function useFieldIds(name: string, hint: React.ReactNode, error?: string) {
+  const id = `${name}-${useId()}`;
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  const ids = [hint ? hintId : null, error ? errorId : null].filter(Boolean);
+  return { id, hintId, errorId, describedBy: ids.length > 0 ? ids.join(" ") : undefined };
 }
 
-function FieldMessages({ name, hint, error }: Omit<FieldProps, "label">) {
+function FieldMessages({ hint, error, hintId, errorId }: Pick<FieldProps, "hint" | "error"> & { hintId: string; errorId: string }) {
   return (
     <>
       {hint && (
-        <p id={`${name}-hint`} className="text-sm text-muted-foreground">
+        <p id={hintId} className="text-sm text-muted-foreground">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${name}-error`} className="text-sm text-destructive">
+        <p id={errorId} className="text-sm text-destructive">
           {error}
         </p>
       )}
@@ -36,18 +44,19 @@ function FieldMessages({ name, hint, error }: Omit<FieldProps, "label">) {
 
 /** A label, an input and its error message, wired together for screen readers. */
 export function FormField({ label, name, error, hint, ...inputProps }: ComponentProps<typeof Input> & FieldProps) {
+  const ids = useFieldIds(name, hint, error);
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={ids.id}>{label}</Label>
       <Input
-        id={name}
+        id={ids.id}
         name={name}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={ids.describedBy}
         className="h-11 text-base"
         {...inputProps}
       />
-      <FieldMessages name={name} hint={hint} error={error} />
+      <FieldMessages hint={hint} error={error} hintId={ids.hintId} errorId={ids.errorId} />
     </div>
   );
 }
@@ -67,14 +76,15 @@ export function SelectField({
   ...selectProps
 }: ComponentProps<"select"> &
   FieldProps & { options: readonly { value: string; label: string }[]; placeholder?: string }) {
+  const ids = useFieldIds(name, hint, error);
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={ids.id}>{label}</Label>
       <select
-        id={name}
+        id={ids.id}
         name={name}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={ids.describedBy}
         className={cn(
           "h-11 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30",
           className,
@@ -88,7 +98,7 @@ export function SelectField({
           </option>
         ))}
       </select>
-      <FieldMessages name={name} hint={hint} error={error} />
+      <FieldMessages hint={hint} error={error} hintId={ids.hintId} errorId={ids.errorId} />
     </div>
   );
 }
@@ -102,21 +112,22 @@ export function TextareaField({
   className,
   ...textareaProps
 }: ComponentProps<"textarea"> & FieldProps) {
+  const ids = useFieldIds(name, hint, error);
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={ids.id}>{label}</Label>
       <textarea
-        id={name}
+        id={ids.id}
         name={name}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(name, hint, error)}
+        aria-describedby={ids.describedBy}
         className={cn(
           "min-h-24 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30",
           className,
         )}
         {...textareaProps}
       />
-      <FieldMessages name={name} hint={hint} error={error} />
+      <FieldMessages hint={hint} error={error} hintId={ids.hintId} errorId={ids.errorId} />
     </div>
   );
 }
