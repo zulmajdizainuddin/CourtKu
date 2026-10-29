@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -44,6 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $error = fn (string $code, string $message, int $status, array $details = []) => response()->json([
             'error' => ['code' => $code, 'message' => $message, 'details' => (object) $details],
         ], $status);
+
+        // A business rule said no (e.g. INVALID_STATUS_CHANGE); always JSON, it only happens in the API.
+        $exceptions->render(fn (ApiException $e) => $error($e->errorCode, $e->getMessage(), $e->status, $e->details));
 
         $exceptions->render(function (ValidationException $e, Request $request) use ($isJson, $error) {
             if ($isJson($request)) {

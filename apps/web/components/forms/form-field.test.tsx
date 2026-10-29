@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { FormField } from "./form-field";
+import { FormField, SelectField } from "./form-field";
 
 describe("FormField", () => {
   it("links the error message to the input so screen readers announce it", () => {
@@ -15,5 +15,29 @@ describe("FormField", () => {
     render(<FormField label="Email" name="email" />);
 
     expect(screen.getByLabelText("Email")).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("reads out the help line and the error together", () => {
+    render(<FormField label="Web address" name="slug" hint="Your page's address." error="Already taken." />);
+
+    expect(screen.getByLabelText("Web address")).toHaveAccessibleDescription("Your page's address. Already taken.");
+  });
+});
+
+describe("SelectField", () => {
+  it("offers the options under a label, with a placeholder first", () => {
+    render(
+      <SelectField
+        label="State"
+        name="state"
+        placeholder="Choose a state"
+        options={[{ value: "selangor", label: "Selangor" }]}
+        error="Choose a state."
+      />,
+    );
+
+    const select = screen.getByLabelText("State");
+    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(["Choose a state", "Selangor"]);
+    expect(select).toHaveAccessibleDescription("Choose a state.");
   });
 });

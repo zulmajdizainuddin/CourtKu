@@ -31,6 +31,23 @@ Free plan limits to know:
 | Emails stop arriving, Brevo logs are empty | Brevo SMTP key expired (1-year expiry, or 90 days without sending) | Brevo → **SMTP & API** → generate a new key → update `MAIL_PASSWORD` in Render |
 | Every request times out, even `/up` | Render instance stuck or failed to deploy | Render → **Events** and **Logs**; **Manual Deploy → Restart service** |
 
+## Make an account the platform admin
+
+The admin approves and suspends venues at `/admin`. No web page can make someone admin; only `php artisan courtku:make-admin`. Render's free plan has no shell, so run it from your own computer against the Aiven database:
+
+1. Register the account on the live site and verify its email.
+2. Download the CA certificate from the Aiven service overview (the same file as Render's `aiven-ca.pem`).
+3. In PowerShell, from `apps/api`, set the database variables for this window only, then run the command. Variables set like this take priority over your local `.env`:
+
+   ```powershell
+   $env:DB_HOST = "<Aiven host>"; $env:DB_PORT = "<Aiven port>"; $env:DB_DATABASE = "courtku"
+   $env:DB_USERNAME = "<Aiven user>"; $env:DB_PASSWORD = "<Aiven password>"
+   $env:MYSQL_ATTR_SSL_CA = "C:\path\to\aiven-ca.pem"
+   php artisan courtku:make-admin you@example.com
+   ```
+
+4. Close the PowerShell window afterwards, so later commands use your local database again.
+
 ## API environment variables (set in Render)
 
 Never commit real values. `APP_KEY` and passwords live only in Render.
