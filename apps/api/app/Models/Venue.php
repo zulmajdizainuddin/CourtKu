@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -69,6 +70,22 @@ class Venue extends Model
     public function owners(): BelongsToMany
     {
         return $this->members()->wherePivot('role', VenueRole::Owner->value);
+    }
+
+    /**
+     * @return HasMany<OperatingHour, $this>
+     */
+    public function operatingHours(): HasMany
+    {
+        return $this->hasMany(OperatingHour::class);
+    }
+
+    /**
+     * @return HasMany<VenueClosure, $this>
+     */
+    public function closures(): HasMany
+    {
+        return $this->hasMany(VenueClosure::class);
     }
 
     /** The user's role here, or null if they don't work here. */

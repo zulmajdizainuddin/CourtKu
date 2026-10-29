@@ -81,6 +81,7 @@ function VenueMenu({ venueId }: { venueId: string }) {
   const items = [
     { href: base, label: "Overview" },
     { href: `${base}/profile`, label: "Profile" },
+    { href: `${base}/hours`, label: "Hours" },
   ];
 
   return (

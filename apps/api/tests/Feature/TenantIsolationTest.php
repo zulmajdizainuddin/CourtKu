@@ -14,16 +14,30 @@ use App\Models\Venue;
 dataset('manage endpoints', [
     'view venue' => ['GET', '/api/v1/manage/venues/{venue}'],
     'update profile' => ['PUT', '/api/v1/manage/venues/{venue}'],
+    'view hours' => ['GET', '/api/v1/manage/venues/{venue}/hours'],
+    'update hours' => ['PUT', '/api/v1/manage/venues/{venue}/hours'],
+    'list closures' => ['GET', '/api/v1/manage/venues/{venue}/closures'],
+    'add closure' => ['POST', '/api/v1/manage/venues/{venue}/closures'],
+    'remove closure' => ['DELETE', '/api/v1/manage/venues/{venue}/closures/{closure}'],
 ]);
+
+/** Fills in {venue}, and {closure} with one of that venue's own closures. */
+function urlFor(string $path, Venue $venue): string
+{
+    if (str_contains($path, '{closure}')) {
+        $closure = $venue->closures()->create(['starts_on' => '2099-01-01', 'ends_on' => '2099-01-02', 'reason' => 'Test']);
+        $path = str_replace('{closure}', (string) $closure->id, $path);
+    }
+
+    return str_replace('{venue}', (string) $venue->id, $path);
+}
 
 it('ADR-002 hides venue B from the owner of venue A', function (string $method, string $path) {
     $ownerOfA = User::factory()->withTwoFactor()->create();
     Venue::factory()->active()->ownedBy($ownerOfA)->create();
     $venueB = Venue::factory()->active()->ownedBy(User::factory()->create())->create();
 
-    $this->actingAs($ownerOfA)
-        ->json($method, str_replace('{venue}', (string) $venueB->id, $path))
-        ->assertNotFound();
+    $this->actingAs($ownerOfA)->json($method, urlFor($path, $venueB))->assertNotFound();
 })->with('manage endpoints');
 
 it('ADR-002 hides venue B from the staff of venue A', function (string $method, string $path) {
@@ -31,15 +45,24 @@ it('ADR-002 hides venue B from the staff of venue A', function (string $method, 
     Venue::factory()->active()->withStaff($staffOfA)->create();
     $venueB = Venue::factory()->active()->ownedBy(User::factory()->create())->create();
 
-    $this->actingAs($staffOfA)
-        ->json($method, str_replace('{venue}', (string) $venueB->id, $path))
-        ->assertNotFound();
+    $this->actingAs($staffOfA)->json($method, urlFor($path, $venueB))->assertNotFound();
 })->with('manage endpoints');
 
 it('ADR-002 hides every venue from a player who works nowhere', function (string $method, string $path) {
     $venue = Venue::factory()->active()->ownedBy(User::factory()->create())->create();
 
-    $this->actingAs(User::factory()->create())
-        ->json($method, str_replace('{venue}', (string) $venue->id, $path))
-        ->assertNotFound();
+    $this->actingAs(User::factory()->create())->json($method, urlFor($path, $venue))->assertNotFound();
 })->with('manage endpoints');
+
+it('ADR-002 never reaches venue B\'s closure through venue A\'s address', function () {
+    $ownerOfA = User::factory()->withTwoFactor()->create();
+    $venueA = Venue::factory()->active()->ownedBy($ownerOfA)->create();
+    $venueB = Venue::factory()->active()->ownedBy(User::factory()->create())->create();
+    $closureOfB = $venueB->closures()->create(['starts_on' => '2099-01-01', 'ends_on' => '2099-01-02', 'reason' => 'Renovation']);
+
+    $this->actingAs($ownerOfA)
+        ->deleteJson("/api/v1/manage/venues/{$venueA->id}/closures/{$closureOfB->id}")
+        ->assertNotFound();
+
+    expect($closureOfB->fresh())->not->toBeNull();
+});

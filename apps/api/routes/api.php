@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
+use App\Http\Controllers\V1\Manage\OpeningHoursController;
+use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
 use App\Http\Controllers\V1\MeController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,16 @@ Route::prefix('v1')->group(function () {
             Route::post('/venues', [ManageVenueController::class, 'store'])->middleware('two-factor:always');
             Route::get('/venues/{venue}', [ManageVenueController::class, 'show'])->can('view', 'venue');
             Route::put('/venues/{venue}', [ManageVenueController::class, 'update'])->can('update', 'venue');
+
+            Route::get('/venues/{venue}/hours', [OpeningHoursController::class, 'index'])->can('view', 'venue');
+            Route::put('/venues/{venue}/hours', [OpeningHoursController::class, 'update'])->can('update', 'venue');
+
+            Route::get('/venues/{venue}/closures', [VenueClosureController::class, 'index'])->can('view', 'venue');
+            Route::post('/venues/{venue}/closures', [VenueClosureController::class, 'store'])->can('update', 'venue');
+            // scopeBindings: {closure} must belong to {venue}, otherwise 404.
+            Route::delete('/venues/{venue}/closures/{closure}', [VenueClosureController::class, 'destroy'])
+                ->scopeBindings()
+                ->can('update', 'venue');
         });
 
         // The platform admin only (is_platform_admin, set with `php artisan courtku:make-admin`),

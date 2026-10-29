@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VenuePage } from "@/components/venues/venue-page";
 import type { ManageVenue } from "@/features/venues/hooks";
+import { useOpeningHours } from "@/features/venues/hours";
 import { stateLabel } from "@/lib/states";
 
 /** One venue's home in the dashboard: what its status means and what to do next. */
@@ -19,6 +20,8 @@ const statusHelp: Record<ManageVenue["status"], (venue: ManageVenue) => string> 
 
 function Overview({ venue }: { venue: ManageVenue }) {
   const profileStarted = venue.address_line !== null || venue.phone !== null;
+  const hours = useOpeningHours(String(venue.id));
+  const hoursSet = (hours.data?.length ?? 0) > 0;
 
   return (
     <Card>
@@ -37,6 +40,15 @@ function Overview({ venue }: { venue: ManageVenue }) {
               add your address, phone number and facilities
             </Link>
             . Opening hours and courts come after that.
+          </p>
+        )}
+        {venue.role === "owner" && profileStarted && hours.isSuccess && !hoursSet && (
+          <p>
+            Next step:{" "}
+            <Link href={`/dashboard/${venue.id}/hours`} className="font-medium underline">
+              set your opening hours
+            </Link>
+            . Until you do, players will see the venue as closed every day.
           </p>
         )}
       </CardContent>
