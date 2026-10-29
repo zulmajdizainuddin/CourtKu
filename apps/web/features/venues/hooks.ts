@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { CreateVenueInput } from "@/lib/schemas/venue";
+import type { CreateVenueInput, VenueProfilePayload } from "@/lib/schemas/venue";
 
 export type VenueStatus = "pending" | "active" | "suspended";
 export type VenueRole = "owner" | "staff";
@@ -15,6 +15,13 @@ export type ManageVenue = {
   status: VenueStatus;
   state: string;
   role: VenueRole;
+  description: string | null;
+  address_line: string | null;
+  city: string | null;
+  postcode: string | null;
+  /** Always in +60 format, e.g. "+60123456789". */
+  phone: string | null;
+  facilities: string[];
   approved_at: string | null;
   created_at: string;
 };
@@ -34,6 +41,20 @@ export function useManageVenue(venueId: string) {
   return useQuery({
     queryKey: [...myVenuesKey, venueId],
     queryFn: async () => (await api<{ data: ManageVenue }>(`/api/v1/manage/venues/${venueId}`)).data,
+  });
+}
+
+/** Saves the venue profile (FR-06). Owners only; the API refuses staff. */
+export function useUpdateVenue(venueId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: VenueProfilePayload) =>
+      (await api<{ data: ManageVenue }>(`/api/v1/manage/venues/${venueId}`, { method: "PUT", body: input })).data,
+    onSuccess: (venue) => {
+      // Show the saved version straight away, and refresh the venue picker (the name may have changed).
+      queryClient.setQueryData([...myVenuesKey, venueId], venue);
+      queryClient.invalidateQueries({ queryKey: myVenuesKey, exact: true });
+    },
   });
 }
 

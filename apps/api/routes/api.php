@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function () {
             // Listing a venue makes you its owner, so two-factor comes first.
             Route::post('/venues', [ManageVenueController::class, 'store'])->middleware('two-factor:always');
             Route::get('/venues/{venue}', [ManageVenueController::class, 'show'])->can('view', 'venue');
+            Route::put('/venues/{venue}', [ManageVenueController::class, 'update'])->can('update', 'venue');
         });
 
         // The platform admin only (is_platform_admin, set with `php artisan courtku:make-admin`),

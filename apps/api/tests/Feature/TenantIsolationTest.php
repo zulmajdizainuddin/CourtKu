@@ -13,6 +13,7 @@ use App\Models\Venue;
 
 dataset('manage endpoints', [
     'view venue' => ['GET', '/api/v1/manage/venues/{venue}'],
+    'update profile' => ['PUT', '/api/v1/manage/venues/{venue}'],
 ]);
 
 it('ADR-002 hides venue B from the owner of venue A', function (string $method, string $path) {
