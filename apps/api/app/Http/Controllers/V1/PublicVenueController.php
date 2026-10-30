@@ -29,7 +29,7 @@ class PublicVenueController extends Controller
         $this->ensurePublic($venue);
 
         return CourtResource::collection(
-            $venue->courts()->where('is_active', true)->with('sports')->orderBy('sort_order')->orderBy('id')->get(),
+            $venue->courts()->bookable()->with('sports')->orderBy('sort_order')->orderBy('id')->get(),
         );
     }
 

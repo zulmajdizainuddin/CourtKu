@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * Adding (POST) or changing (PUT) a court (FR-08):
- * { "name": "Court 1", "is_indoor": true, "is_active": true, "sports": ["badminton", "futsal"] }
+ * { "name": "Court 1", "is_indoor": true, "base_price_sen": 2500, "is_active": true, "sports": ["badminton"] }
  */
 class CourtRequest extends FormRequest
 {
@@ -28,6 +28,9 @@ class CourtRequest extends FormRequest
                 ->where('venue_id', $this->venue()->id)
                 ->ignore($court instanceof Court ? $court->id : null)],
             'is_indoor' => ['required', 'boolean'],
+            // FR-09: price per hour in sen, at most RM 1,000.00. Multiples of 10 sen (ADR-017),
+            // so half an hour is always a whole number of sen. null = not bookable yet; left out = unchanged.
+            'base_price_sen' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000', 'multiple_of:10'],
             'is_active' => ['sometimes', 'boolean'],
             'sports' => ['required', 'array', 'min:1'],
             'sports.*' => ['distinct', Rule::exists('sports', 'slug')],
@@ -43,18 +46,20 @@ class CourtRequest extends FormRequest
             'name.unique' => 'This venue already has a court with this name.',
             'sports.required' => 'Choose at least one sport.',
             'sports.min' => 'Choose at least one sport.',
+            'base_price_sen.multiple_of' => 'Use a price in 10-sen steps, e.g. RM 25.00 or RM 25.50.',
+            'base_price_sen.max' => 'The price can be at most RM 1,000.00 an hour.',
         ];
     }
 
     /**
      * The court's own fields, ready to save.
      *
-     * @return array{name: string, is_indoor: bool, is_active?: bool}
+     * @return array{name: string, is_indoor: bool, base_price_sen?: int|null, is_active?: bool}
      */
     public function courtData(): array
     {
-        /** @var array{name: string, is_indoor: bool, is_active?: bool} */
-        return $this->safe()->only(['name', 'is_indoor', 'is_active']);
+        /** @var array{name: string, is_indoor: bool, base_price_sen?: int|null, is_active?: bool} */
+        return $this->safe()->only(['name', 'is_indoor', 'base_price_sen', 'is_active']);
     }
 
     /**

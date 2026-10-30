@@ -19,7 +19,7 @@ export type PublicVenue = {
   photos: { id: number; url: string; thumbnail_url: string; width: number; height: number }[];
   opening_hours: (OpeningPeriod & { closes_next_day: boolean })[];
   closures: { id: number; starts_on: string; ends_on: string; reason: string }[];
-  courts: { id: number; name: string; is_indoor: boolean; sports: string[] }[];
+  courts: { id: number; name: string; is_indoor: boolean; base_price: string | null; sports: string[] }[];
 };
 
 // Only the Next.js server uses this address; the browser never talks to the API directly here.

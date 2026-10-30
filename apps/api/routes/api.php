@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/venues', [ManageVenueController::class, 'store'])->middleware('two-factor:always');
             Route::get('/venues/{venue}', [ManageVenueController::class, 'show'])->can('view', 'venue');
             Route::put('/venues/{venue}', [ManageVenueController::class, 'update'])->can('update', 'venue');
+            Route::put('/venues/{venue}/settings', [ManageVenueController::class, 'updateSettings'])->can('update', 'venue');
 
             Route::get('/venues/{venue}/hours', [OpeningHoursController::class, 'index'])->can('view', 'venue');
             Route::put('/venues/{venue}/hours', [OpeningHoursController::class, 'update'])->can('update', 'venue');

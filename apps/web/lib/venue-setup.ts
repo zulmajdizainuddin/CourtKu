@@ -13,7 +13,7 @@ export type SetupItem = {
 };
 
 /** How many of each the venue has; they come from their own API calls. */
-export type SetupCounts = { hours: number; courts: number; photos: number };
+export type SetupCounts = { hours: number; courts: number; unpricedCourts: number; photos: number };
 
 /** Everything an owner sets up, needed items first, each with a tick when done. */
 export function setupChecklist(venue: ManageVenue, counts: SetupCounts): SetupItem[] {
@@ -21,6 +21,13 @@ export function setupChecklist(venue: ManageVenue, counts: SetupCounts): SetupIt
     { label: "Address", done: venue.address_line !== null, needed: true, why: "Players use it to find you", tab: "profile" },
     { label: "Opening hours", done: counts.hours > 0, needed: true, why: "Until then, the venue shows as closed", tab: "hours" },
     { label: "Courts", done: counts.courts > 0, needed: true, why: "Players book a court", tab: "courts" },
+    {
+      label: "Prices",
+      done: counts.courts > 0 && counts.unpricedCourts === 0,
+      needed: true,
+      why: "Courts without a price are hidden from players",
+      tab: "courts",
+    },
     { label: "Phone number", done: venue.phone !== null, needed: false, why: "So players can call you", tab: "profile" },
     { label: "Facilities", done: venue.facilities.length > 0, needed: false, why: "Parking, surau, showers...", tab: "profile" },
     { label: "Photos", done: counts.photos > 0, needed: false, why: "Players like to see the courts", tab: "photos" },

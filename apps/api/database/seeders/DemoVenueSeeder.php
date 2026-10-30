@@ -41,17 +41,18 @@ class DemoVenueSeeder extends Seeder
         $venue->operatingHours()->create(['weekday' => 5, 'opens_at' => '14:30', 'closes_at' => '00:00', 'closes_next_day' => true]);
         $venue->operatingHours()->create(['weekday' => 6, 'opens_at' => '08:00', 'closes_at' => '02:00', 'closes_next_day' => true]);
 
+        // Name, indoor, sport, price per hour in sen.
         $courts = [
-            ['Court 1', true, 'badminton'],
-            ['Court 2', true, 'badminton'],
-            ['Court 3', true, 'badminton'],
-            ['Futsal Pitch', true, 'futsal'],
-            ['Pickleball 1', false, 'pickleball'],
-            ['Pickleball 2', false, 'pickleball'],
+            ['Court 1', true, 'badminton', 2000],
+            ['Court 2', true, 'badminton', 2000],
+            ['Court 3', true, 'badminton', 2000],
+            ['Futsal Pitch', true, 'futsal', 8000],
+            ['Pickleball 1', false, 'pickleball', 2500],
+            ['Pickleball 2', false, 'pickleball', 2500],
         ];
-        foreach ($courts as $order => [$name, $indoor, $sport]) {
+        foreach ($courts as $order => [$name, $indoor, $sport, $price]) {
             /** @var Court $court */
-            $court = $venue->courts()->create(['name' => $name, 'is_indoor' => $indoor, 'sort_order' => $order]);
+            $court = $venue->courts()->create(['name' => $name, 'is_indoor' => $indoor, 'base_price_sen' => $price, 'sort_order' => $order]);
             $court->sports()->attach(Sport::where('slug', $sport)->value('id'));
         }
     }

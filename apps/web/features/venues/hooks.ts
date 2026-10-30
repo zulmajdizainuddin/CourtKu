@@ -23,6 +23,13 @@ export type ManageVenue = {
   /** Always in +60 format, e.g. "+60123456789". */
   phone: string | null;
   facilities: string[];
+  /** Booking settings (FR-13): slot length 30 or 60 minutes, shortest/longest booking, days ahead. */
+  slot_minutes: 30 | 60;
+  min_minutes: number;
+  max_minutes: number;
+  booking_window_days: number;
+  /** How close to the start players may still book; 0 = right up to the start time. */
+  min_notice_minutes: number;
   approved_at: string | null;
   created_at: string;
 };
@@ -59,6 +66,25 @@ export function useUpdateVenue(venueId: string) {
       // Show the saved version straight away, and refresh the venue picker (the name may have changed).
       queryClient.setQueryData([...myVenuesKey, venueId], venue);
       queryClient.invalidateQueries({ queryKey: myVenuesKey, exact: true });
+    },
+  });
+}
+
+export type BookingSettings = Pick<
+  ManageVenue,
+  "slot_minutes" | "min_minutes" | "max_minutes" | "booking_window_days" | "min_notice_minutes"
+>;
+
+/** Saves the booking settings (FR-13). Owners only. */
+export function useUpdateSettings(venueId: string) {
+  const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
+  return useMutation({
+    mutationFn: async (input: BookingSettings) =>
+      (await api<{ data: ManageVenue }>(`/api/v1/manage/venues/${venueId}/settings`, { method: "PUT", body: input })).data,
+    onSuccess: (venue) => {
+      refreshPublicPage();
+      queryClient.setQueryData([...myVenuesKey, venueId], venue);
     },
   });
 }

@@ -15,6 +15,7 @@ use App\Models\Venue;
 dataset('manage endpoints', [
     'view venue' => ['GET', '/api/v1/manage/venues/{venue}'],
     'update profile' => ['PUT', '/api/v1/manage/venues/{venue}'],
+    'update booking settings' => ['PUT', '/api/v1/manage/venues/{venue}/settings'],
     'view hours' => ['GET', '/api/v1/manage/venues/{venue}/hours'],
     'update hours' => ['PUT', '/api/v1/manage/venues/{venue}/hours'],
     'list closures' => ['GET', '/api/v1/manage/venues/{venue}/closures'],

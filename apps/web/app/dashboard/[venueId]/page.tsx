@@ -69,6 +69,7 @@ function SetupChecklist({ venue }: { venue: ManageVenue }) {
   const items = setupChecklist(venue, {
     hours: hours.data.length,
     courts: courts.data.length,
+    unpricedCourts: courts.data.filter((court) => court.is_active && court.base_price_sen === null).length,
     photos: photos.data.length,
   });
   const doneCount = items.filter((item) => item.done).length;

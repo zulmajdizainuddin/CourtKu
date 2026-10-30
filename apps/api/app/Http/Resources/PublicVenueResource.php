@@ -40,9 +40,9 @@ class PublicVenueResource extends JsonResource
             'closures' => VenueClosureResource::collection(
                 $this->closures()->where('ends_on', '>=', MalaysiaTime::today())->orderBy('starts_on')->limit(self::CLOSURES_SHOWN)->get(),
             ),
-            // Inactive courts (e.g. under repair) are hidden from players.
+            // Only bookable courts: active and with a price (inactive or unpriced courts are hidden).
             'courts' => CourtResource::collection(
-                $this->courts()->where('is_active', true)->with('sports')->orderBy('sort_order')->orderBy('id')->get(),
+                $this->courts()->bookable()->with('sports')->orderBy('sort_order')->orderBy('id')->get(),
             ),
         ];
     }

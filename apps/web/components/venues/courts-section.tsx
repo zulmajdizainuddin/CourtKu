@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { type Court, useAddCourt, useCourts, useDeleteCourt, useReorderCourts, useUpdateCourt } from "@/features/venues/courts";
 import { ApiError } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form-errors";
+import { senToInput } from "@/lib/money";
 import { type CourtInput, type CourtPayload, courtSchema, toCourtPayload } from "@/lib/schemas/court";
 import { SPORTS, sportLabel } from "@/lib/sports";
 
@@ -65,6 +66,11 @@ export function CourtsSection({ venueId, canEdit }: { venueId: string; canEdit: 
                   <p className="text-sm text-muted-foreground">
                     {court.sports.map(sportLabel).join(", ")} · {court.is_indoor ? "Indoor" : "Outdoor"}
                   </p>
+                  {court.base_price ? (
+                    <p className="text-sm">{court.base_price} an hour</p>
+                  ) : (
+                    <p className="text-sm text-amber-800 dark:text-amber-300">No price yet: hidden from players</p>
+                  )}
                 </div>
                 {canEdit && (
                   <div className="flex items-center gap-1">
@@ -139,8 +145,14 @@ function CourtForm({
   const form = useForm<CourtInput>({
     resolver: zodResolver(courtSchema),
     defaultValues: court
-      ? { name: court.name, sports: court.sports, location: court.is_indoor ? "indoor" : "outdoor", is_active: court.is_active }
-      : { name: suggestedName ?? "", sports: [], location: "indoor", is_active: true },
+      ? {
+          name: court.name,
+          price: court.base_price_sen === null ? "" : senToInput(court.base_price_sen),
+          sports: court.sports,
+          location: court.is_indoor ? "indoor" : "outdoor",
+          is_active: court.is_active,
+        }
+      : { name: suggestedName ?? "", price: "", sports: [], location: "indoor", is_active: true },
   });
   const { errors, isSubmitting } = form.formState;
 
@@ -159,6 +171,14 @@ function CourtForm({
   return (
     <form onSubmit={onSubmit} className="grid gap-4" noValidate>
       <FormField label="Court name" error={errors.name?.message} {...form.register("name")} />
+      <FormField
+        label="Price per hour (RM)"
+        inputMode="decimal"
+        placeholder="25.00"
+        hint="In 10-sen steps, e.g. 25.00 or 25.50. Players don't see the court until it has a price. Peak and off-peak prices come next."
+        error={errors.price?.message}
+        {...form.register("price")}
+      />
 
       <fieldset className="grid gap-2">
         <legend className="mb-1.5 text-sm font-medium">Sports played here</legend>
