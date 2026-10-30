@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * One court at a venue (FR-08). It may offer several sports, but it is still one
@@ -68,5 +69,13 @@ class Court extends Model
     public function sports(): BelongsToMany
     {
         return $this->belongsToMany(Sport::class, 'court_sports')->orderBy('sports.id');
+    }
+
+    /**
+     * @return HasMany<Booking, $this>
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 }

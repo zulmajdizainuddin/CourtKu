@@ -25,3 +25,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [018](018-photos-on-cloudinary.md) | Venue photos are stored on Cloudinary | 2026-10-31 |
 | [019](019-staff-invites-table.md) | Staff invites have their own table | 2026-10-31 |
 | [020](020-price-rules-never-overlap.md) | Price rules never overlap; a court's own rule beats an all-courts rule | 2026-10-31 |
+| [021](021-holds-move-to-m4.md) | Checkout holds arrive with online payment (M4), not in M3 | 2026-11-01 |

@@ -28,7 +28,7 @@ export function CourtsSection({ venueId, canEdit }: { venueId: string; canEdit: 
   };
 
   const onDelete = (court: Court) => {
-    // TODO(M3): the API will refuse this once the court has bookings; deactivating stays possible.
+    // The API refuses this once the court has bookings (COURT_HAS_BOOKINGS); its message shows below the list.
     if (window.confirm(`Delete ${court.name} for good? To hide it for a while instead, edit it and untick "Players can book".`)) {
       remove.mutate(court.id);
     }
