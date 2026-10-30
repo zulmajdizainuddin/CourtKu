@@ -2,7 +2,7 @@
 
 Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a multi-tenant SaaS: each venue gets its own booking page, players see live availability and pay online, and owners run their day from a dashboard.
 
-> **Status:** M1 Venues and courts is live. Venue owners sign up (with two-factor login), wait for approval, and set up their profile, opening hours, courts, photos and staff; anyone can see an approved venue's page at `/v/<venue>`. Pricing and online booking come next (M2, M3).
+> **Status:** M2 Pricing and availability is live. Venue owners sign up (with two-factor login), wait for approval, and set up their profile, opening hours, courts, photos, staff, prices (including peak and off-peak) and booking rules; anyone can see an approved venue's page at `/v/<venue>` and its free times and prices at `/v/<venue>/book`. Online booking and payment come next (M3).
 
 ## Live demo
 

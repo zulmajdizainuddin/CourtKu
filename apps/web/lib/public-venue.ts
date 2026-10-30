@@ -20,6 +20,8 @@ export type PublicVenue = {
   opening_hours: (OpeningPeriod & { closes_next_day: boolean })[];
   closures: { id: number; starts_on: string; ends_on: string; reason: string }[];
   courts: { id: number; name: string; is_indoor: boolean; base_price: string | null; sports: string[] }[];
+  /** How players may book (FR-13): lengths in minutes and how many days ahead. */
+  booking: { slot_minutes: number; min_minutes: number; max_minutes: number; booking_window_days: number };
 };
 
 // Only the Next.js server uses this address; the browser never talks to the API directly here.
