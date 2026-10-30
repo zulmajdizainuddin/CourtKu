@@ -44,7 +44,7 @@ class PriceRuleController extends Controller
     /** PUT /api/v1/manage/venues/{venue}/price-rules/{priceRule} */
     public function update(PriceRuleRequest $request, Venue $venue, PriceRule $priceRule): PriceRuleResource
     {
-        // TODO(M3): bookings already made keep the price they were quoted.
+        // Bookings already made keep their price: each one stores the price of every half hour.
         $priceRule->update($request->ruleData());
 
         return new PriceRuleResource($priceRule);

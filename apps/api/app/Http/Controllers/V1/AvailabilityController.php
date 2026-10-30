@@ -39,6 +39,7 @@ class AvailabilityController extends Controller
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
+        $taken = $availability->takenSlots($courts->modelKeys(), $date);
 
         return response()->json(['data' => [
             'date' => $date->toDateString(),
@@ -58,8 +59,8 @@ class AvailabilityController extends Controller
                     'time' => AvailabilityService::startsAt($date, $minute)->format('H:i'),
                     // This half hour's price in sen: half the hourly price that applies then.
                     'price_sen' => $pricing->cellPriceSen($court, $date->dayOfWeek, $minute),
-                    // Always true until bookings arrive in M3.
-                    'available' => true,
+                    // false when a booking already holds this half hour.
+                    'available' => ! isset($taken[AvailabilityService::slotKey($court->id, AvailabilityService::startsAt($date, $minute))]),
                 ], $minutes),
             ])->values(),
         ]]);

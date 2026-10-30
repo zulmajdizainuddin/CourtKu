@@ -68,7 +68,13 @@ class CourtController extends Controller
     /** DELETE /api/v1/manage/venues/{venue}/courts/{court} */
     public function destroy(Venue $venue, Court $court): Response
     {
-        // TODO(M3): refuse once the court has bookings, so booking history is never lost.
+        // Booking history is never lost: a court that was ever booked stays, and can be hidden instead.
+        if ($court->bookings()->exists()) {
+            throw new ApiException(
+                'COURT_HAS_BOOKINGS',
+                "{$court->name} has bookings, so it can't be deleted. Edit it and untick \"Players can book\" to hide it instead.",
+            );
+        }
         $court->delete();
 
         return response()->noContent();

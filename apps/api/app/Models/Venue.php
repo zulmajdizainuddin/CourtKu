@@ -97,6 +97,14 @@ class Venue extends Model
     }
 
     /**
+     * @return HasMany<Booking, $this>
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
      * @return HasMany<PriceRule, $this>
      */
     public function priceRules(): HasMany
