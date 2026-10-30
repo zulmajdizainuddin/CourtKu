@@ -83,6 +83,7 @@ function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) 
     { href: `${base}/profile`, label: "Profile" },
     { href: `${base}/hours`, label: "Hours" },
     { href: `${base}/courts`, label: "Courts" },
+    { href: `${base}/prices`, label: "Prices" },
     { href: `${base}/photos`, label: "Photos" },
     { href: `${base}/settings`, label: "Settings" },
     // Only owners manage staff; the API refuses everyone else anyway.

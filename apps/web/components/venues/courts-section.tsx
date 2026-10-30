@@ -175,7 +175,7 @@ function CourtForm({
         label="Price per hour (RM)"
         inputMode="decimal"
         placeholder="25.00"
-        hint="In 10-sen steps, e.g. 25.00 or 25.50. Players don't see the court until it has a price. Peak and off-peak prices come next."
+        hint="In 10-sen steps, e.g. 25.00 or 25.50. Players don't see the court until it has a price. Set peak and off-peak prices on the Prices page."
         error={errors.price?.message}
         {...form.register("price")}
       />

@@ -5,6 +5,7 @@ use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\InviteController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
+use App\Http\Controllers\V1\Manage\PriceRuleController;
 use App\Http\Controllers\V1\Manage\StaffController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
@@ -64,6 +65,18 @@ Route::prefix('v1')->group(function () {
                 ->can('update', 'venue');
             Route::delete('/venues/{venue}/courts/{court}', [CourtController::class, 'destroy'])
                 ->whereNumber('court')
+                ->scopeBindings()
+                ->can('update', 'venue');
+
+            // Peak and off-peak prices (FR-10).
+            Route::get('/venues/{venue}/price-rules', [PriceRuleController::class, 'index'])->can('view', 'venue');
+            Route::post('/venues/{venue}/price-rules', [PriceRuleController::class, 'store'])->can('update', 'venue');
+            Route::put('/venues/{venue}/price-rules/{priceRule}', [PriceRuleController::class, 'update'])
+                ->whereNumber('priceRule')
+                ->scopeBindings()
+                ->can('update', 'venue');
+            Route::delete('/venues/{venue}/price-rules/{priceRule}', [PriceRuleController::class, 'destroy'])
+                ->whereNumber('priceRule')
                 ->scopeBindings()
                 ->can('update', 'venue');
 

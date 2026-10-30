@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Court;
+use App\Models\PriceRule;
 use App\Models\User;
 use App\Models\Venue;
 
@@ -26,6 +27,10 @@ dataset('manage endpoints', [
     'reorder courts' => ['PUT', '/api/v1/manage/venues/{venue}/courts/order'],
     'change court' => ['PUT', '/api/v1/manage/venues/{venue}/courts/{court}'],
     'remove court' => ['DELETE', '/api/v1/manage/venues/{venue}/courts/{court}'],
+    'list price rules' => ['GET', '/api/v1/manage/venues/{venue}/price-rules'],
+    'add price rule' => ['POST', '/api/v1/manage/venues/{venue}/price-rules'],
+    'change price rule' => ['PUT', '/api/v1/manage/venues/{venue}/price-rules/{rule}'],
+    'remove price rule' => ['DELETE', '/api/v1/manage/venues/{venue}/price-rules/{rule}'],
     'list photos' => ['GET', '/api/v1/manage/venues/{venue}/photos'],
     'add photo' => ['POST', '/api/v1/manage/venues/{venue}/photos'],
     'reorder photos' => ['PUT', '/api/v1/manage/venues/{venue}/photos/order'],
@@ -36,7 +41,7 @@ dataset('manage endpoints', [
     'remove staff' => ['DELETE', '/api/v1/manage/venues/{venue}/staff/{member}'],
 ]);
 
-/** Fills in {venue}, and {closure}, {court}, {photo}, {invite} or {member} with one of that venue's own. */
+/** Fills in {venue}, and {closure}, {court}, {rule}, {photo}, {invite} or {member} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
     if (str_contains($path, '{invite}')) {
@@ -56,6 +61,9 @@ function urlFor(string $path, Venue $venue): string
     }
     if (str_contains($path, '{court}')) {
         $path = str_replace('{court}', (string) Court::factory()->for($venue)->create()->id, $path);
+    }
+    if (str_contains($path, '{rule}')) {
+        $path = str_replace('{rule}', (string) PriceRule::factory()->for($venue)->create()->id, $path);
     }
     if (str_contains($path, '{closure}')) {
         $closure = $venue->closures()->create(['starts_on' => '2099-01-01', 'ends_on' => '2099-01-02', 'reason' => 'Test']);
@@ -113,4 +121,19 @@ it('ADR-002 never reaches venue B\'s court through venue A\'s address', function
     $this->actingAs($ownerOfA)->deleteJson("/api/v1/manage/venues/{$venueA->id}/courts/{$courtOfB->id}")->assertNotFound();
 
     expect($courtOfB->fresh()->name)->toBe('Court B');
+});
+
+it('ADR-002 never reaches venue B\'s price rule through venue A\'s address', function () {
+    $ownerOfA = User::factory()->withTwoFactor()->create();
+    $venueA = Venue::factory()->active()->ownedBy($ownerOfA)->create();
+    $ruleOfB = PriceRule::factory()->for(Venue::factory()->create())->create(['price_sen' => 3000]);
+
+    $this->actingAs($ownerOfA)
+        ->putJson("/api/v1/manage/venues/{$venueA->id}/price-rules/{$ruleOfB->id}", [
+            'weekdays' => [1], 'starts_at' => '08:00', 'ends_at' => '10:00', 'price_sen' => 10,
+        ])
+        ->assertNotFound();
+    $this->actingAs($ownerOfA)->deleteJson("/api/v1/manage/venues/{$venueA->id}/price-rules/{$ruleOfB->id}")->assertNotFound();
+
+    expect($ruleOfB->fresh()->price_sen)->toBe(3000);
 });

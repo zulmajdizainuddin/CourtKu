@@ -97,6 +97,14 @@ class Venue extends Model
     }
 
     /**
+     * @return HasMany<PriceRule, $this>
+     */
+    public function priceRules(): HasMany
+    {
+        return $this->hasMany(PriceRule::class);
+    }
+
+    /**
      * @return HasMany<VenueInvite, $this>
      */
     public function invites(): HasMany

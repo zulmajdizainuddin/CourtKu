@@ -12,6 +12,18 @@ export function parseRinggit(text: string): number | null {
   return Number(ringgit) * 100 + Number(cents.padEnd(2, "0"));
 }
 
+/**
+ * What is wrong with a typed price per hour, or undefined when it is fine.
+ * The same rules as the API: 10-sen steps (ADR-017), at most RM 1,000.00.
+ */
+export function hourlyPriceProblem(text: string): string | undefined {
+  const sen = parseRinggit(text);
+  if (sen === null) return "Enter a price like 25.00.";
+  if (sen % 10 !== 0) return "Use a price in 10-sen steps, e.g. 25.00 or 25.50.";
+  if (sen > 100000) return "The price can be at most RM 1,000.00 an hour.";
+  return undefined;
+}
+
 /** 2500 -> "RM 25.00", 125050 -> "RM 1,250.50" (the same as App\Support\Money in the API) */
 export function formatRinggit(sen: number): string {
   const ringgit = Math.floor(sen / 100).toLocaleString("en-MY");
