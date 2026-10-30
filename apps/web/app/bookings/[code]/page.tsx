@@ -44,7 +44,8 @@ function Confirmation() {
         </p>
       )}
 
-      {booking && (
+      {/* Never show a booking the API just refused, even if the browser still remembers it. */}
+      {booking && !error && (
         <>
           <header className="grid gap-1">
             <p

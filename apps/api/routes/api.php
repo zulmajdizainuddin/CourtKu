@@ -8,6 +8,7 @@ use App\Http\Controllers\V1\InviteController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\PriceRuleController;
+use App\Http\Controllers\V1\Manage\ScheduleController;
 use App\Http\Controllers\V1\Manage\StaffController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
@@ -55,6 +56,9 @@ Route::prefix('v1')->group(function () {
             Route::get('/venues/{venue}', [ManageVenueController::class, 'show'])->can('view', 'venue');
             Route::put('/venues/{venue}', [ManageVenueController::class, 'update'])->can('update', 'venue');
             Route::put('/venues/{venue}/settings', [ManageVenueController::class, 'updateSettings'])->can('update', 'venue');
+
+            // The day schedule for the counter (FR-31): owners and staff.
+            Route::get('/venues/{venue}/schedule', [ScheduleController::class, 'show'])->can('view', 'venue');
 
             Route::get('/venues/{venue}/hours', [OpeningHoursController::class, 'index'])->can('view', 'venue');
             Route::put('/venues/{venue}/hours', [OpeningHoursController::class, 'update'])->can('update', 'venue');

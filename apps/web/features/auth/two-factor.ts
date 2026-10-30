@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRefreshMe } from "@/features/auth/hooks";
+import { useRefreshMe, useStartSession } from "@/features/auth/hooks";
 import { api } from "@/lib/api";
 
 // Two-factor login: after the password, the user also types a 6-digit code from an
@@ -10,11 +10,12 @@ import { api } from "@/lib/api";
 
 /** The second step of logging in: the code from the app, or one of the recovery codes. */
 export function useTwoFactorChallenge() {
-  const refreshMe = useRefreshMe();
+  // The code was right: this is where a two-factor login really logs someone in.
+  const startSession = useStartSession();
   return useMutation({
     mutationFn: (input: { code: string } | { recovery_code: string }) =>
       api("/auth/two-factor-challenge", { method: "POST", body: input }),
-    onSuccess: refreshMe,
+    onSuccess: startSession,
   });
 }
 

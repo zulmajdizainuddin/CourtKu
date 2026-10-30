@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, api } from "@/lib/api";
-import { type User, useLogin, useMe } from "./hooks";
+import { type User, useLogin, useLogout, useMe } from "./hooks";
 
 vi.mock("@/lib/api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/api")>()),
@@ -71,5 +71,39 @@ describe("useLogin", () => {
     await login.mutateAsync({ email: player.email, password: "secret" });
 
     expect(queryClient.getQueryData(["me"])).toBeNull();
+  });
+});
+
+describe("a new person on the same browser", () => {
+  beforeEach(() => {
+    vi.mocked(api).mockReset();
+  });
+
+  it("forgets the previous person's bookings and venues after logout", async () => {
+    vi.mocked(api).mockResolvedValue(undefined);
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(["bookings", "CK-EF9BX"], { code: "CK-EF9BX" });
+    queryClient.setQueryData(["manage", "venues", "9"], { name: "Arena Demo" });
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>,
+    });
+
+    await result.current.mutateAsync();
+
+    expect(queryClient.getQueryData(["bookings", "CK-EF9BX"])).toBeUndefined();
+    expect(queryClient.getQueryData(["manage", "venues", "9"])).toBeUndefined();
+    expect(queryClient.getQueryData(["me"])).toBeNull();
+  });
+
+  it("starts a login with nothing left from whoever was here before", async () => {
+    fakeApi({ twoFactor: false });
+    const { queryClient, login } = await setup();
+    // Left over from someone else, e.g. after their session ran out without a logout.
+    queryClient.setQueryData(["bookings", "CK-EF9BX"], { code: "CK-EF9BX" });
+
+    await login.mutateAsync({ email: player.email, password: "secret" });
+
+    expect(queryClient.getQueryData(["bookings", "CK-EF9BX"])).toBeUndefined();
+    expect(queryClient.getQueryData(["me"])).toEqual(player);
   });
 });

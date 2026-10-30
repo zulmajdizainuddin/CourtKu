@@ -25,7 +25,8 @@ const TABS = [
 function MyBookings() {
   const [when, setWhen] = useState<"upcoming" | "past">("upcoming");
   const bookings = useMyBookings(when);
-  const list = bookings.data?.pages.flatMap((page) => page.data) ?? [];
+  // Never show bookings the API just refused, even if the browser still remembers them.
+  const list = bookings.isError ? [] : (bookings.data?.pages.flatMap((page) => page.data) ?? []);
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-10">

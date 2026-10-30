@@ -61,7 +61,8 @@ function VenueFrame({ venueId, children }: { venueId: string; children: (venue: 
         </p>
       )}
 
-      {venue && (
+      {/* Never show a venue the API just refused, even if the browser still remembers it. */}
+      {venue && !error && (
         <>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">{venue.name}</h1>
@@ -80,6 +81,7 @@ function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) 
   const base = `/dashboard/${venueId}`;
   const items = [
     { href: base, label: "Overview" },
+    { href: `${base}/schedule`, label: "Schedule" },
     { href: `${base}/profile`, label: "Profile" },
     { href: `${base}/hours`, label: "Hours" },
     { href: `${base}/courts`, label: "Courts" },
