@@ -84,7 +84,7 @@ final class OpeningHoursRules
     }
 
     /** "08:30" -> 510 */
-    private static function minutes(string $time): int
+    public static function minutes(string $time): int
     {
         [$hours, $minutes] = explode(':', $time);
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
+use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\InviteController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
@@ -23,6 +24,8 @@ Route::prefix('v1')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/venues/{venue:slug}', [PublicVenueController::class, 'show']);
         Route::get('/venues/{venue:slug}/courts', [PublicVenueController::class, 'courts']);
+        Route::get('/venues/{venue:slug}/availability', [AvailabilityController::class, 'show']);
+        Route::post('/venues/{venue:slug}/quote', [AvailabilityController::class, 'quote']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
