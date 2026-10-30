@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property int $venue_id
  * @property int $court_id
  * @property int|null $user_id
+ * @property int|null $sport_id
  * @property BookingSource $source
  * @property BookingStatus $status
  * @property Carbon $starts_at UTC
@@ -29,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $checked_in_at
  */
-#[Fillable(['code', 'venue_id', 'court_id', 'sport_id', 'user_id', 'customer_name', 'customer_phone', 'source', 'starts_at', 'ends_at', 'business_date', 'total_sen', 'created_by'])]
+#[Fillable(['code', 'idempotency_key', 'venue_id', 'court_id', 'sport_id', 'user_id', 'customer_name', 'customer_phone', 'source', 'starts_at', 'ends_at', 'business_date', 'total_sen', 'created_by'])]
 class Booking extends Model
 {
     protected function casts(): array
@@ -60,6 +61,16 @@ class Booking extends Model
     public function court(): BelongsTo
     {
         return $this->belongsTo(Court::class);
+    }
+
+    /**
+     * The sport played, e.g. badminton on a hall that also takes futsal (ADR-014).
+     *
+     * @return BelongsTo<Sport, $this>
+     */
+    public function sport(): BelongsTo
+    {
+        return $this->belongsTo(Sport::class);
     }
 
     /**

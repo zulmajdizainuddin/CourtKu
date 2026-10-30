@@ -24,3 +24,8 @@ export function todayInMalaysia(now: Date = new Date()): string {
   // en-CA writes dates as YYYY-MM-DD.
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(now);
 }
+
+/** The hour in Malaysia now, 0–23, e.g. to know whether it is just after midnight there. */
+export function hourInMalaysia(now: Date = new Date()): number {
+  return Number(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone: "Asia/Kuala_Lumpur" }).format(now));
+}

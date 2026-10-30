@@ -1,22 +1,26 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAvailability, useQuote } from "@/features/booking/hooks";
+import { ButtonLink } from "@/components/ui/button-link";
+import { useMe } from "@/features/auth/hooks";
+import { type BookingInput, useAvailability, useBook, useQuote } from "@/features/booking/hooks";
 import { ApiError } from "@/lib/api";
-import { bookingDates, dateChip, endLabel, lengthOptions, startOptions } from "@/lib/booking";
+import { bookingDates, dateChip, endLabel, lastNightDate, lengthOptions, startOptions } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
-import { formatDay, todayInMalaysia } from "@/lib/format";
+import { formatDay, hourInMalaysia, todayInMalaysia } from "@/lib/format";
 import { formatRinggit } from "@/lib/money";
 import { formatPhone } from "@/lib/phone";
 import type { PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
+import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "cn";
 
 /**
  * The booking page (FR-11, FR-12), time first: choose a date, sport and length, then a start
- * time, then one of the courts free for the whole booking. The total comes from the API's quote.
- * Booking itself arrives in M3; until then the player is told to call the venue.
+ * time, then one of the courts free for the whole booking. The total comes from the API's quote,
+ * and logged-in players with a verified email book it, paid at the venue (FR-15, ADR-021).
  */
 export function BookingPanel({
   slug,
@@ -29,9 +33,12 @@ export function BookingPanel({
   booking: PublicVenue["booking"];
   phone: string | null;
 }) {
-  const dates = bookingDates(todayInMalaysia(), booking.booking_window_days);
+  const today = todayInMalaysia();
+  // Just after midnight, last night's late hours come first (ADR-015).
+  const lastNight = lastNightDate(today, hourInMalaysia());
+  const dates = [...(lastNight ? [lastNight] : []), ...bookingDates(today, booking.booking_window_days)];
   const lengths = lengthOptions(booking);
-  const [date, setDate] = useState(dates[0]);
+  const [date, setDate] = useState(today);
   const [sport, setSport] = useState(sports[0]);
   const [minutes, setMinutes] = useState(lengths[0]);
   const [startsAt, setStartsAt] = useState<string>();
@@ -55,9 +62,10 @@ export function BookingPanel({
     <div className="grid gap-6">
       <Choices
         legend="Date"
-        options={dates.map((day, i) => {
+        options={dates.map((day) => {
           const chip = dateChip(day);
-          return { value: day, label: i === 0 ? "Today" : chip.day, detail: chip.date };
+          const label = day === lastNight ? `${chip.day} night` : day === today ? "Today" : chip.day;
+          return { value: day, label, detail: chip.date };
         })}
         value={date}
         onChange={choose(setDate)}
@@ -145,22 +153,93 @@ export function BookingPanel({
         ) : (
           <p className="text-sm text-muted-foreground">Choose a start time and a court to see the total.</p>
         )}
-        <Button className="h-11 justify-self-start px-6" disabled>
-          Online booking opens soon
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          {phone ? (
-            <>
-              To book now, call the venue:{" "}
-              <a href={`tel:${phone}`} className="font-medium text-foreground underline">
-                {formatPhone(phone)}
-              </a>
-            </>
-          ) : (
-            "To book now, contact the venue."
-          )}
-        </p>
+        <BookAction
+          slug={slug}
+          booking={
+            start && court && quote.data
+              ? { court_id: court.id, sport, starts_at: start.starts_at, minutes }
+              : null
+          }
+          phone={phone}
+        />
       </section>
+    </div>
+  );
+}
+
+/**
+ * The Book button, or what the player must do first: log in (FR-36) or verify their email (FR-35).
+ * Each choice of court and time gets one Idempotency-Key, kept for every try of that choice,
+ * so pressing twice or retrying after a network error never makes two bookings.
+ */
+function BookAction({ slug, booking, phone }: { slug: string; booking: BookingInput | null; phone: string | null }) {
+  const me = useMe();
+  const book = useBook(slug);
+  const router = useRouter();
+  const choice = booking ? `${booking.court_id}|${booking.starts_at}|${booking.minutes}|${booking.sport}` : null;
+  const [press, setPress] = useState<{ choice: string; key: string }>();
+
+  const onBook = () => {
+    if (!booking || !choice) return;
+    const key = press?.choice === choice ? press.key : crypto.randomUUID();
+    setPress({ choice, key });
+    book.mutate({ ...booking, key }, { onSuccess: (made) => router.push(`/bookings/${made.code}`) });
+  };
+
+  const help = phone ? (
+    <>
+      Questions? Call the venue:{" "}
+      <a href={`tel:${phone}`} className="font-medium text-foreground underline">
+        {formatPhone(phone)}
+      </a>
+    </>
+  ) : null;
+
+  // The server can't know who is logged in, so it draws nothing here; the browser's first draw must match.
+  const hydrated = useHydrated();
+  if (!hydrated || me.isPending) return null;
+
+  if (!me.data) {
+    return (
+      <div className="grid gap-2">
+        <ButtonLink href={`/login?next=${encodeURIComponent(`/v/${slug}/book`)}`} className="h-11 justify-self-start px-6">
+          Log in to book
+        </ButtonLink>
+        <p className="text-sm text-muted-foreground">
+          You need a free CourtKu account to book. No account yet?{" "}
+          <a href="/register" className="font-medium text-foreground underline">
+            Sign up
+          </a>
+          .
+        </p>
+      </div>
+    );
+  }
+
+  if (!me.data.email_verified) {
+    return (
+      <p className="text-sm">
+        Verify your email before your first booking: open the link we sent to {me.data.email}.{" "}
+        <a href="/verify-email" className="font-medium underline">
+          Send it again
+        </a>
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid gap-2">
+      <Button className="h-11 justify-self-start px-6" disabled={!booking || book.isPending} onClick={onBook}>
+        {book.isPending ? "Booking..." : "Book now, pay at the venue"}
+      </Button>
+      {book.error && (
+        <p className="text-sm text-destructive" role="alert">
+          {book.error instanceof ApiError ? book.error.message : "Could not reach CourtKu. Check your connection and try again."}
+        </p>
+      )}
+      <p className="text-sm text-muted-foreground">
+        You pay at the counter when you arrive. {help}
+      </p>
     </div>
   );
 }

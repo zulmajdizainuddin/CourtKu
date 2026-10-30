@@ -50,8 +50,11 @@ async function ensureCsrfCookie(force = false): Promise<void> {
   await fetch("/sanctum/csrf-cookie", { credentials: "same-origin" });
 }
 
-/** body: an object is sent as JSON; FormData (e.g. a photo file) is sent as a file upload. */
-type RequestOptions = { method?: string; body?: unknown };
+/**
+ * body: an object is sent as JSON; FormData (e.g. a photo file) is sent as a file upload.
+ * headers: extra headers, e.g. the Idempotency-Key of a booking.
+ */
+type RequestOptions = { method?: string; body?: unknown; headers?: Record<string, string> };
 
 export async function api<T = unknown>(path: string, options: RequestOptions = {}): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
@@ -71,6 +74,7 @@ export async function api<T = unknown>(path: string, options: RequestOptions = {
         Accept: "application/json",
         ...(options.body !== undefined && !isUpload && { "Content-Type": "application/json" }),
         ...(xsrf && { "X-XSRF-TOKEN": xsrf }),
+        ...options.headers,
       },
       body: options.body === undefined ? undefined : isUpload ? (options.body as FormData) : JSON.stringify(options.body),
     });

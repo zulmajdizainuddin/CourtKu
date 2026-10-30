@@ -78,11 +78,13 @@ class BookingService
         ?int $sportId = null,
         ?string $customerName = null,
         ?string $customerPhone = null,
+        ?string $idempotencyKey = null,
     ): Booking {
         try {
-            return DB::transaction(function () use ($draft, $source, $player, $createdBy, $sportId, $customerName, $customerPhone) {
+            return DB::transaction(function () use ($draft, $source, $player, $createdBy, $sportId, $customerName, $customerPhone, $idempotencyKey) {
                 $booking = new Booking([
                     'code' => $this->newCode(),
+                    'idempotency_key' => $idempotencyKey,
                     'venue_id' => $draft->court->venue_id,
                     'court_id' => $draft->court->id,
                     'sport_id' => $sportId,
@@ -117,7 +119,12 @@ class BookingService
 
                 return $booking;
             });
-        } catch (UniqueConstraintViolationException) {
+        } catch (UniqueConstraintViolationException $e) {
+            // The same Book press arriving twice at once: the caller returns the first booking.
+            if (str_contains($e->getMessage(), 'idempotency_key')) {
+                throw $e;
+            }
+
             // Everything this booking saved was rolled back. Say which half hours the other booking took.
             $taken = AvailabilityService::takenOf(
                 $draft->court,

@@ -3,6 +3,7 @@
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
+use App\Http\Controllers\V1\BookingController;
 use App\Http\Controllers\V1\InviteController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
@@ -30,6 +31,10 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', MeController::class);
+
+        // Players book online (FR-15): verified email first (FR-35), at most 10 tries a minute each.
+        Route::post('/venues/{venue:slug}/bookings', [BookingController::class, 'store'])->middleware(['verified', 'throttle:10,1']);
+        Route::get('/bookings/{code}', [BookingController::class, 'show'])->middleware('throttle:60,1');
 
         // The invited person's side of a staff invite (FR-05). Limited, so codes can't be guessed.
         Route::middleware('throttle:10,1')->group(function () {

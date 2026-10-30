@@ -36,6 +36,23 @@ export type Quote = {
   price: string; // "RM 30.00"
 };
 
+/** The API's PlayerBookingResource: a booking as its player sees it. */
+export type PlayerBooking = {
+  code: string; // "CK-7F3K2"
+  status: "confirmed" | "checked_in" | "completed" | "no_show" | "cancelled";
+  venue: { name: string; slug: string; phone: string | null };
+  court: { id: number; name: string };
+  sport: string | null;
+  starts_at: string; // "2026-11-06T18:00:00+08:00"
+  ends_at: string;
+  business_date: string;
+  minutes: number;
+  total_sen: number;
+  total: string; // "RM 20.00"
+  /** In M3 every booking is paid at the venue. */
+  pay_at_venue: boolean;
+};
+
 /** A start time players can choose, with every court free for the whole booking from then. */
 export type StartOption = {
   starts_at: string;
@@ -51,6 +68,16 @@ export function bookingDates(today: string, windowDays: number): string[] {
   return Array.from({ length: windowDays + 1 }, (_, i) =>
     new Date(first.getTime() + i * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
   );
+}
+
+/**
+ * Just after midnight, last night's late hours (e.g. Friday until 2 am) can still be booked,
+ * and they belong to yesterday's business day (ADR-015). Before 6 am in Malaysia, offer
+ * yesterday too. A venue that closed at midnight simply shows no free times for it.
+ */
+export function lastNightDate(today: string, hourInMalaysia: number): string | null {
+  if (hourInMalaysia >= 6) return null;
+  return new Date(Date.parse(`${today}T00:00:00Z`) - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 // Calendar days, shown in UTC on purpose so they never shift by a day (like formatDay).
