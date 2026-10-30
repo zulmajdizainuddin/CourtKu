@@ -28,6 +28,7 @@ it('FR-06 shows an approved venue to anyone, without logging in', function () {
         ->assertJsonPath('data.opening_hours.0.closes_next_day', true)
         ->assertJsonPath('data.courts.0.name', 'Hall A')
         ->assertJsonPath('data.courts.0.sports', ['badminton', 'futsal'])
+        ->assertJsonPath('data.booking', ['slot_minutes' => 60, 'min_minutes' => 60, 'max_minutes' => 180, 'booking_window_days' => 14])
         ->assertJsonPath('data.photos.0.url', 'https://res.cloudinary.com/courtku-test/image/upload/c_limit,w_1600,f_auto,q_auto/courtku/venues/1/cover');
 });
 

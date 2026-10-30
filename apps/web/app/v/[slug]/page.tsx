@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { facilityLabel } from "@/lib/facilities";
 import { formatDay } from "@/lib/format";
@@ -60,20 +61,27 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
         <p className="text-muted-foreground">{where}</p>
       </header>
 
-      {/* Honest about what works today. Replace with the booking button in M3. */}
-      <p className="rounded-lg border border-dashed px-4 py-3 text-sm">
-        <span className="font-medium">Online booking is coming soon.</span>{" "}
-        {venue.phone ? (
-          <>
-            For now, call the venue to book:{" "}
-            <a href={`tel:${venue.phone}`} className="font-medium underline">
-              {formatPhone(venue.phone)}
-            </a>
-          </>
-        ) : (
-          "For now, contact the venue to book."
+      {/* Honest about what works today: free times and prices, but booking itself arrives in M3. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-dashed px-4 py-3 text-sm">
+        {venue.courts.length > 0 && (
+          <ButtonLink href={`/v/${venue.slug}/book`} className="h-11 px-6">
+            See free times and prices
+          </ButtonLink>
         )}
-      </p>
+        <p>
+          <span className="font-medium">Online booking is coming soon.</span>{" "}
+          {venue.phone ? (
+            <>
+              For now, call the venue to book:{" "}
+              <a href={`tel:${venue.phone}`} className="font-medium underline">
+                {formatPhone(venue.phone)}
+              </a>
+            </>
+          ) : (
+            "For now, contact the venue to book."
+          )}
+        </p>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-[1fr_20rem]">
         <div className="grid content-start gap-6">
