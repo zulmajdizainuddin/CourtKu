@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Support\MalaysiaTime;
 use App\Support\Money;
@@ -39,6 +40,18 @@ class ManageBookingResource extends JsonResource
                 'email' => $this->user?->email,
             ],
             'checked_in_at' => $this->checked_in_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
+            // Paid at the counter (FR-28): when, how and by whom.
+            'paid_at' => $this->paid_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
+            'payment_method' => $this->payment_method?->value,
+            'paid_by' => $this->paidBy?->name,
+            'cancel_reason' => $this->cancel_reason,
+            // Which buttons the schedule shows, by the same rules the API checks.
+            'actions' => [
+                'check_in' => $this->canCheckIn(),
+                'no_show' => $this->status === BookingStatus::Confirmed,
+                'cancel' => $this->status === BookingStatus::Confirmed,
+                'mark_paid' => $this->canMarkPaid(),
+            ],
         ];
     }
 }

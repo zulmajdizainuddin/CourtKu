@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
+use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,9 @@ use Illuminate\Support\Carbon;
  * @property int $total_sen
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $checked_in_at
+ * @property Carbon|null $paid_at paid at the counter (FR-28)
+ * @property PaymentMethod|null $payment_method
+ * @property int|null $paid_by
  */
 #[Fillable(['code', 'idempotency_key', 'venue_id', 'court_id', 'sport_id', 'user_id', 'customer_name', 'customer_phone', 'source', 'starts_at', 'ends_at', 'business_date', 'total_sen', 'created_by'])]
 class Booking extends Model
@@ -44,6 +48,8 @@ class Booking extends Model
             'total_sen' => 'integer',
             'cancelled_at' => 'datetime',
             'checked_in_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'payment_method' => PaymentMethod::class,
         ];
     }
 
@@ -91,6 +97,30 @@ class Booking extends Model
     public function playerCanCancel(): bool
     {
         return $this->status === BookingStatus::Confirmed && now()->lessThan($this->playerCancelDeadline());
+    }
+
+    /**
+     * Who marked it paid at the counter.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function paidBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'paid_by');
+    }
+
+    /** FR-28: from an hour before the start until it ends, so tomorrow's booking can't be checked in by mistake. */
+    public function canCheckIn(): bool
+    {
+        return $this->status === BookingStatus::Confirmed
+            && now()->greaterThanOrEqualTo($this->starts_at->copy()->subHour())
+            && now()->lessThan($this->ends_at);
+    }
+
+    /** A booking that wasn't cancelled and isn't paid yet. A no-show can still pay, if the venue charges it. */
+    public function canMarkPaid(): bool
+    {
+        return $this->status !== BookingStatus::Cancelled && $this->paid_at === null;
     }
 
     /**

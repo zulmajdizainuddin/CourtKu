@@ -5,6 +5,7 @@ use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\BookingController;
 use App\Http\Controllers\V1\InviteController;
+use App\Http\Controllers\V1\Manage\BookingActionController;
 use App\Http\Controllers\V1\Manage\CounterBookingController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
@@ -64,6 +65,14 @@ Route::prefix('v1')->group(function () {
             // Walk-in and phone bookings (FR-20), and blocks for repairs or private events (FR-21).
             Route::post('/venues/{venue}/bookings', [CounterBookingController::class, 'store'])->can('view', 'venue');
             Route::post('/venues/{venue}/blocks', [SlotBlockController::class, 'store'])->can('view', 'venue');
+            // At the counter (FR-28): check in, no-show, paid, and cancelling any booking. {booking} is its code,
+            // and scopeBindings only finds bookings of this {venue}.
+            Route::prefix('/venues/{venue}/bookings/{booking:code}')->scopeBindings()->can('view', 'venue')->group(function () {
+                Route::post('/check-in', [BookingActionController::class, 'checkIn']);
+                Route::post('/no-show', [BookingActionController::class, 'noShow']);
+                Route::post('/paid', [BookingActionController::class, 'markPaid']);
+                Route::post('/cancel', [BookingActionController::class, 'cancel']);
+            });
             Route::delete('/venues/{venue}/blocks/{slotBlock}', [SlotBlockController::class, 'destroy'])
                 ->whereNumber('slotBlock')
                 ->scopeBindings()

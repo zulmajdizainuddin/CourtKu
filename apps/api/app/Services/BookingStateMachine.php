@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\ApiException;
 use App\Models\AuditLog;
 use App\Models\Booking;
@@ -52,6 +53,29 @@ class BookingStateMachine
                 'to' => $to->value,
                 'reason' => $reason,
             ]));
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Payment taken at the counter (FR-28). Not a status change, but the same row lock, so two staff
+     * tapping "Paid" at once can't record it twice. Written to the audit log.
+     */
+    public function markPaid(Booking $booking, PaymentMethod $method, User $by): Booking
+    {
+        return DB::transaction(function () use ($booking, $method, $by) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+
+            if (! $locked->canMarkPaid()) {
+                throw new ApiException(
+                    'CANNOT_MARK_PAID',
+                    $locked->paid_at !== null ? 'This booking is already paid.' : "This booking is {$locked->status->label()}, so it can't be paid.",
+                );
+            }
+
+            $locked->forceFill(['paid_at' => now(), 'payment_method' => $method, 'paid_by' => $by->id])->save();
+            AuditLog::record($locked, 'booking.paid', $by, ['method' => $method->value, 'total_sen' => $locked->total_sen]);
 
             return $locked;
         });

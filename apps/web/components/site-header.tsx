@@ -26,7 +26,7 @@ export function SiteHeader() {
               {/* On phones only an icon, like the account link, so the header fits a 360 px screen. */}
               <Link href="/me/bookings" aria-label="My bookings" className="flex items-center px-1.5 py-1 hover:underline sm:px-2">
                 <CalendarDays className="size-5 sm:hidden" aria-hidden />
-                <span className="hidden sm:inline">Bookings</span>
+                <span className="hidden sm:inline">My bookings</span>
               </Link>
               <Link href="/dashboard" className="px-1.5 py-1 hover:underline sm:px-2">
                 Dashboard
