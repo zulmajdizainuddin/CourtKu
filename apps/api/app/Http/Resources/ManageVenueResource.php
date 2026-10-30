@@ -43,6 +43,7 @@ class ManageVenueResource extends JsonResource
             'max_minutes' => $this->max_minutes,
             'booking_window_days' => $this->booking_window_days,
             'min_notice_minutes' => $this->min_notice_minutes,
+            'cancel_cutoff_hours' => $this->cancel_cutoff_hours,
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Availability, PlayerBooking, Quote } from "@/lib/booking";
 
@@ -59,6 +59,40 @@ export function useBook(slug: string) {
         })
       ).data,
     onSettled: () => queryClient.invalidateQueries({ queryKey: availabilityKey(slug) }),
+  });
+}
+
+/**
+ * The player's bookings (FR-30): "upcoming" soonest first, or "past" (with cancelled ones) latest
+ * first, 20 at a time. fetchNextPage() asks for the next 20 with the API's cursor.
+ */
+export function useMyBookings(when: "upcoming" | "past") {
+  return useInfiniteQuery({
+    queryKey: ["bookings", "mine", when],
+    queryFn: async ({ pageParam }) => {
+      const query = new URLSearchParams({ when, ...(pageParam ? { cursor: pageParam } : {}) });
+      return api<{ data: PlayerBooking[]; meta: { next_cursor: string | null } }>(`/api/v1/me/bookings?${query}`);
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (page) => page.meta.next_cursor,
+  });
+}
+
+/**
+ * Cancels one of the player's bookings (FR-24). Afterwards the booking, the lists and the
+ * venue's free times are asked again, because the cancelled time is free for others now.
+ */
+export function useCancelBooking(code: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => (await api<{ data: PlayerBooking }>(`/api/v1/bookings/${encodeURIComponent(code)}/cancel`, { method: "POST" })).data,
+    onSuccess: (booking) => {
+      queryClient.setQueryData(["bookings", code], booking);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["bookings", "mine"] }),
+        queryClient.invalidateQueries({ queryKey: availabilityKey(booking.venue.slug) }),
+      ]);
+    },
   });
 }
 

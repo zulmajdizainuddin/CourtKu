@@ -161,6 +161,7 @@ export function BookingPanel({
               : null
           }
           phone={phone}
+          cancelCutoffHours={booking.cancel_cutoff_hours}
         />
       </section>
     </div>
@@ -172,7 +173,17 @@ export function BookingPanel({
  * Each choice of court and time gets one Idempotency-Key, kept for every try of that choice,
  * so pressing twice or retrying after a network error never makes two bookings.
  */
-function BookAction({ slug, booking, phone }: { slug: string; booking: BookingInput | null; phone: string | null }) {
+function BookAction({
+  slug,
+  booking,
+  phone,
+  cancelCutoffHours,
+}: {
+  slug: string;
+  booking: BookingInput | null;
+  phone: string | null;
+  cancelCutoffHours: number;
+}) {
   const me = useMe();
   const book = useBook(slug);
   const router = useRouter();
@@ -238,7 +249,8 @@ function BookAction({ slug, booking, phone }: { slug: string; booking: BookingIn
         </p>
       )}
       <p className="text-sm text-muted-foreground">
-        You pay at the counter when you arrive. {help}
+        You pay at the counter when you arrive. Free cancellation online until {cancelCutoffHours} hours before the
+        start. {help}
       </p>
     </div>
   );

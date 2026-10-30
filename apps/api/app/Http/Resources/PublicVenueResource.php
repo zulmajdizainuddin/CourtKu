@@ -46,6 +46,8 @@ class PublicVenueResource extends JsonResource
                 'min_minutes' => $this->min_minutes,
                 'max_minutes' => $this->max_minutes,
                 'booking_window_days' => $this->booking_window_days,
+                // FR-24: shown before booking, so players know the policy.
+                'cancel_cutoff_hours' => $this->cancel_cutoff_hours,
             ],
             // Only bookable courts: active and with a price (inactive or unpriced courts are hidden).
             'courts' => CourtResource::collection(

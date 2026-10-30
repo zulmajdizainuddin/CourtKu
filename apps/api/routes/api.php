@@ -35,6 +35,9 @@ Route::prefix('v1')->group(function () {
         // Players book online (FR-15): verified email first (FR-35), at most 10 tries a minute each.
         Route::post('/venues/{venue:slug}/bookings', [BookingController::class, 'store'])->middleware(['verified', 'throttle:10,1']);
         Route::get('/bookings/{code}', [BookingController::class, 'show'])->middleware('throttle:60,1');
+        // The player's own bookings (FR-30), and cancelling one (FR-24).
+        Route::get('/me/bookings', [BookingController::class, 'index'])->middleware('throttle:60,1');
+        Route::post('/bookings/{code}/cancel', [BookingController::class, 'cancel'])->middleware('throttle:10,1');
 
         // The invited person's side of a staff invite (FR-05). Limited, so codes can't be guessed.
         Route::middleware('throttle:10,1')->group(function () {

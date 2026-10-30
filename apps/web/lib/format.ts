@@ -1,3 +1,5 @@
+import { formatTime } from "@/lib/opening-hours";
+
 // The API sends times in UTC (ISO 8601); people read them in Malaysia time (NFR-12).
 
 const dateFormat = new Intl.DateTimeFormat("en-MY", {
@@ -28,4 +30,9 @@ export function todayInMalaysia(now: Date = new Date()): string {
 /** The hour in Malaysia now, 0–23, e.g. to know whether it is just after midnight there. */
 export function hourInMalaysia(now: Date = new Date()): number {
   return Number(new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone: "Asia/Kuala_Lumpur" }).format(now));
+}
+
+/** "2026-11-02T18:00:00+08:00" (already Malaysia time) -> "2 Nov 2026, 6:00 pm" */
+export function formatDayTime(iso: string): string {
+  return `${formatDay(iso.slice(0, 10))}, ${formatTime(iso.slice(11, 16))}`;
 }

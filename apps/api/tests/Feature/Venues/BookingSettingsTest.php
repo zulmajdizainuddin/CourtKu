@@ -5,6 +5,7 @@ use App\Models\Venue;
 
 $settings = fn (array $overrides = []) => array_merge([
     'slot_minutes' => 30, 'min_minutes' => 60, 'max_minutes' => 120, 'booking_window_days' => 30, 'min_notice_minutes' => 0,
+    'cancel_cutoff_hours' => 24,
 ], $overrides);
 
 it('starts every venue with sensible booking settings', function () {
@@ -17,7 +18,9 @@ it('starts every venue with sensible booking settings', function () {
         ->assertJsonPath('data.max_minutes', 180)
         ->assertJsonPath('data.booking_window_days', 14)
         // Last-minute bookings are allowed until the start time, e.g. at 7:50 pm for 8:00 pm.
-        ->assertJsonPath('data.min_notice_minutes', 0);
+        ->assertJsonPath('data.min_notice_minutes', 0)
+        // FR-24: players can cancel online until a day before.
+        ->assertJsonPath('data.cancel_cutoff_hours', 24);
 });
 
 it('FR-13 lets the owner ask for notice before a booking starts', function (int $minutes) use ($settings) {
@@ -55,6 +58,7 @@ it('checks the settings make sense together', function (array $input, string $fi
     'more than 90 days ahead' => [['booking_window_days' => 91], 'booking_window_days'],
     'no days ahead' => [['booking_window_days' => 0], 'booking_window_days'],
     'notice that is not one of the choices' => [['min_notice_minutes' => 45], 'min_notice_minutes'],
+    'a cancel cutoff that is not one of the choices' => [['cancel_cutoff_hours' => 3], 'cancel_cutoff_hours'],
 ]);
 
 it('lets staff see the settings but not change them', function () use ($settings) {

@@ -51,6 +51,10 @@ export type PlayerBooking = {
   total: string; // "RM 20.00"
   /** In M3 every booking is paid at the venue. */
   pay_at_venue: boolean;
+  /** FR-24: whether the player can still cancel online, and until when. */
+  can_cancel: boolean;
+  cancel_until: string;
+  cancelled_at: string | null;
 };
 
 /** A start time players can choose, with every court free for the whole booking from then. */
