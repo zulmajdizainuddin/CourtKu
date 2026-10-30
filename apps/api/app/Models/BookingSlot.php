@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -28,5 +29,15 @@ class BookingSlot extends Model
             'slot_block_id' => 'integer',
             'price_sen' => 'integer',
         ];
+    }
+
+    /**
+     * The booking holding this half hour, or null when a block holds it.
+     *
+     * @return BelongsTo<Booking, $this>
+     */
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
     }
 }

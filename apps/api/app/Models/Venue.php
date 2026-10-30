@@ -108,6 +108,16 @@ class Venue extends Model
     }
 
     /**
+     * Times courts are closed for repairs or a private event (FR-21).
+     *
+     * @return HasMany<SlotBlock, $this>
+     */
+    public function slotBlocks(): HasMany
+    {
+        return $this->hasMany(SlotBlock::class);
+    }
+
+    /**
      * @return HasMany<PriceRule, $this>
      */
     public function priceRules(): HasMany

@@ -13,12 +13,15 @@ export default function VenueSchedulePage() {
           <CardHeader>
             <CardTitle>Schedule</CardTitle>
             <CardDescription>
-              Every court and booking of the day. Tap a booking to see who booked it. New online bookings appear within a
-              minute.
+              Every court and booking of the day. Tap a booking or block to see the details. Add walk-in and phone
+              bookings, or block a time for repairs or a private event. New online bookings appear within a minute.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DaySchedule venueId={String(venue.id)} />
+            <DaySchedule
+              venueId={String(venue.id)}
+              rules={{ slot_minutes: venue.slot_minutes, min_minutes: venue.min_minutes, max_minutes: venue.max_minutes }}
+            />
           </CardContent>
         </Card>
       )}
