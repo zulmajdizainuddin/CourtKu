@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type ScheduleBooking, useDaySchedule } from "@/features/venues/schedule";
+import { BlockForm, CounterBookingForm } from "@/components/venues/schedule-forms";
+import { type ScheduleBlock, type ScheduleBooking, useDaySchedule, useLiftBlock } from "@/features/venues/schedule";
+import { ApiError } from "@/lib/api";
 import { endLabel } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
 import { formatDay, todayInMalaysia } from "@/lib/format";
@@ -31,13 +33,22 @@ const SOURCE_LABELS: Record<ScheduleBooking["source"], string> = {
 };
 
 /**
- * The day schedule (FR-31) as a timetable: courts across, half hours down, each booking a block
- * over its half hours. Tap a booking to see who booked it and how to reach them.
+ * The day schedule (FR-31) as a timetable: courts across, half hours down, each booking a tile
+ * over its half hours, blocked times in grey. Tap one to see the details. From here staff also
+ * add walk-in and phone bookings (FR-20) and block times (FR-21).
  */
-export function DaySchedule({ venueId }: { venueId: string }) {
+export function DaySchedule({
+  venueId,
+  rules,
+}: {
+  venueId: string;
+  rules: { slot_minutes: number; min_minutes: number; max_minutes: number };
+}) {
   const today = todayInMalaysia();
   const [date, setDate] = useState(today);
+  // A booking code, or "block-12" for a block.
   const [selected, setSelected] = useState<string>();
+  const [adding, setAdding] = useState<"booking" | "block">();
   const schedule = useDaySchedule(venueId, date);
   // Never show a schedule the API just refused, even if the browser still remembers it.
   const data = schedule.isError ? undefined : schedule.data;
@@ -46,8 +57,11 @@ export function DaySchedule({ venueId }: { venueId: string }) {
   const go = (next: (current: string) => string) => {
     setDate(next);
     setSelected(undefined);
+    setAdding(undefined);
   };
   const booking = data?.bookings.find((b) => b.code === selected);
+  const block = data?.blocks.find((b) => `block-${b.id}` === selected);
+  const canAdd = data !== undefined && data.times.length > 0 && data.courts.length > 0;
 
   return (
     <div className="grid gap-4">
@@ -66,6 +80,26 @@ export function DaySchedule({ venueId }: { venueId: string }) {
           {data && ` · ${data.bookings.length} booking${data.bookings.length === 1 ? "" : "s"}`}
         </p>
       </div>
+
+      {canAdd && !adding && (
+        <div className="flex flex-wrap gap-2">
+          <Button className="h-11 px-4" onClick={() => setAdding("booking")}>
+            Add booking
+          </Button>
+          <Button variant="outline" className="h-11 px-4" onClick={() => setAdding("block")}>
+            Block time
+          </Button>
+        </div>
+      )}
+      {data && adding && (
+        <div className="rounded-lg p-4 ring-1 ring-foreground/10">
+          {adding === "booking" ? (
+            <CounterBookingForm venueId={venueId} schedule={data} rules={rules} onDone={() => setAdding(undefined)} />
+          ) : (
+            <BlockForm venueId={venueId} schedule={data} onDone={() => setAdding(undefined)} />
+          )}
+        </div>
+      )}
 
       {schedule.isPending && <p className="text-sm text-muted-foreground">Loading...</p>}
       {schedule.isError && <p className="text-sm text-destructive">Could not load the schedule. Please refresh the page.</p>}
@@ -141,11 +175,43 @@ export function DaySchedule({ venueId }: { venueId: string }) {
                 </button>
               );
             })}
+
+            {/* Blocked times, in grey with their reason. */}
+            {data.blocks.map((b) => {
+              const row = data.times.findIndex((t) => t.starts_at === b.starts_at);
+              const column = data.courts.findIndex((c) => c.id === b.court_id);
+              if (row === -1 || column === -1) return null;
+              const key = `block-${b.id}`;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={selected === key}
+                  onClick={() => setSelected(selected === key ? undefined : key)}
+                  className={cn(
+                    "z-10 m-0.5 overflow-hidden rounded-md border border-dashed border-foreground/30 bg-muted px-2 py-1 text-left text-xs leading-tight text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                    selected === key && "ring-2 ring-ring ring-offset-1",
+                  )}
+                  style={{ gridColumn: column + 2, gridRow: `${row + 2} / span ${b.minutes / 30}` }}
+                >
+                  <span className="block font-medium">Blocked</span>
+                  <span className="block">{b.reason}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
       {booking && <BookingDetails booking={booking} courtName={data?.courts.find((c) => c.id === booking.court_id)?.name} />}
+      {block && (
+        <BlockDetails
+          venueId={venueId}
+          block={block}
+          courtName={data?.courts.find((c) => c.id === block.court_id)?.name}
+          onLifted={() => setSelected(undefined)}
+        />
+      )}
     </div>
   );
 }
@@ -194,6 +260,56 @@ function BookingDetails({ booking, courtName }: { booking: ScheduleBooking; cour
         <dt className="text-muted-foreground">How</dt>
         <dd>{SOURCE_LABELS[booking.source]}</dd>
       </dl>
+    </section>
+  );
+}
+
+/** A blocked time, and lifting it so the time can be booked again. */
+function BlockDetails({
+  venueId,
+  block,
+  courtName,
+  onLifted,
+}: {
+  venueId: string;
+  block: ScheduleBlock;
+  courtName?: string;
+  onLifted: () => void;
+}) {
+  const lift = useLiftBlock(venueId);
+  const start = block.starts_at.slice(11, 16);
+
+  const onLift = () => {
+    if (window.confirm(`Lift this block on ${courtName ?? "this court"}? Players can book the time again.`)) {
+      lift.mutate(block.id, { onSuccess: onLifted });
+    }
+  };
+
+  return (
+    <section aria-label="Blocked time" className="grid gap-2 rounded-lg p-4 text-sm ring-1 ring-foreground/10">
+      <h2 className="font-medium">Blocked: {block.reason}</h2>
+      <dl className="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-1">
+        <dt className="text-muted-foreground">Court</dt>
+        <dd>{courtName}</dd>
+        <dt className="text-muted-foreground">Time</dt>
+        <dd>
+          {formatTime(start)} – {endLabel(start, block.minutes)} ({formatDuration(block.minutes)})
+        </dd>
+        {block.created_by && (
+          <>
+            <dt className="text-muted-foreground">By</dt>
+            <dd>{block.created_by}</dd>
+          </>
+        )}
+      </dl>
+      <Button variant="outline" className="h-11 justify-self-start px-6" disabled={lift.isPending} onClick={onLift}>
+        {lift.isPending ? "Lifting..." : "Lift block"}
+      </Button>
+      {lift.error && (
+        <p className="text-sm text-destructive" role="alert">
+          {lift.error instanceof ApiError ? lift.error.message : "Could not reach CourtKu. Check your connection and try again."}
+        </p>
+      )}
     </section>
   );
 }

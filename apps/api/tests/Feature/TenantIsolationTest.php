@@ -2,6 +2,7 @@
 
 use App\Models\Court;
 use App\Models\PriceRule;
+use App\Models\SlotBlock;
 use App\Models\User;
 use App\Models\Venue;
 
@@ -18,6 +19,9 @@ dataset('manage endpoints', [
     'update profile' => ['PUT', '/api/v1/manage/venues/{venue}'],
     'update booking settings' => ['PUT', '/api/v1/manage/venues/{venue}/settings'],
     'view schedule' => ['GET', '/api/v1/manage/venues/{venue}/schedule'],
+    'add walk-in booking' => ['POST', '/api/v1/manage/venues/{venue}/bookings'],
+    'add block' => ['POST', '/api/v1/manage/venues/{venue}/blocks'],
+    'lift block' => ['DELETE', '/api/v1/manage/venues/{venue}/blocks/{block}'],
     'view hours' => ['GET', '/api/v1/manage/venues/{venue}/hours'],
     'update hours' => ['PUT', '/api/v1/manage/venues/{venue}/hours'],
     'list closures' => ['GET', '/api/v1/manage/venues/{venue}/closures'],
@@ -42,7 +46,7 @@ dataset('manage endpoints', [
     'remove staff' => ['DELETE', '/api/v1/manage/venues/{venue}/staff/{member}'],
 ]);
 
-/** Fills in {venue}, and {closure}, {court}, {rule}, {photo}, {invite} or {member} with one of that venue's own. */
+/** Fills in {venue}, and {closure}, {court}, {rule}, {block}, {photo}, {invite} or {member} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
     if (str_contains($path, '{invite}')) {
@@ -65,6 +69,13 @@ function urlFor(string $path, Venue $venue): string
     }
     if (str_contains($path, '{rule}')) {
         $path = str_replace('{rule}', (string) PriceRule::factory()->for($venue)->create()->id, $path);
+    }
+    if (str_contains($path, '{block}')) {
+        $block = SlotBlock::create([
+            'venue_id' => $venue->id, 'court_id' => Court::factory()->for($venue)->create()->id,
+            'starts_at' => '2099-01-01 10:00:00', 'ends_at' => '2099-01-01 11:00:00', 'business_date' => '2099-01-01', 'reason' => 'Test',
+        ]);
+        $path = str_replace('{block}', (string) $block->id, $path);
     }
     if (str_contains($path, '{closure}')) {
         $closure = $venue->closures()->create(['starts_on' => '2099-01-01', 'ends_on' => '2099-01-02', 'reason' => 'Test']);

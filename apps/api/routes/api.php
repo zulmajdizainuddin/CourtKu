@@ -5,10 +5,12 @@ use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\BookingController;
 use App\Http\Controllers\V1\InviteController;
+use App\Http\Controllers\V1\Manage\CounterBookingController;
 use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\PriceRuleController;
 use App\Http\Controllers\V1\Manage\ScheduleController;
+use App\Http\Controllers\V1\Manage\SlotBlockController;
 use App\Http\Controllers\V1\Manage\StaffController;
 use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
@@ -59,6 +61,13 @@ Route::prefix('v1')->group(function () {
 
             // The day schedule for the counter (FR-31): owners and staff.
             Route::get('/venues/{venue}/schedule', [ScheduleController::class, 'show'])->can('view', 'venue');
+            // Walk-in and phone bookings (FR-20), and blocks for repairs or private events (FR-21).
+            Route::post('/venues/{venue}/bookings', [CounterBookingController::class, 'store'])->can('view', 'venue');
+            Route::post('/venues/{venue}/blocks', [SlotBlockController::class, 'store'])->can('view', 'venue');
+            Route::delete('/venues/{venue}/blocks/{slotBlock}', [SlotBlockController::class, 'destroy'])
+                ->whereNumber('slotBlock')
+                ->scopeBindings()
+                ->can('view', 'venue');
 
             Route::get('/venues/{venue}/hours', [OpeningHoursController::class, 'index'])->can('view', 'venue');
             Route::put('/venues/{venue}/hours', [OpeningHoursController::class, 'update'])->can('update', 'venue');
