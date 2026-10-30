@@ -43,6 +43,9 @@ const NOTICE_OPTIONS = [
   { value: "1440", label: "Until 1 day before" },
 ];
 
+/** Until when players may cancel their own booking online (FR-24); staff can always cancel. */
+const CANCEL_OPTIONS = [2, 6, 12, 24, 48].map((hours) => ({ value: String(hours), label: `Until ${hours} hours before` }));
+
 function noticeLabel(minutes: number): string {
   return NOTICE_OPTIONS.find((o) => o.value === String(minutes))?.label ?? `Until ${formatDuration(minutes)} before`;
 }
@@ -60,6 +63,7 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
     max_minutes: venue.max_minutes,
     booking_window_days: venue.booking_window_days,
     min_notice_minutes: venue.min_notice_minutes,
+    cancel_cutoff_hours: venue.cancel_cutoff_hours,
   });
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string>();
@@ -139,6 +143,14 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
         value={String(settings.min_notice_minutes)}
         onChange={(e) => change({ min_notice_minutes: Number(e.target.value) })}
       />
+      <SelectField
+        label="Players can cancel online"
+        name="cancel_cutoff_hours"
+        hint="After this, players call you to cancel. You and your staff can always cancel. Players see this before they book."
+        options={CANCEL_OPTIONS}
+        value={String(settings.cancel_cutoff_hours)}
+        onChange={(e) => change({ cancel_cutoff_hours: Number(e.target.value) })}
+      />
       <FormAlert message={error} />
       {saved && <FormAlert tone="success" message="Booking settings saved." />}
       <Button type="submit" size="lg" className="h-11 justify-self-start px-6" disabled={save.isPending}>
@@ -155,6 +167,7 @@ function SettingsView({ venue }: { venue: ManageVenue }) {
     ["Longest booking", formatDuration(venue.max_minutes)],
     ["Book ahead", `${venue.booking_window_days} days`],
     ["Players can book", noticeLabel(venue.min_notice_minutes)],
+    ["Players can cancel online", `Until ${venue.cancel_cutoff_hours} hours before`],
   ];
   return (
     <dl className="grid gap-2 text-sm sm:grid-cols-[12rem_1fr]">

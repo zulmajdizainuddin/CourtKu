@@ -9,7 +9,8 @@ use Illuminate\Validation\Validator;
 
 /**
  * PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13).
- * { "slot_minutes": 60, "min_minutes": 60, "max_minutes": 180, "booking_window_days": 14, "min_notice_minutes": 0 }
+ * { "slot_minutes": 60, "min_minutes": 60, "max_minutes": 180, "booking_window_days": 14, "min_notice_minutes": 0,
+ *   "cancel_cutoff_hours": 24 }
  */
 class UpdateBookingSettingsRequest extends FormRequest
 {
@@ -27,6 +28,8 @@ class UpdateBookingSettingsRequest extends FormRequest
             // How close to the start players may still book: right up to it (0), or 30 minutes,
             // 1 hour, 2 hours or 1 day before.
             'min_notice_minutes' => ['required', 'integer', 'in:0,30,60,120,1440'],
+            // FR-24: players cancel online until 2, 6, 12, 24 or 48 hours before the start.
+            'cancel_cutoff_hours' => ['required', 'integer', 'in:2,6,12,24,48'],
         ];
     }
 
@@ -41,6 +44,7 @@ class UpdateBookingSettingsRequest extends FormRequest
             'max_minutes.max' => 'The longest booking can be at most 12 hours.',
             'booking_window_days.max' => 'Players can book at most 90 days ahead.',
             'min_notice_minutes.in' => 'Choose until the start, or 30 minutes, 1 hour, 2 hours or 1 day before.',
+            'cancel_cutoff_hours.in' => 'Choose 2, 6, 12, 24 or 48 hours before the start.',
         ];
     }
 

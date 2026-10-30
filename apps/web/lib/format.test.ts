@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatDay, hourInMalaysia, todayInMalaysia } from "./format";
+import { formatDate, formatDay, formatDayTime, hourInMalaysia, todayInMalaysia } from "./format";
 
 describe("formatDate", () => {
   it("NFR-12 shows the date in Malaysia time, not UTC", () => {
@@ -25,5 +25,12 @@ describe("hourInMalaysia", () => {
   it("gives the hour in Malaysia, 0 to 23", () => {
     expect(hourInMalaysia(new Date("2026-11-06T16:40:00Z"))).toBe(0); // 00:40 on Saturday there
     expect(hourInMalaysia(new Date("2026-11-06T10:00:00Z"))).toBe(18);
+  });
+});
+
+describe("formatDayTime", () => {
+  it("writes a Malaysia time as day and time, without shifting it", () => {
+    expect(formatDayTime("2026-11-02T18:00:00+08:00")).toBe("2 Nov 2026, 6:00 pm");
+    expect(formatDayTime("2026-11-07T00:30:00+08:00")).toBe("7 Nov 2026, 12:30 am");
   });
 });

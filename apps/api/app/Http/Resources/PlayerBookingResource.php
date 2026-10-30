@@ -42,6 +42,10 @@ class PlayerBookingResource extends JsonResource
             'total' => Money::format($this->total_sen),
             // In M3 every booking is paid at the venue (ADR-021).
             'pay_at_venue' => true,
+            // FR-24: whether the player can still cancel online, and until when.
+            'can_cancel' => $this->playerCanCancel(),
+            'cancel_until' => $this->playerCancelDeadline()->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
+            'cancelled_at' => $this->cancelled_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
         ];
     }
 }

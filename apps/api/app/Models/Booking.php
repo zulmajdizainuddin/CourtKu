@@ -81,6 +81,18 @@ class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** FR-24: the last moment the player may cancel online, e.g. 24 hours before the start. */
+    public function playerCancelDeadline(): Carbon
+    {
+        return $this->starts_at->copy()->subHours($this->venue->cancel_cutoff_hours);
+    }
+
+    /** A confirmed booking, before the venue's cutoff. After that the player calls the venue; staff can always cancel. */
+    public function playerCanCancel(): bool
+    {
+        return $this->status === BookingStatus::Confirmed && now()->lessThan($this->playerCancelDeadline());
+    }
+
     /**
      * The half hours this booking holds (ADR-010): a 2-hour booking has 4.
      *

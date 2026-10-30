@@ -5,16 +5,21 @@ import { useParams } from "next/navigation";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/ui/button-link";
 import { RequireUser } from "@/features/auth/require-user";
-import { useBooking } from "@/features/booking/hooks";
+import { useBooking, useCancelBooking } from "@/features/booking/hooks";
+import { Button } from "@/components/ui/button";
+import type { PlayerBooking } from "@/lib/booking";
 import { ApiError } from "@/lib/api";
 import { endLabel } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
-import { formatDay } from "@/lib/format";
+import { formatDay, formatDayTime } from "@/lib/format";
 import { formatTime } from "@/lib/opening-hours";
 import { formatPhone } from "@/lib/phone";
 import { sportLabel } from "@/lib/sports";
 
-/** The player's booking confirmation (FR-18): the code to show at the counter, and what they booked. */
+/**
+ * One of the player's bookings (FR-18, FR-24): the code to show at the counter, what they booked,
+ * and cancelling it until the venue's cutoff.
+ */
 export default function BookingConfirmationPage() {
   // The code comes from the URL, which is only known when someone opens the page.
   return (
@@ -42,14 +47,22 @@ function Confirmation() {
       {booking && (
         <>
           <header className="grid gap-1">
-            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-              {booking.status === "cancelled" ? "Cancelled" : "You're booked"}
+            <p
+              className={
+                booking.status === "cancelled"
+                  ? "text-sm font-medium text-destructive"
+                  : "text-sm font-medium text-emerald-700 dark:text-emerald-400"
+              }
+            >
+              {STATUS_HEADINGS[booking.status]}
             </p>
             <h1 className="text-3xl font-semibold tracking-tight">{booking.venue.name}</h1>
           </header>
 
           <section aria-label="Booking code" className="grid gap-1 rounded-xl p-4 text-center ring-1 ring-foreground/10">
-            <p className="text-sm text-muted-foreground">Show this code at the counter</p>
+            <p className="text-sm text-muted-foreground">
+              {booking.status === "confirmed" ? "Show this code at the counter" : "Booking code"}
+            </p>
             <p className="font-mono text-3xl font-semibold tracking-widest">{booking.code}</p>
           </section>
 
@@ -68,9 +81,15 @@ function Confirmation() {
             </dd>
             <dt className="text-muted-foreground">Total</dt>
             <dd className="font-semibold">{booking.total}</dd>
-            <dt className="text-muted-foreground">Payment</dt>
-            <dd>Pay at the counter when you arrive</dd>
+            {booking.status === "confirmed" && (
+              <>
+                <dt className="text-muted-foreground">Payment</dt>
+                <dd>Pay at the counter when you arrive</dd>
+              </>
+            )}
           </dl>
+
+          <CancelSection booking={booking} />
 
           {booking.venue.phone && (
             <p className="text-sm text-muted-foreground">
@@ -92,5 +111,51 @@ function Confirmation() {
         </>
       )}
     </div>
+  );
+}
+
+const STATUS_HEADINGS: Record<PlayerBooking["status"], string> = {
+  confirmed: "You're booked",
+  checked_in: "Checked in",
+  completed: "Played",
+  no_show: "Marked as a no-show",
+  cancelled: "Cancelled",
+};
+
+/** Cancel until the venue's cutoff (FR-24); after it, the player calls the venue. */
+function CancelSection({ booking }: { booking: PlayerBooking }) {
+  const cancel = useCancelBooking(booking.code);
+
+  if (booking.status === "cancelled") {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Cancelled{booking.cancelled_at && ` on ${formatDayTime(booking.cancelled_at)}`}. The time is free for others again.
+      </p>
+    );
+  }
+  if (booking.status !== "confirmed") return null;
+
+  const onCancel = () => {
+    if (window.confirm(`Cancel ${booking.code} at ${booking.venue.name}? The time goes back to other players.`)) {
+      cancel.mutate();
+    }
+  };
+
+  return booking.can_cancel ? (
+    <div className="grid gap-2">
+      <p className="text-sm text-muted-foreground">Free cancellation online until {formatDayTime(booking.cancel_until)}.</p>
+      <Button variant="outline" className="h-11 justify-self-start px-6 text-destructive" disabled={cancel.isPending} onClick={onCancel}>
+        {cancel.isPending ? "Cancelling..." : "Cancel booking"}
+      </Button>
+      {cancel.error && (
+        <p className="text-sm text-destructive" role="alert">
+          {cancel.error instanceof ApiError ? cancel.error.message : "Could not reach CourtKu. Check your connection and try again."}
+        </p>
+      )}
+    </div>
+  ) : (
+    <p className="text-sm text-muted-foreground">
+      Online cancelling closed on {formatDayTime(booking.cancel_until)}. To cancel now, call the venue.
+    </p>
   );
 }

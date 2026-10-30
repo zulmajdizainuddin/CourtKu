@@ -20,6 +20,7 @@ const venue = (overrides: Partial<ManageVenue>): ManageVenue => ({
   max_minutes: 180,
   booking_window_days: 14,
   min_notice_minutes: 0,
+  cancel_cutoff_hours: 24,
   approved_at: null,
   created_at: "2026-10-29T00:00:00+00:00",
   ...overrides,

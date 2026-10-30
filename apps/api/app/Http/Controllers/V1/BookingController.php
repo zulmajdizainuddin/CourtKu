@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1;
 
 use App\Enums\BookingSource;
+use App\Enums\BookingStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookingRequest;
@@ -12,9 +13,11 @@ use App\Models\Court;
 use App\Models\Sport;
 use App\Models\Venue;
 use App\Services\BookingService;
+use App\Services\BookingStateMachine;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -61,14 +64,64 @@ class BookingController extends Controller
         return (new PlayerBookingResource($booking))->response()->setStatusCode(201);
     }
 
+    /**
+     * GET /api/v1/me/bookings?when=upcoming (soonest first) or ?when=past (latest first, with
+     * cancelled ones), 20 at a time. The next page is ?cursor=<meta.next_cursor> (plan section 8).
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $when = $request->validate(['when' => ['sometimes', 'in:upcoming,past']])['when'] ?? 'upcoming';
+        $active = [BookingStatus::Confirmed->value, BookingStatus::CheckedIn->value];
+
+        $bookings = Booking::where('user_id', $request->user()->id)
+            ->with(['venue', 'court', 'sport'])
+            ->when(
+                $when === 'upcoming',
+                fn ($query) => $query->whereIn('status', $active)->where('ends_at', '>', now())
+                    ->orderBy('starts_at')->orderBy('id'),
+                fn ($query) => $query->where(fn ($q) => $q->whereNotIn('status', $active)->orWhere('ends_at', '<=', now()))
+                    ->orderByDesc('starts_at')->orderByDesc('id'),
+            )
+            ->cursorPaginate(20);
+
+        return PlayerBookingResource::collection($bookings);
+    }
+
     /** GET /api/v1/bookings/{code}: the player's own booking, e.g. for the confirmation page. */
     public function show(Request $request, string $code): PlayerBookingResource
     {
-        $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->first();
-        // Someone else's booking answers 404, exactly like a code that doesn't exist.
+        return new PlayerBookingResource($this->ownBooking($request, $code));
+    }
+
+    /**
+     * POST /api/v1/bookings/{code}/cancel: the player cancels their own booking (FR-24), until the
+     * venue's cutoff (e.g. 24 hours before). The half hours are free for others straight away.
+     */
+    public function cancel(Request $request, string $code, BookingStateMachine $machine): PlayerBookingResource
+    {
+        $booking = $this->ownBooking($request, $code);
+
+        if ($booking->status === BookingStatus::Confirmed && ! $booking->playerCanCancel()) {
+            $hours = $booking->venue->cancel_cutoff_hours;
+            $phone = $booking->venue->phone === null ? '' : ' on '.$booking->venue->phone;
+            throw new ApiException(
+                'TOO_LATE_TO_CANCEL',
+                "Online cancelling closed {$hours} hours before the start. Please call the venue{$phone}.",
+            );
+        }
+        // Any other status (already cancelled, checked in...) is refused by the state machine.
+        $machine->transition($booking, BookingStatus::Cancelled, $request->user(), 'Cancelled by the player');
+
+        return new PlayerBookingResource($booking->fresh(['venue', 'court', 'sport']));
+    }
+
+    /** Someone else's booking answers 404, exactly like a code that doesn't exist. */
+    private function ownBooking(Request $request, string $code): Booking
+    {
+        $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->with(['venue', 'court', 'sport'])->first();
         abort_if($booking === null, 404);
 
-        return new PlayerBookingResource($booking->load(['venue', 'court', 'sport']));
+        return $booking;
     }
 
     private function bookingWithKey(int $userId, string $key): ?Booking

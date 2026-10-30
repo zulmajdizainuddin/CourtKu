@@ -30,6 +30,8 @@ export type ManageVenue = {
   booking_window_days: number;
   /** How close to the start players may still book; 0 = right up to the start time. */
   min_notice_minutes: number;
+  /** Players cancel online until this many hours before the start (FR-24). */
+  cancel_cutoff_hours: number;
   approved_at: string | null;
   created_at: string;
 };
@@ -72,7 +74,7 @@ export function useUpdateVenue(venueId: string) {
 
 export type BookingSettings = Pick<
   ManageVenue,
-  "slot_minutes" | "min_minutes" | "max_minutes" | "booking_window_days" | "min_notice_minutes"
+  "slot_minutes" | "min_minutes" | "max_minutes" | "booking_window_days" | "min_notice_minutes" | "cancel_cutoff_hours"
 >;
 
 /** Saves the booking settings (FR-13). Owners only. */
