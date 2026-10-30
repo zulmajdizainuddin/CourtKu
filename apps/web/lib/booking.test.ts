@@ -5,6 +5,7 @@ import {
   cellLabel,
   dateChip,
   endLabel,
+  lastNightDate,
   lengthOptions,
   startOptions,
   venueSports,
@@ -36,6 +37,14 @@ describe("bookingDates", () => {
     expect(dates[0]).toBe("2026-10-30");
     expect(dates[2]).toBe("2026-11-01");
     expect(dates[7]).toBe("2026-11-06");
+  });
+});
+
+describe("lastNightDate", () => {
+  it("ADR-015 offers last night just after midnight, across a month start", () => {
+    expect(lastNightDate("2026-11-01", 0)).toBe("2026-10-31");
+    expect(lastNightDate("2026-11-07", 5)).toBe("2026-11-06");
+    expect(lastNightDate("2026-11-07", 6)).toBeNull();
   });
 });
 

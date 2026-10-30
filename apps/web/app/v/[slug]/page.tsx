@@ -61,26 +61,29 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
         <p className="text-muted-foreground">{where}</p>
       </header>
 
-      {/* Honest about what works today: free times and prices, but booking itself arrives in M3. */}
+      {/* Booking online works from M3; payment is at the counter until online payment in M4 (ADR-021). */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-dashed px-4 py-3 text-sm">
-        {venue.courts.length > 0 && (
-          <ButtonLink href={`/v/${venue.slug}/book`} className="h-11 px-6">
-            See free times and prices
-          </ButtonLink>
+        {venue.courts.length > 0 ? (
+          <>
+            <ButtonLink href={`/v/${venue.slug}/book`} className="h-11 px-6">
+              Book a court
+            </ButtonLink>
+            <p>See free times and prices, book online, and pay at the counter when you arrive.</p>
+          </>
+        ) : (
+          <p>
+            Courts will be bookable here soon.
+            {venue.phone && (
+              <>
+                {" "}
+                For now, call the venue:{" "}
+                <a href={`tel:${venue.phone}`} className="font-medium underline">
+                  {formatPhone(venue.phone)}
+                </a>
+              </>
+            )}
+          </p>
         )}
-        <p>
-          <span className="font-medium">Online booking is coming soon.</span>{" "}
-          {venue.phone ? (
-            <>
-              For now, call the venue to book:{" "}
-              <a href={`tel:${venue.phone}`} className="font-medium underline">
-                {formatPhone(venue.phone)}
-              </a>
-            </>
-          ) : (
-            "For now, contact the venue to book."
-          )}
-        </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-[1fr_20rem]">
