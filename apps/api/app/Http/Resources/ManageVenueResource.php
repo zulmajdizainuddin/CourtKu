@@ -37,6 +37,12 @@ class ManageVenueResource extends JsonResource
             'postcode' => $this->postcode,
             'phone' => $this->phone,
             'facilities' => $this->facilities ?? [],
+            // Booking settings (FR-13).
+            'slot_minutes' => $this->slot_minutes,
+            'min_minutes' => $this->min_minutes,
+            'max_minutes' => $this->max_minutes,
+            'booking_window_days' => $this->booking_window_days,
+            'min_notice_minutes' => $this->min_notice_minutes,
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

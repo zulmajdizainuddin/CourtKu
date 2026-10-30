@@ -7,6 +7,7 @@ use App\Enums\VenueStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVenueRequest;
+use App\Http\Requests\UpdateBookingSettingsRequest;
 use App\Http\Requests\UpdateVenueRequest;
 use App\Http\Resources\ManageVenueResource;
 use App\Models\Venue;
@@ -63,6 +64,15 @@ class VenueController extends Controller
     /** GET /api/v1/manage/venues/{venue}. The route checks VenuePolicy::view first. */
     public function show(Venue $venue): ManageVenueResource
     {
+        return new ManageVenueResource($venue);
+    }
+
+    /** PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13). Owners only. */
+    public function updateSettings(UpdateBookingSettingsRequest $request, Venue $venue): ManageVenueResource
+    {
+        // TODO(M3, FR-38): refuse changes that make existing future bookings impossible.
+        $venue->update($request->validated());
+
         return new ManageVenueResource($venue);
     }
 

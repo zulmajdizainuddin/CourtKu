@@ -15,6 +15,11 @@ const venue = (overrides: Partial<ManageVenue>): ManageVenue => ({
   postcode: null,
   phone: null,
   facilities: [],
+  slot_minutes: 60,
+  min_minutes: 60,
+  max_minutes: 180,
+  booking_window_days: 14,
+  min_notice_minutes: 0,
   approved_at: null,
   created_at: "2026-10-29T00:00:00+00:00",
   ...overrides,
@@ -25,10 +30,11 @@ const summary = (items: ReturnType<typeof setupChecklist>) =>
 
 describe("setupChecklist", () => {
   it("shows a new venue everything to set up, needed items first", () => {
-    expect(summary(setupChecklist(venue({}), { hours: 0, courts: 0, photos: 0 }))).toEqual([
+    expect(summary(setupChecklist(venue({}), { hours: 0, courts: 0, unpricedCourts: 0, photos: 0 }))).toEqual([
       "✗ Address",
       "✗ Opening hours",
       "✗ Courts",
+      "✗ Prices",
       "✗ Phone number (optional)",
       "✗ Facilities (optional)",
       "✗ Photos (optional)",
@@ -36,13 +42,22 @@ describe("setupChecklist", () => {
   });
 
   it("ticks each item on its own, e.g. facilities without an address", () => {
-    expect(summary(setupChecklist(venue({ facilities: ["parking"] }), { hours: 7, courts: 0, photos: 2 }))).toEqual([
+    expect(summary(setupChecklist(venue({ facilities: ["parking"] }), { hours: 7, courts: 0, unpricedCourts: 0, photos: 2 }))).toEqual([
       "✗ Address",
       "✓ Opening hours",
       "✗ Courts",
+      "✗ Prices",
       "✗ Phone number (optional)",
       "✓ Facilities (optional)",
       "✓ Photos (optional)",
     ]);
+  });
+
+  it("FR-09 ticks Prices only when every court has a price", () => {
+    const prices = (unpricedCourts: number) =>
+      setupChecklist(venue({}), { hours: 7, courts: 3, unpricedCourts, photos: 0 }).find((i) => i.label === "Prices");
+
+    expect(prices(1)?.done).toBe(false);
+    expect(prices(0)?.done).toBe(true);
   });
 });

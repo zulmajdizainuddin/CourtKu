@@ -21,9 +21,16 @@ class CourtFactory extends Factory
         return [
             'name' => 'Court '.fake()->unique()->numberBetween(1, 9999),
             'is_indoor' => true,
+            'base_price_sen' => 2500, // RM 25.00 an hour
             'is_active' => true,
             'sort_order' => 0,
         ];
+    }
+
+    /** A court the owner hasn't priced yet: hidden from players. */
+    public function unpriced(): static
+    {
+        return $this->state(fn () => ['base_price_sen' => null]);
     }
 
     public function offering(string ...$sportSlugs): static

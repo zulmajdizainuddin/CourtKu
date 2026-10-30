@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\CourtFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,8 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property bool $is_indoor
  * @property bool $is_active
  * @property int $sort_order
+ * @property int|null $base_price_sen price per hour in sen (FR-09); null until the owner sets it
  */
-#[Fillable(['name', 'is_indoor', 'is_active', 'sort_order'])]
+#[Fillable(['name', 'is_indoor', 'base_price_sen', 'is_active', 'sort_order'])]
 class Court extends Model
 {
     /** @use HasFactory<CourtFactory> */
@@ -37,7 +39,19 @@ class Court extends Model
             'is_indoor' => 'boolean',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+            'base_price_sen' => 'integer',
         ];
+    }
+
+    /**
+     * Courts players can see and book: active, and with a price (FR-09).
+     * An owner who hasn't set a price yet keeps the court out of players' sight.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeBookable(Builder $query): void
+    {
+        $query->where('is_active', true)->whereNotNull('base_price_sen');
     }
 
     /**

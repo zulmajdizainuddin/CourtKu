@@ -121,6 +121,7 @@ function Courts({ courts }: { courts: PublicVenue["courts"] }) {
               <p className="text-sm text-muted-foreground">
                 {court.sports.map(sportLabel).join(", ")} · {court.is_indoor ? "Indoor" : "Outdoor"}
               </p>
+              {court.base_price && <p className="text-sm">{court.base_price} an hour</p>}
             </li>
           ))}
         </ul>

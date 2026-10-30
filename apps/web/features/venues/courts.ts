@@ -11,6 +11,10 @@ export type Court = {
   id: number;
   name: string;
   is_indoor: boolean;
+  /** Price per hour in sen (FR-09). null = no price yet: hidden from players. */
+  base_price_sen: number | null;
+  /** The same price as text, e.g. "RM 25.00". */
+  base_price: string | null;
   /** Inactive courts stay here but players can't see or book them. */
   is_active: boolean;
   sort_order: number;

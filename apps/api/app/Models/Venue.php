@@ -26,8 +26,13 @@ use Illuminate\Support\Carbon;
  * @property list<string>|null $facilities
  * @property Carbon|null $approved_at
  * @property Carbon|null $suspended_at
+ * @property int $slot_minutes 30 or 60 (FR-13)
+ * @property int $min_minutes
+ * @property int $max_minutes
+ * @property int $booking_window_days
+ * @property int $min_notice_minutes 0 = players can book right up to the start time
  */
-#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities'])]
+#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes'])]
 class Venue extends Model
 {
     /** @use HasFactory<VenueFactory> */
@@ -35,6 +40,12 @@ class Venue extends Model
 
     protected $attributes = [
         'status' => 'pending',
+        // The same defaults as the database columns (FR-13).
+        'slot_minutes' => 60,
+        'min_minutes' => 60,
+        'max_minutes' => 180,
+        'booking_window_days' => 14,
+        'min_notice_minutes' => 0,
     ];
 
     protected function casts(): array
@@ -46,6 +57,11 @@ class Venue extends Model
             'lat' => 'decimal:7',
             'lng' => 'decimal:7',
             'is_demo' => 'boolean',
+            'slot_minutes' => 'integer',
+            'min_minutes' => 'integer',
+            'max_minutes' => 'integer',
+            'booking_window_days' => 'integer',
+            'min_notice_minutes' => 'integer',
             'approved_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];
