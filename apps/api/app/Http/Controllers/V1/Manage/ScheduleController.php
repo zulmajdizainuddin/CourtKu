@@ -36,7 +36,7 @@ class ScheduleController extends Controller
         $bookings = $venue->bookings()
             ->where('business_date', $day)
             ->where('status', '!=', BookingStatus::Cancelled->value)
-            ->with(['user', 'sport'])
+            ->with(['user', 'sport', 'paidBy'])
             ->orderBy('starts_at')
             ->get();
         $blocks = $venue->slotBlocks()->where('business_date', $day)->with('creator')->orderBy('starts_at')->get();

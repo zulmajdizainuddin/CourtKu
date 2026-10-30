@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\Court;
 use App\Models\PriceRule;
 use App\Models\SlotBlock;
@@ -22,6 +24,10 @@ dataset('manage endpoints', [
     'add walk-in booking' => ['POST', '/api/v1/manage/venues/{venue}/bookings'],
     'add block' => ['POST', '/api/v1/manage/venues/{venue}/blocks'],
     'lift block' => ['DELETE', '/api/v1/manage/venues/{venue}/blocks/{block}'],
+    'check in' => ['POST', '/api/v1/manage/venues/{venue}/bookings/{booking}/check-in'],
+    'mark no-show' => ['POST', '/api/v1/manage/venues/{venue}/bookings/{booking}/no-show'],
+    'mark paid' => ['POST', '/api/v1/manage/venues/{venue}/bookings/{booking}/paid'],
+    'cancel any booking' => ['POST', '/api/v1/manage/venues/{venue}/bookings/{booking}/cancel'],
     'view hours' => ['GET', '/api/v1/manage/venues/{venue}/hours'],
     'update hours' => ['PUT', '/api/v1/manage/venues/{venue}/hours'],
     'list closures' => ['GET', '/api/v1/manage/venues/{venue}/closures'],
@@ -46,7 +52,7 @@ dataset('manage endpoints', [
     'remove staff' => ['DELETE', '/api/v1/manage/venues/{venue}/staff/{member}'],
 ]);
 
-/** Fills in {venue}, and {closure}, {court}, {rule}, {block}, {photo}, {invite} or {member} with one of that venue's own. */
+/** Fills in {venue}, and {closure}, {court}, {rule}, {block}, {booking}, {photo}, {invite} or {member} with one of that venue's own. */
 function urlFor(string $path, Venue $venue): string
 {
     if (str_contains($path, '{invite}')) {
@@ -69,6 +75,16 @@ function urlFor(string $path, Venue $venue): string
     }
     if (str_contains($path, '{rule}')) {
         $path = str_replace('{rule}', (string) PriceRule::factory()->for($venue)->create()->id, $path);
+    }
+    if (str_contains($path, '{booking}')) {
+        $booking = new Booking([
+            'code' => 'CK-'.strtoupper(substr(md5((string) $venue->id), 0, 5)), 'venue_id' => $venue->id,
+            'court_id' => Court::factory()->for($venue)->create()->id, 'source' => 'online',
+            'starts_at' => '2099-01-01 10:00:00', 'ends_at' => '2099-01-01 11:00:00', 'business_date' => '2099-01-01', 'total_sen' => 2000,
+        ]);
+        $booking->status = BookingStatus::Confirmed;
+        $booking->save();
+        $path = str_replace('{booking}', $booking->code, $path);
     }
     if (str_contains($path, '{block}')) {
         $block = SlotBlock::create([

@@ -1,9 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { BlockForm, CounterBookingForm } from "@/components/venues/schedule-forms";
-import { type ScheduleBlock, type ScheduleBooking, useDaySchedule, useLiftBlock } from "@/features/venues/schedule";
+import {
+  type BookingAction,
+  PAYMENT_METHODS,
+  type ScheduleBlock,
+  type ScheduleBooking,
+  useBookingAction,
+  useDaySchedule,
+  useLiftBlock,
+} from "@/features/venues/schedule";
 import { ApiError } from "@/lib/api";
 import { endLabel } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
@@ -162,7 +171,9 @@ export function DaySchedule({
                     "z-10 m-0.5 overflow-hidden rounded-md px-2 py-1 text-left text-xs leading-tight focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
                     b.status === "no_show"
                       ? "bg-muted text-muted-foreground line-through"
-                      : "bg-primary text-primary-foreground",
+                      : b.status === "checked_in"
+                        ? "bg-emerald-700 text-white"
+                        : "bg-primary text-primary-foreground",
                     selected === b.code && "ring-2 ring-ring ring-offset-1",
                   )}
                   style={{ gridColumn: column + 2, gridRow: `${row + 2} / span ${b.minutes / 30}` }}
@@ -171,7 +182,10 @@ export function DaySchedule({
                   <span className="block">
                     {b.code} · {b.total}
                   </span>
-                  {b.status !== "confirmed" && <span className="block">{STATUS_LABELS[b.status]}</span>}
+                  <span className="block">
+                    {b.status !== "confirmed" && `${STATUS_LABELS[b.status]} · `}
+                    {b.paid_at ? "Paid" : "Not paid yet"}
+                  </span>
                 </button>
               );
             })}
@@ -203,7 +217,13 @@ export function DaySchedule({
         </div>
       )}
 
-      {booking && <BookingDetails booking={booking} courtName={data?.courts.find((c) => c.id === booking.court_id)?.name} />}
+      {booking && (
+        <BookingDetails
+          venueId={venueId}
+          booking={booking}
+          courtName={data?.courts.find((c) => c.id === booking.court_id)?.name}
+        />
+      )}
       {block && (
         <BlockDetails
           venueId={venueId}
@@ -216,7 +236,15 @@ export function DaySchedule({
   );
 }
 
-function BookingDetails({ booking, courtName }: { booking: ScheduleBooking; courtName?: string }) {
+function BookingDetails({
+  venueId,
+  booking,
+  courtName,
+}: {
+  venueId: string;
+  booking: ScheduleBooking;
+  courtName?: string;
+}) {
   const start = booking.starts_at.slice(11, 16);
   return (
     <section aria-label={`Booking ${booking.code}`} className="grid gap-2 rounded-lg p-4 text-sm ring-1 ring-foreground/10">
@@ -256,10 +284,22 @@ function BookingDetails({ booking, courtName }: { booking: ScheduleBooking; cour
           {formatTime(start)} – {endLabel(start, booking.minutes)} ({formatDuration(booking.minutes)})
         </dd>
         <dt className="text-muted-foreground">Total</dt>
-        <dd>{booking.total}, paid at the counter</dd>
+        <dd>
+          {booking.total}
+          {booking.paid_at
+            ? `, paid by ${PAYMENT_METHODS.find((m) => m.value === booking.payment_method)?.label ?? "the counter"} at ${formatTime(booking.paid_at.slice(11, 16))}${booking.paid_by ? ` (${booking.paid_by})` : ""}`
+            : ", not paid yet"}
+        </dd>
         <dt className="text-muted-foreground">How</dt>
         <dd>{SOURCE_LABELS[booking.source]}</dd>
+        {booking.checked_in_at && (
+          <>
+            <dt className="text-muted-foreground">Arrived</dt>
+            <dd>{formatTime(booking.checked_in_at.slice(11, 16))}</dd>
+          </>
+        )}
       </dl>
+      <BookingActions venueId={venueId} booking={booking} />
     </section>
   );
 }
@@ -311,5 +351,97 @@ function BlockDetails({
         </p>
       )}
     </section>
+  );
+}
+
+/**
+ * The counter buttons for one booking (FR-28): check in, no-show, paid (how) and cancel (why).
+ * Each button shows only when the API would allow it (booking.actions).
+ */
+function BookingActions({ venueId, booking }: { venueId: string; booking: ScheduleBooking }) {
+  const act = useBookingAction(venueId, booking.code);
+  const [cancelling, setCancelling] = useState(false);
+  const [reason, setReason] = useState("");
+  const { actions } = booking;
+
+  const run = (action: BookingAction, question?: string) => {
+    if (question && !window.confirm(question)) return;
+    act.mutate(action, { onSuccess: () => setCancelling(false) });
+  };
+
+  if (!actions.check_in && !actions.no_show && !actions.cancel && !actions.mark_paid) return null;
+
+  return (
+    <div className="grid gap-3 border-t pt-3">
+      <div className="flex flex-wrap gap-2">
+        {actions.check_in && (
+          <Button className="h-11 px-4" disabled={act.isPending} onClick={() => run({ action: "check-in" })}>
+            Check in
+          </Button>
+        )}
+        {actions.no_show && (
+          <Button
+            variant="outline"
+            className="h-11 px-4"
+            disabled={act.isPending}
+            onClick={() => run({ action: "no-show" }, `Mark ${booking.code} as a no-show? The time stays taken.`)}
+          >
+            No-show
+          </Button>
+        )}
+        {actions.cancel && !cancelling && (
+          <Button variant="outline" className="h-11 px-4 text-destructive" disabled={act.isPending} onClick={() => setCancelling(true)}>
+            Cancel booking
+          </Button>
+        )}
+      </div>
+
+      {actions.mark_paid && (
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Mark paid at the counter</p>
+          <div className="flex flex-wrap gap-2">
+            {PAYMENT_METHODS.map((m) => (
+              <Button
+                key={m.value}
+                variant="outline"
+                className="h-11 px-4"
+                disabled={act.isPending}
+                onClick={() => run({ action: "paid", method: m.value })}
+              >
+                {m.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {cancelling && (
+        <form
+          className="grid gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            run({ action: "cancel", reason });
+          }}
+        >
+          <FormField label="Why cancel?" name="cancel_reason" placeholder="Rain, or the player asked" value={reason} onChange={(e) => setReason(e.target.value)} />
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="outline" className="h-11 px-4 text-destructive" disabled={act.isPending}>
+              Cancel this booking
+            </Button>
+            <Button type="button" variant="ghost" className="h-11" onClick={() => setCancelling(false)}>
+              Keep it
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {act.error && (
+        <p className="text-sm text-destructive" role="alert">
+          {act.error instanceof ApiError
+            ? (Object.values(act.error.fields).flat()[0] ?? act.error.message)
+            : "Could not reach CourtKu. Check your connection and try again."}
+        </p>
+      )}
+    </div>
   );
 }

@@ -19,7 +19,22 @@ export type ScheduleBooking = {
   total: string;
   customer: { name: string | null; phone: string | null; email: string | null };
   checked_in_at: string | null;
+  /** Paid at the counter (FR-28): when, how and by whom. */
+  paid_at: string | null;
+  payment_method: PaymentMethod | null;
+  paid_by: string | null;
+  cancel_reason: string | null;
+  /** Which buttons to show, by the same rules the API checks. */
+  actions: { check_in: boolean; no_show: boolean; cancel: boolean; mark_paid: boolean };
 };
+
+export type PaymentMethod = "cash" | "qr" | "card";
+
+export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+  { value: "cash", label: "Cash" },
+  { value: "qr", label: "QR / DuitNow" },
+  { value: "card", label: "Card" },
+];
 
 /** A time a court is closed for repairs or a private event (FR-21). */
 export type ScheduleBlock = {
@@ -93,5 +108,21 @@ export function useAddBlock(venueId: string) {
 export function useLiftBlock(venueId: string) {
   return useScheduleMutation(venueId, (blockId: number) =>
     api(`/api/v1/manage/venues/${venueId}/blocks/${blockId}`, { method: "DELETE" }),
+  );
+}
+
+export type BookingAction =
+  | { action: "check-in" }
+  | { action: "no-show" }
+  | { action: "paid"; method: PaymentMethod }
+  | { action: "cancel"; reason: string };
+
+/** Check in, no-show, paid or cancel (FR-28), at the counter. */
+export function useBookingAction(venueId: string, code: string) {
+  return useScheduleMutation(venueId, ({ action, ...body }: BookingAction) =>
+    api<{ data: ScheduleBooking }>(`/api/v1/manage/venues/${venueId}/bookings/${encodeURIComponent(code)}/${action}`, {
+      method: "POST",
+      body,
+    }),
   );
 }
