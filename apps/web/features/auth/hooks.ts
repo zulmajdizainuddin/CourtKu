@@ -46,8 +46,21 @@ export function useRefreshMe() {
   return () => queryClient.invalidateQueries({ queryKey: meKey });
 }
 
+/**
+ * A new person is logged in: forget everything the previous one loaded (their bookings, venues,
+ * schedules...), then ask who is logged in now. Without this, on a shared phone or the counter
+ * computer, the next person briefly saw the previous person's data from the browser's memory.
+ */
+export function useStartSession() {
+  const queryClient = useQueryClient();
+  return async () => {
+    queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== meKey[0] });
+    await queryClient.invalidateQueries({ queryKey: meKey });
+  };
+}
+
 export function useLogin() {
-  const refreshMe = useRefreshMe();
+  const startSession = useStartSession();
   return useMutation({
     // two_factor: true means the password was right, but the user must still enter
     // the code from their authenticator app before they are logged in.
@@ -56,16 +69,16 @@ export function useLogin() {
     // Waits until we know who is logged in before the login page moves on. Otherwise the
     // next page still sees "nobody is logged in" and sends the user back to /login.
     onSuccess: async (result) => {
-      if (!result.two_factor) await refreshMe();
+      if (!result.two_factor) await startSession();
     },
   });
 }
 
 export function useRegister() {
-  const refreshMe = useRefreshMe();
+  const startSession = useStartSession();
   return useMutation({
     mutationFn: (input: RegisterInput) => api("/auth/register", { method: "POST", body: input }),
-    onSuccess: refreshMe,
+    onSuccess: startSession,
   });
 }
 
@@ -73,7 +86,11 @@ export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => api("/auth/logout", { method: "POST" }),
-    onSuccess: () => queryClient.setQueryData(meKey, null),
+    // Forget everything this person loaded, so the next person on this browser can't see it.
+    onSuccess: () => {
+      queryClient.clear();
+      queryClient.setQueryData(meKey, null);
+    },
   });
 }
 
