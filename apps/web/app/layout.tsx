@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
@@ -30,6 +31,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SiteHeader />
           <main className="flex flex-1 flex-col">{children}</main>
         </Providers>
+        {/* Vercel Web Analytics: page views and visitor counts, without cookies. Only sends data on Vercel. */}
+        <Analytics />
       </body>
     </html>
   );
