@@ -24,3 +24,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [017](017-price-steps.md) | Prices are set in 10-sen steps | 2026-10-17 |
 | [018](018-photos-on-cloudinary.md) | Venue photos are stored on Cloudinary | 2026-10-31 |
 | [019](019-staff-invites-table.md) | Staff invites have their own table | 2026-10-31 |
+| [020](020-price-rules-never-overlap.md) | Price rules never overlap; a court's own rule beats an all-courts rule | 2026-10-31 |
