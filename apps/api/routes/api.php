@@ -95,6 +95,8 @@ Route::prefix('v1')->group(function () {
 
             // The day schedule for the counter (FR-31): owners and staff.
             Route::get('/venues/{venue}/schedule', [ScheduleController::class, 'show'])->can('view', 'venue');
+            // FR-14: what the Schedule tab asks every 10 seconds, to know when to reload.
+            Route::get('/venues/{venue}/schedule/version', [ScheduleController::class, 'version'])->middleware('throttle:120,1')->can('view', 'venue');
             // Walk-in and phone bookings (FR-20), and blocks for repairs or private events (FR-21).
             Route::post('/venues/{venue}/bookings', [CounterBookingController::class, 'store'])->can('view', 'venue');
             Route::post('/venues/{venue}/blocks', [SlotBlockController::class, 'store'])->can('view', 'venue');

@@ -1,8 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { api } from "@/lib/api";
 import type { BookingStatus } from "@/lib/booking";
+import { LIVE_CHECK_MS } from "@/lib/live-schedule";
 
 // The day schedule for the counter (FR-31), for owners and staff.
 
@@ -71,13 +73,36 @@ export type DaySchedule = {
 
 const scheduleKey = (venueId: string) => ["manage", "venues", venueId, "schedule"] as const;
 
-/** One business day's schedule. Asked again every minute, so new online bookings appear at the counter. */
+/**
+ * One business day's schedule, kept live (FR-14): every 10 seconds the page asks for the venue's
+ * version, a word that changes whenever a booking, cancel, block or setting is saved, and reloads
+ * the schedule only when it changed. While the tab is hidden it stops asking; coming back checks
+ * at once. Every 5 minutes it reloads anyway, as a safety net.
+ */
 export function useDaySchedule(venueId: string, date: string) {
+  const queryClient = useQueryClient();
+  const version = useQuery({
+    queryKey: [...scheduleKey(venueId), "version"],
+    queryFn: async () =>
+      (await api<{ data: { version: string } }>(`/api/v1/manage/venues/${venueId}/schedule/version`)).data.version,
+    refetchInterval: LIVE_CHECK_MS,
+  }).data;
+
+  // The version this page last saw. A different one means something changed: reload the days.
+  const seen = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (version === undefined) return;
+    if (seen.current !== undefined && seen.current !== version) {
+      queryClient.invalidateQueries({ queryKey: scheduleKey(venueId), predicate: (q) => q.queryKey[4] !== "version" });
+    }
+    seen.current = version;
+  }, [version, venueId, queryClient]);
+
   return useQuery({
     queryKey: [...scheduleKey(venueId), date],
     queryFn: async () =>
       (await api<{ data: DaySchedule }>(`/api/v1/manage/venues/${venueId}/schedule?date=${date}`)).data,
-    refetchInterval: 60_000,
+    refetchInterval: 5 * 60_000,
   });
 }
 

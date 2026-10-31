@@ -26,5 +26,6 @@ The plan (M2, step 4) asked for a 30-second cache. A plain 30-second cache has a
 ## Consequences
 
 - Repeat visits to the same day are much cheaper (locally about 100 ms down to about 30 ms).
+- The same version tells the staff Schedule tab when to reload (FR-14): it asks for the version every 10 seconds (`GET /manage/venues/{venue}/schedule/version`) and reloads only when it changed, so new online bookings reach the counter within seconds without a live connection.
 - A change made directly in the database, outside CourtKu, shows within 30 seconds.
 - A new model or query that changes free times must clear the venue's version too; `tests/Feature/Venues/AvailabilityCacheTest.php` lists every change that must show at once.

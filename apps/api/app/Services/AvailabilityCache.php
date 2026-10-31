@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
  * see Models\Concerns\ClearsAvailabilityCache). A kept grid is only used while its version still
  * matches, so a change shows at once instead of after 30 seconds.
  *
+ * The same version tells the staff schedule when to reload (FR-14, ScheduleController::version).
+ *
  * The version is read BEFORE the grid is worked out. If a change lands while it is being worked out,
  * the grid is kept under the old version and simply not used again.
  */
@@ -51,7 +53,8 @@ final class AvailabilityCache
         DB::afterCommit(fn () => Cache::forever(self::versionKey($venueId), Str::random(16)));
     }
 
-    private static function version(int $venueId): string
+    /** The venue's version now. The staff schedule asks for it every few seconds to know when to reload (FR-14). */
+    public static function version(int $venueId): string
     {
         return (string) Cache::get(self::versionKey($venueId), 'first');
     }
