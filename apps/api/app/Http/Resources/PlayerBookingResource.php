@@ -26,6 +26,8 @@ class PlayerBookingResource extends JsonResource
         return [
             'code' => $this->code,
             'status' => $this->status->value,
+            // While waiting for payment: when the held time is freed (FR-16).
+            'hold_expires_at' => $this->hold_expires_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
             'venue' => [
                 'name' => $this->venue->name,
                 'slug' => $this->venue->slug,

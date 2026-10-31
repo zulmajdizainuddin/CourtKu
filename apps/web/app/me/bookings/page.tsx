@@ -85,11 +85,13 @@ function MyBookings() {
 }
 
 const STATUS_LABELS: Record<PlayerBooking["status"], string> = {
+  pending_payment: "Waiting for payment",
   confirmed: "Booked",
   checked_in: "Checked in",
   completed: "Played",
   no_show: "No-show",
   cancelled: "Cancelled",
+  expired: "Not paid in time",
 };
 
 function BookingCard({ booking }: { booking: PlayerBooking }) {
@@ -112,7 +114,9 @@ function BookingCard({ booking }: { booking: PlayerBooking }) {
       <span
         className={cn(
           "rounded-full px-2 py-0.5 text-xs",
-          booking.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground",
+          booking.status === "cancelled" || booking.status === "expired"
+            ? "bg-destructive/10 text-destructive"
+            : "bg-muted text-muted-foreground",
         )}
       >
         {STATUS_LABELS[booking.status]}

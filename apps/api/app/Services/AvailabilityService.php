@@ -22,7 +22,8 @@ use Illuminate\Validation\ValidationException;
  *   - the day is not a closure day,
  *   - the day is inside the booking window ("14 days ahead" = today to today + 14),
  *   - it starts at least the venue's notice from now (0 = right up to the start time),
- *   - no booking already holds it (booking_slots).
+ *   - no booking already holds it (booking_slots). Holds whose payment time is up are freed
+ *     first (Holds), so they never block anyone.
  *
  * Every time here is Malaysia time. A cell is "business date + minutes after that date's
  * midnight": at a venue open Friday until 2 am, Saturday 00:30 is Friday, minute 1470.
@@ -36,6 +37,8 @@ class AvailabilityService
 
     /** @var array<string, VenueClosure|null> closures already looked up, by date */
     private array $closures = [];
+
+    private bool $holdsReleased = false;
 
     public function __construct(private readonly Venue $venue)
     {
@@ -141,6 +144,7 @@ class AvailabilityService
         if ($minutes === [] || $courtIds === []) {
             return [];
         }
+        $this->releaseExpiredHolds();
 
         return BookingSlot::whereIn('court_id', $courtIds)
             ->whereBetween('slot_start', [
@@ -218,6 +222,7 @@ class AvailabilityService
             $cellStarts[] = self::startsAt($date, $minute)->utc()->format('Y-m-d H:i:s');
         }
 
+        $this->releaseExpiredHolds();
         $taken = self::takenOf($court, $cellStarts);
         if ($taken !== []) {
             throw new ApiException(
@@ -269,6 +274,15 @@ class AvailabilityService
         }
 
         return null;
+    }
+
+    /** FR-16: frees this venue's unpaid holds whose time is up, once per request, before looking at what is taken. */
+    private function releaseExpiredHolds(): void
+    {
+        if (! $this->holdsReleased) {
+            (new Holds)->releaseExpired(venue: $this->venue);
+            $this->holdsReleased = true;
+        }
     }
 
     private function earliestStart(): CarbonImmutable

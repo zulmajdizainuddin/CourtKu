@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\TickController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\BookingController;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 
 // Used by the uptime monitor (NFR-03). Not versioned: it is for machines, not apps.
 Route::get('/health', HealthController::class);
+// The every-minute jobs, called by a cron service on hosting without a scheduler (ADR-022).
+Route::post('/tick', TickController::class)->middleware('throttle:10,1');
 
 Route::prefix('v1')->group(function () {
     // Public: anyone can read an approved venue's page (plan: public reads 60 a minute).

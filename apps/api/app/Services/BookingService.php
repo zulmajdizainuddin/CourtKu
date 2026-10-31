@@ -14,6 +14,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 
 /**
  * Makes bookings (FR-15, FR-18). Plan section 7, step by step:
@@ -26,11 +27,17 @@ use Illuminate\Support\Facades\DB;
  * Step 2 can: booking_slots has a unique index on (court_id, slot_start), so the database
  * saves only the first claim on a half hour. The second fails, everything it saved is
  * rolled back, and the player gets 409 SLOT_TAKEN.
+ *
+ * A booking paid online is saved as a hold (FR-16): pending_payment until the venue's hold
+ * time runs out, with the half hours taken exactly like a confirmed booking's.
  */
 class BookingService
 {
     /** Letters and digits that can't be mixed up when read out (no 0/O, 1/I/L). */
     private const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+
+    /** FR-16: a player can wait on at most this many unpaid bookings at once, so one person can't hold a whole evening. */
+    public const MAX_HOLDS_PER_PLAYER = 2;
 
     /**
      * Checks a booking (venue approved, court bookable, start on :00 or :30, allowed length, opening
@@ -67,8 +74,11 @@ class BookingService
 
     /**
      * Saves a prepared booking, or throws 409 SLOT_TAKEN when someone took one of its
-     * half hours since it was prepared. In M3 every booking is paid at the venue,
-     * so it is confirmed straight away (ADR-021).
+     * half hours since it was prepared.
+     *
+     * $hold = false: paid at the venue, so confirmed straight away (ADR-021).
+     * $hold = true: paid online, so it waits as pending_payment until the venue's hold time
+     * runs out (FR-16), and the player may have at most 2 of those (409 TOO_MANY_HOLDS).
      */
     public function store(
         BookingDraft $draft,
@@ -79,9 +89,14 @@ class BookingService
         ?string $customerName = null,
         ?string $customerPhone = null,
         ?string $idempotencyKey = null,
+        bool $hold = false,
     ): Booking {
         try {
-            return DB::transaction(function () use ($draft, $source, $player, $createdBy, $sportId, $customerName, $customerPhone, $idempotencyKey) {
+            return DB::transaction(function () use ($draft, $source, $player, $createdBy, $sportId, $customerName, $customerPhone, $idempotencyKey, $hold) {
+                if ($hold) {
+                    $this->checkHoldLimit($player);
+                }
+
                 $booking = new Booking([
                     'code' => $this->newCode(),
                     'idempotency_key' => $idempotencyKey,
@@ -98,7 +113,8 @@ class BookingService
                     'total_sen' => $draft->totalSen,
                     'created_by' => $createdBy?->id,
                 ]);
-                $booking->status = BookingStatus::Confirmed;
+                $booking->status = $hold ? BookingStatus::PendingPayment : BookingStatus::Confirmed;
+                $booking->hold_expires_at = $hold ? now()->addMinutes($draft->court->venue->hold_minutes) : null;
                 $booking->save();
 
                 // One insert for all half hours. If any of them is taken, this throws.
@@ -112,10 +128,11 @@ class BookingService
                     'updated_at' => $now,
                 ], $draft->cells));
 
-                AuditLog::record($booking, 'booking.created', $createdBy, [
+                AuditLog::record($booking, 'booking.created', $createdBy, array_filter([
                     'source' => $source->value,
                     'total_sen' => $draft->totalSen,
-                ]);
+                    'hold_expires_at' => $booking->hold_expires_at?->toIso8601String(),
+                ]));
 
                 return $booking;
             });
@@ -135,6 +152,30 @@ class BookingService
                 'SLOT_TAKEN',
                 "Someone has just booked {$draft->court->name} at this time. Please choose another time or court.",
                 details: ['slots' => $taken],
+            );
+        }
+    }
+
+    /**
+     * FR-16: at most 2 unpaid holds per player. The player's row is locked first, so two Book presses at the
+     * same moment are counted one after the other and can't both slip in as the second hold.
+     * Holds whose time is up don't count, even before they are marked expired.
+     */
+    private function checkHoldLimit(?User $player): void
+    {
+        if ($player === null) {
+            throw new LogicException('Only a player booking online can hold a booking while paying.');
+        }
+        User::whereKey($player->id)->lockForUpdate()->first();
+
+        $holds = Booking::where('user_id', $player->id)
+            ->where('status', BookingStatus::PendingPayment->value)
+            ->where('hold_expires_at', '>', now())
+            ->count();
+        if ($holds >= self::MAX_HOLDS_PER_PLAYER) {
+            throw new ApiException(
+                'TOO_MANY_HOLDS',
+                'You already have '.self::MAX_HOLDS_PER_PLAYER.' bookings waiting for payment. Pay for or cancel one of them first.',
             );
         }
     }

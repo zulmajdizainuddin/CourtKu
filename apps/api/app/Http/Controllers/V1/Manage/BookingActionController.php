@@ -58,7 +58,8 @@ class BookingActionController extends Controller
 
     /**
      * POST .../bookings/{code}/cancel  { "reason": "Rain" }
-     * Staff and owners can cancel any confirmed booking, with no cutoff (unlike players, FR-24).
+     * Staff and owners can cancel any confirmed booking, or one waiting for payment, with no cutoff
+     * (unlike players, FR-24).
      * The time is free for others straight away.
      */
     public function cancel(Request $request, Venue $venue, Booking $booking): ManageBookingResource

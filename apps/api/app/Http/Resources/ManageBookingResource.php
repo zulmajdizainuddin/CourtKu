@@ -39,6 +39,8 @@ class ManageBookingResource extends JsonResource
                 'phone' => $this->user->phone ?? $this->customer_phone,
                 'email' => $this->user?->email,
             ],
+            // While waiting for online payment: when the held time is freed (FR-16).
+            'hold_expires_at' => $this->hold_expires_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
             'checked_in_at' => $this->checked_in_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
             // Paid at the counter (FR-28): when, how and by whom.
             'paid_at' => $this->paid_at?->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),
@@ -49,7 +51,7 @@ class ManageBookingResource extends JsonResource
             'actions' => [
                 'check_in' => $this->canCheckIn(),
                 'no_show' => $this->status === BookingStatus::Confirmed,
-                'cancel' => $this->status === BookingStatus::Confirmed,
+                'cancel' => in_array($this->status, [BookingStatus::Confirmed, BookingStatus::PendingPayment], true),
                 'mark_paid' => $this->canMarkPaid(),
             ],
         ];

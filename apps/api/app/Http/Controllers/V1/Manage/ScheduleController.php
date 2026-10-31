@@ -9,6 +9,7 @@ use App\Models\Court;
 use App\Models\SlotBlock;
 use App\Models\Venue;
 use App\Services\AvailabilityService;
+use App\Services\Holds;
 use App\Support\MalaysiaTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class ScheduleController extends Controller
      *
      * times: the day's half hours, from opening to closing, after midnight too (ADR-015), plus any
      * half hour a booking or block holds outside today's hours. courts: the active courts, and any
-     * other court with a booking or block that day. bookings: everything except cancelled ones.
+     * other court with a booking or block that day. bookings: everything except cancelled and expired
+     * ones (holds still waiting for payment included).
      * blocks: times closed for repairs or a private event (FR-21).
      */
     public function show(Request $request, Venue $venue): JsonResponse
@@ -33,9 +35,10 @@ class ScheduleController extends Controller
         $date = AvailabilityService::date($day);
         $availability = new AvailabilityService($venue);
 
+        (new Holds)->releaseExpired(venue: $venue);
         $bookings = $venue->bookings()
             ->where('business_date', $day)
-            ->where('status', '!=', BookingStatus::Cancelled->value)
+            ->whereNotIn('status', [BookingStatus::Cancelled->value, BookingStatus::Expired->value])
             ->with(['user', 'sport', 'paidBy'])
             ->orderBy('starts_at')
             ->get();

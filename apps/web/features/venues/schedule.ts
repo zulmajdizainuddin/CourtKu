@@ -2,13 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import type { BookingStatus } from "@/lib/booking";
 
 // The day schedule for the counter (FR-31), for owners and staff.
 
 /** A booking as the venue sees it (the API's ManageBookingResource). */
 export type ScheduleBooking = {
   code: string;
-  status: "confirmed" | "checked_in" | "completed" | "no_show" | "cancelled";
+  status: BookingStatus;
   source: "online" | "walk_in" | "phone";
   court_id: number;
   sport: string | null;
@@ -18,6 +19,8 @@ export type ScheduleBooking = {
   total_sen: number;
   total: string;
   customer: { name: string | null; phone: string | null; email: string | null };
+  /** While waiting for online payment: when the held time is freed. */
+  hold_expires_at: string | null;
   checked_in_at: string | null;
   /** Paid at the counter (FR-28): when, how and by whom. */
   paid_at: string | null;
