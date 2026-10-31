@@ -137,6 +137,16 @@ class Booking extends Model
     }
 
     /**
+     * Its online payment attempts (FR-22); most bookings have one, or none when paid at the counter.
+     *
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
      * The half hours this booking holds (ADR-010): a 2-hour booking has 4.
      *
      * @return HasMany<BookingSlot, $this>
