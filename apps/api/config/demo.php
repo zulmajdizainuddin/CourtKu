@@ -16,8 +16,9 @@ return [
     'days_back' => (int) env('DEMO_DAYS_BACK', 30),
     'days_ahead' => (int) env('DEMO_DAYS_AHEAD', 13),
 
-    // How long each minute's tick may spend on it, so the cron call stays short.
-    'seconds_per_tick' => (float) env('DEMO_SECONDS_PER_TICK', 10),
+    // How long each minute's tick may spend on it, so the whole cron call stays well under
+    // cron-job.org's 30 seconds. Checked after every court, so it may run over by one court's bookings.
+    'seconds_per_tick' => (float) env('DEMO_SECONDS_PER_TICK', 8),
 
     // Only the first N venues (tests); null = all of them.
     'venue_limit' => null,

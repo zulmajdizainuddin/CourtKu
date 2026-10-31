@@ -87,6 +87,33 @@ it('finishes games that have ended: completed and paid, or a no-show', function 
         ->and(Booking::where('ends_at', '>', now())->where('status', BookingStatus::Completed->value)->count())->toBe(0);
 });
 
+it('spreads a big day over several ticks, court by court, with the same bookings as in one go', function () {
+    config(['demo.venue_limit' => 1, 'demo.days_back' => 0, 'demo.days_ahead' => 1]); // Shuttle House: 8 courts, today and tomorrow
+    $world = new DemoWorld;
+    $bookings = fn () => Booking::orderBy('court_id')->orderBy('starts_at')->get()
+        ->map(fn (Booking $b) => "{$b->court_id} {$b->starts_at->toIso8601String()} {$b->ends_at->toIso8601String()}")->all();
+
+    // No time at all: each tick still makes one court, then stops until the next minute.
+    $ticks = 0;
+    do {
+        $done = $world->step(0);
+        $ticks++;
+    } while ($done['days_left'] > 0 && $ticks < 50);
+    $piecemeal = $bookings();
+
+    expect($ticks)->toBe(16) // 2 days x 8 courts
+        ->and(DB::table('demo_days')->whereNull('finished_at')->count())->toBe(0)
+        ->and($piecemeal)->not->toBeEmpty();
+
+    // The same two days made in one go.
+    foreach (['refunds', 'payments', 'booking_slots', 'audit_logs', 'bookings', 'demo_days'] as $table) {
+        DB::table($table)->delete();
+    }
+    $world->step(120);
+
+    expect($bookings())->toBe($piecemeal);
+});
+
 it('does each day once, and rolls the window forward each day', function () {
     $world = new DemoWorld;
     $world->step();
