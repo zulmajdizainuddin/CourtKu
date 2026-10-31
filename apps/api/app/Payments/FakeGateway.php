@@ -5,27 +5,68 @@ namespace App\Payments;
 use Carbon\CarbonImmutable;
 
 /**
- * A pretend gateway for tests: keeps payment pages in memory and lets a test "pay" them, so the
- * payment flow can be tested without the internet or a Stripe account.
+ * A pretend gateway for tests: keeps venue accounts and payment pages in memory and lets a test
+ * finish an owner's sign-up or "pay", so the payment flow can be tested without the internet or a
+ * Stripe account.
  *
  * Its webhooks are signed too (HMAC-SHA256 of the body with the secret, header X-Fake-Signature),
  * so tests also prove that unsigned or wrongly signed webhooks change nothing.
  */
 class FakeGateway implements PaymentGateway
 {
+    /** @var array<string, GatewayAccount> venue accounts, by id */
+    public array $accounts = [];
+
     /** @var array<string, Checkout> every payment page, by id */
     public array $checkouts = [];
+
+    /** @var array<string, string|null> which venue account each payment page belongs to */
+    public array $checkoutAccounts = [];
 
     /** @var list<CheckoutRequest> what CourtKu asked for, in order */
     public array $requests = [];
 
-    /** @var array<string, string> payment page id by idempotency key */
-    private array $idempotencyKeys = [];
-
     /** true = act as if the gateway can't be reached */
     public bool $down = false;
 
-    public function createCheckout(CheckoutRequest $request): Checkout
+    /** @var array<string, string> what was made for each idempotency key */
+    private array $idempotencyKeys = [];
+
+    public function createAccount(string $email, string $businessName, string $idempotencyKey): string
+    {
+        $this->failIfDown();
+        if (isset($this->idempotencyKeys[$idempotencyKey])) {
+            return $this->idempotencyKeys[$idempotencyKey];
+        }
+
+        $id = 'acct_fake_'.(count($this->accounts) + 1);
+        $this->accounts[$id] = new GatewayAccount($id, $businessName, 'MY', chargesEnabled: false);
+
+        return $this->idempotencyKeys[$idempotencyKey] = $id;
+    }
+
+    public function onboardingUrl(string $accountId, string $returnUrl, string $refreshUrl): string
+    {
+        $this->failIfDown();
+
+        return "https://connect.example.test/{$accountId}?return=".urlencode($returnUrl);
+    }
+
+    public function account(string $accountId): GatewayAccount
+    {
+        $this->failIfDown();
+
+        return $this->accounts[$accountId] ?? throw new PaymentGatewayException('The payment service doesn\'t know this account.');
+    }
+
+    /** The owner finishes the gateway's sign-up pages, and the account can take payments. */
+    public function finishOnboarding(string $accountId): void
+    {
+        $account = $this->accounts[$accountId];
+        $this->accounts[$accountId] = new GatewayAccount($account->id, $account->name, $account->country, chargesEnabled: true);
+    }
+
+    public function createCheckout(?string $accountId, CheckoutRequest $request): Checkout
     {
         $this->failIfDown();
         $this->requests[] = $request;
@@ -37,6 +78,7 @@ class FakeGateway implements PaymentGateway
 
         $id = 'cs_fake_'.(count($this->checkouts) + 1);
         $this->idempotencyKeys[$request->idempotencyKey] = $id;
+        $this->checkoutAccounts[$id] = $accountId;
 
         return $this->checkouts[$id] = new Checkout(
             id: $id,
@@ -50,16 +92,20 @@ class FakeGateway implements PaymentGateway
         );
     }
 
-    public function findCheckout(string $id): Checkout
+    public function findCheckout(?string $accountId, string $id): Checkout
     {
         $this->failIfDown();
+        // Like Stripe: a payment page is only found on the account it belongs to.
+        if (! isset($this->checkouts[$id]) || $this->checkoutAccounts[$id] !== $accountId) {
+            throw new PaymentGatewayException('The payment service doesn\'t know this payment.');
+        }
 
-        return $this->checkouts[$id] ?? throw new PaymentGatewayException('The payment service doesn\'t know this payment.');
+        return $this->checkouts[$id];
     }
 
-    public function expireCheckout(string $id): Checkout
+    public function expireCheckout(?string $accountId, string $id): Checkout
     {
-        $checkout = $this->findCheckout($id);
+        $checkout = $this->findCheckout($accountId, $id);
         if ($checkout->status !== CheckoutStatus::Open) {
             return $checkout;
         }
@@ -79,9 +125,12 @@ class FakeGateway implements PaymentGateway
         }
         $event = json_decode($payload, true);
         $type = PaymentEventType::tryFrom((string) ($event['type'] ?? ''));
-        $checkout = $this->checkouts[(string) ($event['checkout'] ?? '')] ?? null;
+        $id = (string) ($event['checkout'] ?? '');
+        $checkout = $this->checkouts[$id] ?? null;
 
-        return $type === null || $checkout === null ? null : new PaymentEvent((string) $event['id'], $type, $checkout);
+        return $type === null || $checkout === null
+            ? null
+            : new PaymentEvent((string) $event['id'], $type, $checkout, $this->checkoutAccounts[$id] ?? null);
     }
 
     /** The player pays (or pays a different amount, to test the amount check). */

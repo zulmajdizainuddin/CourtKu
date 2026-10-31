@@ -3,6 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-10-09
 - **Changed by:** [ADR-023](023-stripe-test-mode-instead-of-billplz.md): the gateway is Stripe, not Billplz. Each venue still connects its own account.
+- **Changed by:** [ADR-024](024-venues-connect-through-stripe-connect.md): venues connect through Stripe Connect, so CourtKu stores no keys of theirs.
 
 ## Context
 

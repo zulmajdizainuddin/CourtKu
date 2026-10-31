@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MalaysianState;
+use App\Enums\PaymentMode;
 use App\Enums\VenueRole;
 use App\Enums\VenueStatus;
 use App\Exceptions\ApiException;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -33,8 +35,10 @@ use Illuminate\Support\Carbon;
  * @property int $min_notice_minutes 0 = players can book right up to the start time
  * @property int $cancel_cutoff_hours players cancel online until this many hours before the start (FR-24)
  * @property int $hold_minutes how long a player has to pay online before the time is freed (FR-16)
+ * @property PaymentMode $payment_mode counter, online or both (FR-17)
+ * @property VenuePaymentAccount|null $paymentAccount
  */
-#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours'])]
+#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'hold_minutes', 'payment_mode'])]
 class Venue extends Model
 {
     /** @use HasFactory<VenueFactory> */
@@ -50,6 +54,7 @@ class Venue extends Model
         'min_notice_minutes' => 0,
         'cancel_cutoff_hours' => 24,
         'hold_minutes' => 15,
+        'payment_mode' => 'counter',
     ];
 
     protected function casts(): array
@@ -68,6 +73,7 @@ class Venue extends Model
             'min_notice_minutes' => 'integer',
             'cancel_cutoff_hours' => 'integer',
             'hold_minutes' => 'integer',
+            'payment_mode' => PaymentMode::class,
             'approved_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];
@@ -150,6 +156,16 @@ class Venue extends Model
     public function operatingHours(): HasMany
     {
         return $this->hasMany(OperatingHour::class);
+    }
+
+    /**
+     * The venue's own payment account for online payments (ADR-009), if connected.
+     *
+     * @return HasOne<VenuePaymentAccount, $this>
+     */
+    public function paymentAccount(): HasOne
+    {
+        return $this->hasOne(VenuePaymentAccount::class);
     }
 
     /**

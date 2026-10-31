@@ -21,24 +21,26 @@ function fakeRequest(string $key = 'payment-1'): CheckoutRequest
 it('opens one payment page per idempotency key, and lets a test pay it', function () {
     $fake = new FakeGateway;
 
-    $first = $fake->createCheckout(fakeRequest());
-    expect($fake->createCheckout(fakeRequest())->id)->toBe($first->id) // a retry gets the same page
-        ->and($fake->createCheckout(fakeRequest('payment-2'))->id)->not->toBe($first->id);
+    $first = $fake->createCheckout('acct_venue', fakeRequest());
+    expect($fake->createCheckout('acct_venue', fakeRequest())->id)->toBe($first->id) // a retry gets the same page
+        ->and($fake->createCheckout('acct_venue', fakeRequest('payment-2'))->id)->not->toBe($first->id);
 
     $fake->pay($first->id);
-    expect($fake->findCheckout($first->id)->paid)->toBeTrue()
-        ->and($fake->expireCheckout($first->id)->status)->toBe(CheckoutStatus::Complete); // paid stays paid
+    expect($fake->findCheckout('acct_venue', $first->id)->paid)->toBeTrue()
+        ->and($fake->expireCheckout('acct_venue', $first->id)->status)->toBe(CheckoutStatus::Complete) // paid stays paid
+        ->and(fn () => $fake->findCheckout('acct_other_venue', $first->id))->toThrow(PaymentGatewayException::class); // only on its own account
 });
 
 it('signs its webhooks, and refuses ones signed with another secret', function () {
     $fake = new FakeGateway;
-    $checkout = $fake->createCheckout(fakeRequest());
+    $checkout = $fake->createCheckout('acct_venue', fakeRequest());
     $fake->pay($checkout->id, 3000); // the player paid a different amount
 
     [$payload, $headers] = $fake->webhook($checkout->id, PaymentEventType::Paid, 'whsec_venue');
     $event = $fake->parseWebhook($payload, $headers['X-Fake-Signature'], 'whsec_venue');
 
     expect($event?->type)->toBe(PaymentEventType::Paid)
+        ->and($event?->accountId)->toBe('acct_venue')
         ->and($event?->checkout->amountSen)->toBe(3000)
         ->and(fn () => $fake->parseWebhook($payload, $headers['X-Fake-Signature'], 'whsec_other'))->toThrow(InvalidWebhookSignature::class);
 });
@@ -47,5 +49,5 @@ it('can pretend the gateway is down', function () {
     $fake = new FakeGateway;
     $fake->down = true;
 
-    expect(fn () => $fake->createCheckout(fakeRequest()))->toThrow(PaymentGatewayException::class);
+    expect(fn () => $fake->createCheckout('acct_venue', fakeRequest()))->toThrow(PaymentGatewayException::class);
 });

@@ -88,8 +88,13 @@ function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) 
     { href: `${base}/prices`, label: "Prices" },
     { href: `${base}/photos`, label: "Photos" },
     { href: `${base}/settings`, label: "Settings" },
-    // Only owners manage staff; the API refuses everyone else anyway.
-    ...(isOwner ? [{ href: `${base}/staff`, label: "Staff" }] : []),
+    // Only owners manage staff and money; the API refuses everyone else anyway.
+    ...(isOwner
+      ? [
+          { href: `${base}/payments`, label: "Payments" },
+          { href: `${base}/staff`, label: "Staff" },
+        ]
+      : []),
   ];
 
   return (
@@ -104,7 +109,7 @@ function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) 
             href={item.href}
             aria-current={current ? "page" : undefined}
             className={cn(
-              "border-b-2 px-3 py-2 text-sm whitespace-nowrap",
+              "border-b-2 px-2.5 py-2 text-sm whitespace-nowrap",
               current
                 ? "border-foreground font-medium"
                 : "border-transparent text-muted-foreground hover:text-foreground",
