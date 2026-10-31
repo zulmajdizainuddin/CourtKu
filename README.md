@@ -10,6 +10,8 @@ Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a 
 
 Log in with the demo account `player@example.com` / `CourtKu-Demo-2026`, or register your own.
 
+The live site runs on **20 made-up demo venues** across Malaysia with about 10,000 bookings made through the real booking engine, kept fresh every night ([ADR-030](docs/adr/030-a-rolling-demo-world.md)). Try one, e.g. https://courtku.vercel.app/v/demo-shuttle-house-cheras (it also takes the test card below). What you book at a demo venue is cleared overnight.
+
 Online payments run in **Stripe test mode: no real money is charged.** Pay with the test card `4242 4242 4242 4242`, any future expiry date and any CVC (`4000 0000 0000 0002` is always declined).
 
 The API runs on a free plan that sleeps when nobody uses it, so the first request after a quiet period can take up to a minute.
@@ -74,7 +76,7 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 4. Open http://localhost:3000. Emails (verification, password reset) appear in Mailpit at http://localhost:8025.
 
-**Local demo data** (created by `--seed`): the account `player@example.com` / `CourtKu-Demo-2026`, and a fictional approved venue at http://localhost:3000/v/arena-demo
+**Local demo data** (created by `--seed`): the account `player@example.com` / `CourtKu-Demo-2026`, and a fictional approved venue at http://localhost:3000/v/arena-demo. For the full demo world as on the live site, set `DEMO_WORLD=true` in `apps/api/.env` and run `php artisan courtku:demo --until-done` (about 10 minutes); `schedule:work` then keeps it fresh.
 
 **Photo uploads** need a free Cloudinary account; see the `CLOUDINARY_*` lines in `apps/api/.env.example` ([ADR-018](docs/adr/018-photos-on-cloudinary.md)).
 

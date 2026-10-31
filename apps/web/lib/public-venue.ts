@@ -10,6 +10,8 @@ import { serverRequestHeaders } from "@/lib/web-proxy";
 export type PublicVenue = {
   name: string;
   slug: string;
+  /** A made-up venue of the demo world (ADR-030): its pages say so. */
+  is_demo: boolean;
   description: string | null;
   address_line: string | null;
   city: string | null;

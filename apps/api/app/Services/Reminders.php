@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Demo\DemoVenues;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Notifications\BookingReminder;
@@ -34,6 +35,8 @@ class Reminders
             ->where('status', BookingStatus::Confirmed->value)
             ->whereNull('reminder_sent_at')
             ->whereNotNull('user_id')
+            // The demo world's made-up players (ADR-030) are never emailed.
+            ->whereHas('user', fn ($user) => $user->where('email', 'not like', '%@'.DemoVenues::PLAYER_DOMAIN))
             ->where('starts_at', '>', $now)
             ->where('starts_at', '<=', $now->copy()->addHours(self::HOURS_BEFORE))
             ->whereRaw('created_at <= starts_at - INTERVAL '.self::HOURS_BEFORE.' HOUR')

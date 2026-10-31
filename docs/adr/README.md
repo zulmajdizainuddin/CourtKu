@@ -34,3 +34,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [027](027-emails-queued-and-sent-by-the-tick.md) | Booking emails wait in a database queue and the minute tick sends them | 2026-11-07 |
 | [028](028-availability-kept-30-seconds.md) | The public time grid is kept for 30 seconds and thrown away on every change | 2026-11-08 |
 | [029](029-nightly-locked-backups-in-a-private-repo.md) | Nightly locked backups, kept in a private repository, restored every night | 2026-11-09 |
+| [030](030-a-rolling-demo-world.md) | The live demo runs on a rolling demo world, kept fresh by the minute tick | 2026-11-10 |

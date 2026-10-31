@@ -9,6 +9,9 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Events\NotificationSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -45,6 +48,14 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(fn ($user, string $token) => config('app.frontend_url')
             .'/reset-password?'.http_build_query(['token' => $token, 'email' => $user->getEmailForPasswordReset()]));
 
+        // On the live site, never email @example.com or its subdomains: they are reserved for examples
+        // (the demo accounts, ADR-030) and can't receive mail, so sending would only waste Brevo's allowance.
+        Event::listen(NotificationSending::class, function (NotificationSending $event) {
+            if ($event->channel === 'mail' && $this->app->isProduction() && self::isExampleAddress($event->notifiable)) {
+                return false;
+            }
+        });
+
         // The platform admin approves and suspends venues (routes/api.php, "can:admin").
         Gate::define('admin', fn (User $user) => $user->is_platform_admin);
 
@@ -54,5 +65,16 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('public-reads', fn (Request $request) => $request->attributes->get('via') === TrustWebProxy::VIA_WEB_SERVER
             ? Limit::perMinute(600)->by('web-server')
             : Limit::perMinute(60)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
+    }
+
+    /** Whether a notification would go to example.com or one of its subdomains. */
+    public static function isExampleAddress(object $notifiable): bool
+    {
+        $address = $notifiable instanceof AnonymousNotifiable
+            ? $notifiable->routes['mail'] ?? null
+            : ($notifiable->email ?? null);
+        $domain = strtolower((string) substr(strrchr((string) $address, '@') ?: '', 1));
+
+        return $domain === 'example.com' || str_ends_with($domain, '.example.com');
     }
 }

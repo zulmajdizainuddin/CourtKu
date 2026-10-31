@@ -8,6 +8,7 @@ import { facilityLabel } from "@/lib/facilities";
 import { formatDay } from "@/lib/format";
 import { DAY_NAMES, formatPeriod, WEEK_ORDER, weekFromPeriods } from "@/lib/opening-hours";
 import { formatPhone } from "@/lib/phone";
+import { DemoVenueNotice } from "@/components/venues/demo-venue-notice";
 import { directionsUrl, fullAddress, getPublicVenue, type PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
 import { stateLabel } from "@/lib/states";
@@ -60,6 +61,7 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
         <h1 className="text-3xl font-semibold tracking-tight">{venue.name}</h1>
         <p className="text-muted-foreground">{where}</p>
       </header>
+      {venue.is_demo && <DemoVenueNotice />}
 
       {/* Booking online works from M3; payment is at the counter until online payment in M4 (ADR-021). */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-dashed px-4 py-3 text-sm">

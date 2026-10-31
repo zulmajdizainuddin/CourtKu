@@ -26,6 +26,8 @@ class PublicVenueResource extends JsonResource
         return [
             'name' => $this->name,
             'slug' => $this->slug,
+            // A made-up venue of the demo world (ADR-030): the page says so.
+            'is_demo' => (bool) $this->is_demo,
             'description' => $this->description,
             'address_line' => $this->address_line,
             'city' => $this->city,

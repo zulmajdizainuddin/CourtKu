@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { BookingPanel } from "@/components/booking/booking-panel";
 import { venueSports } from "@/lib/booking";
+import { DemoVenueNotice } from "@/components/venues/demo-venue-notice";
 import { getPublicVenue } from "@/lib/public-venue";
 
 // A venue's booking page (FR-11, FR-12): free times and prices, without logging in.
@@ -43,6 +44,7 @@ async function BookingContent({ params }: { params: PageProps<"/v/[slug]/book">[
         <h1 className="text-3xl font-semibold tracking-tight">Book a court</h1>
         <p className="text-muted-foreground">{venue.name}</p>
       </header>
+      {venue.is_demo && <DemoVenueNotice />}
 
       {sports.length === 0 ? (
         <p className="text-sm text-muted-foreground">This venue has no courts to book yet.</p>
