@@ -17,12 +17,14 @@ use Illuminate\Support\Carbon;
  * @property string $gateway "stripe"
  * @property string $account_id the venue's Stripe account
  * @property string $checkout_id the gateway's payment page, e.g. "cs_test_..."
+ * @property string|null $checkout_url where the player pays
  * @property int $amount_sen what the booking costs
  * @property string $currency "myr"
  * @property PaymentStatus $status
  * @property PaymentProblem|null $problem
  * @property int|null $paid_amount_sen
  * @property Carbon|null $paid_at
+ * @property Carbon|null $checked_at when CourtKu last asked the gateway
  */
 class Payment extends Model
 {
@@ -34,6 +36,7 @@ class Payment extends Model
             'amount_sen' => 'integer',
             'paid_amount_sen' => 'integer',
             'paid_at' => 'datetime',
+            'checked_at' => 'datetime',
         ];
     }
 

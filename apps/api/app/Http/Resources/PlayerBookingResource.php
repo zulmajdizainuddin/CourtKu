@@ -42,8 +42,16 @@ class PlayerBookingResource extends JsonResource
             'minutes' => (int) $this->starts_at->diffInMinutes($this->ends_at),
             'total_sen' => $this->total_sen,
             'total' => Money::format($this->total_sen),
-            // In M3 every booking is paid at the venue (ADR-021).
-            'pay_at_venue' => true,
+            // Paid at the venue, or online (online bookings are held while the player pays, FR-16).
+            'pay_at_venue' => $this->hold_expires_at === null,
+            'paid' => $this->paid_at !== null,
+            'payment_method' => $this->payment_method?->value,
+            // The newest online payment attempt, for the status page: pending, paid, failed or expired,
+            // and a problem when the money came in but couldn't confirm the booking (e.g. paid too late).
+            'payment' => $this->whenLoaded('latestPayment', fn () => $this->latestPayment === null ? null : [
+                'status' => $this->latestPayment->status->value,
+                'problem' => $this->latestPayment->problem?->value,
+            ]),
             // FR-24: whether the player can still cancel online, and until when.
             'can_cancel' => $this->playerCanCancel(),
             'cancel_until' => $this->playerCancelDeadline()->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE)->toIso8601String(),

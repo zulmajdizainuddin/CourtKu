@@ -5,13 +5,14 @@ import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { useMe } from "@/features/auth/hooks";
-import { type BookingInput, useAvailability, useBook, useQuote } from "@/features/booking/hooks";
+import { type BookingInput, useAvailability, useBook, usePay, useQuote } from "@/features/booking/hooks";
 import { ApiError } from "@/lib/api";
 import { bookingDates, dateChip, endLabel, lastNightDate, lengthOptions, startOptions } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
 import { formatDay, hourInMalaysia, todayInMalaysia } from "@/lib/format";
 import { formatRinggit } from "@/lib/money";
 import { formatPhone } from "@/lib/phone";
+import { DemoNotice } from "@/components/booking/demo-notice";
 import type { PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -20,7 +21,8 @@ import { cn } from "cn";
 /**
  * The booking page (FR-11, FR-12), time first: choose a date, sport and length, then a start
  * time, then one of the courts free for the whole booking. The total comes from the API's quote,
- * and logged-in players with a verified email book it, paid at the venue (FR-15, ADR-021).
+ * and logged-in players with a verified email book it (FR-15): paid online on Stripe's page while
+ * the court is held (FR-16, FR-22), or at the venue (ADR-021), as the venue allows.
  */
 export function BookingPanel({
   slug,
@@ -156,12 +158,11 @@ export function BookingPanel({
         <BookAction
           slug={slug}
           booking={
-            start && court && quote.data
-              ? { court_id: court.id, sport, starts_at: start.starts_at, minutes }
-              : null
+            start && court && quote.data ? { court_id: court.id, sport, starts_at: start.starts_at, minutes } : null
           }
+          total={quote.data?.price}
           phone={phone}
-          cancelCutoffHours={booking.cancel_cutoff_hours}
+          rules={booking}
         />
       </section>
     </div>
@@ -169,32 +170,44 @@ export function BookingPanel({
 }
 
 /**
- * The Book button, or what the player must do first: log in (FR-36) or verify their email (FR-35).
- * Each choice of court and time gets one Idempotency-Key, kept for every try of that choice,
- * so pressing twice or retrying after a network error never makes two bookings.
+ * The Book buttons, or what the player must do first: log in (FR-36) or verify their email (FR-35).
+ * Each choice of court, time and way of paying gets one Idempotency-Key, kept for every try of that
+ * choice, so pressing twice or retrying after a network error never makes two bookings.
  */
 function BookAction({
   slug,
   booking,
+  total,
   phone,
-  cancelCutoffHours,
+  rules,
 }: {
   slug: string;
-  booking: BookingInput | null;
+  booking: Omit<BookingInput, "pay"> | null;
+  total: string | undefined;
   phone: string | null;
-  cancelCutoffHours: number;
+  rules: PublicVenue["booking"];
 }) {
   const me = useMe();
   const book = useBook(slug);
+  const pay = usePay();
   const router = useRouter();
-  const choice = booking ? `${booking.court_id}|${booking.starts_at}|${booking.minutes}|${booking.sport}` : null;
   const [press, setPress] = useState<{ choice: string; key: string }>();
 
-  const onBook = () => {
-    if (!booking || !choice) return;
+  const onBook = (how: BookingInput["pay"]) => {
+    if (!booking) return;
+    const choice = `${booking.court_id}|${booking.starts_at}|${booking.minutes}|${booking.sport}|${how}`;
     const key = press?.choice === choice ? press.key : crypto.randomUUID();
     setPress({ choice, key });
-    book.mutate({ ...booking, key }, { onSuccess: (made) => router.push(`/bookings/${made.code}`) });
+    book.mutate(
+      { ...booking, pay: how, key },
+      {
+        onSuccess: (made) =>
+          how === "online"
+            ? // Straight on to Stripe's page. If that fails, the status page offers to try again.
+              pay.mutate(made.code, { onError: () => router.push(`/bookings/${made.code}/status`) })
+            : router.push(`/bookings/${made.code}`),
+      },
+    );
   };
 
   const help = phone ? (
@@ -238,19 +251,40 @@ function BookAction({
     );
   }
 
+  const busy = book.isPending || pay.isPending || pay.isSuccess;
   return (
-    <div className="grid gap-2">
-      <Button className="h-11 justify-self-start px-6" disabled={!booking || book.isPending} onClick={onBook}>
-        {book.isPending ? "Booking..." : "Book now, pay at the venue"}
-      </Button>
+    <div className="grid gap-3">
+      <div className="flex flex-wrap gap-2">
+        {rules.pay_online && (
+          <Button className="h-11 px-6" disabled={!booking || busy} onClick={() => onBook("online")}>
+            {busy && press?.choice.endsWith("|online") ? "Going to payment..." : total ? `Pay ${total} online` : "Pay online"}
+          </Button>
+        )}
+        {rules.pay_at_counter && (
+          <Button
+            variant={rules.pay_online ? "outline" : "default"}
+            className="h-11 px-6"
+            disabled={!booking || busy}
+            onClick={() => onBook("counter")}
+          >
+            {book.isPending && press?.choice.endsWith("|counter") ? "Booking..." : "Book now, pay at the venue"}
+          </Button>
+        )}
+      </div>
       {book.error && (
         <p className="text-sm text-destructive" role="alert">
           {book.error instanceof ApiError ? book.error.message : "Could not reach CourtKu. Check your connection and try again."}
         </p>
       )}
+      {rules.pay_online && (
+        <p className="text-sm text-muted-foreground">
+          Paying online: we keep the court for you for {rules.hold_minutes} minutes while you pay on Stripe&apos;s secure
+          page. <DemoNotice />
+        </p>
+      )}
       <p className="text-sm text-muted-foreground">
-        You pay at the counter when you arrive. Free cancellation online until {cancelCutoffHours} hours before the
-        start. {help}
+        {rules.pay_at_counter && "Paying at the venue: you pay at the counter when you arrive. "}
+        Free cancellation online until {rules.cancel_cutoff_hours} hours before the start. {help}
       </p>
     </div>
   );

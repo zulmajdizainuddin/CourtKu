@@ -50,6 +50,8 @@ Route::prefix('v1')->group(function () {
         // The player's own bookings (FR-30), and cancelling one (FR-24).
         Route::get('/me/bookings', [BookingController::class, 'index'])->middleware('throttle:60,1');
         Route::post('/bookings/{code}/cancel', [BookingController::class, 'cancel'])->middleware('throttle:10,1');
+        // Pay online for a held booking (FR-22): the gateway's payment page, opened or reused.
+        Route::post('/bookings/{code}/pay', [BookingController::class, 'pay'])->middleware('throttle:10,1');
 
         // The invited person's side of a staff invite (FR-05). Limited, so codes can't be guessed.
         Route::middleware('throttle:10,1')->group(function () {

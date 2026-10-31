@@ -48,6 +48,10 @@ class PublicVenueResource extends JsonResource
                 'booking_window_days' => $this->booking_window_days,
                 // FR-24: shown before booking, so players know the policy.
                 'cancel_cutoff_hours' => $this->cancel_cutoff_hours,
+                // How players can pay (FR-17), and how long the court is held while they pay online (FR-16).
+                'pay_online' => $this->acceptsOnlinePayment(),
+                'pay_at_counter' => $this->acceptsCounterPayment(),
+                'hold_minutes' => $this->hold_minutes,
             ],
             // Only bookable courts: active and with a price (inactive or unpriced courts are hidden).
             'courts' => CourtResource::collection(
