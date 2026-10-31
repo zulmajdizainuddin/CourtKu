@@ -70,8 +70,10 @@ export type PlayerBooking = {
   payment_method: "cash" | "qr" | "card" | "online" | null;
   /** The newest online payment attempt; problem = the money came in but couldn't confirm the booking. */
   payment: {
-    status: "pending" | "paid" | "failed" | "expired";
+    status: "pending" | "paid" | "failed" | "expired" | "refunded";
     problem: "amount_mismatch" | "booking_expired" | "booking_cancelled" | "already_paid" | null;
+    /** Refunded by the venue so far, e.g. "RM 20.00" (FR-25); null when nothing was. */
+    refunded: string | null;
   } | null;
   /** FR-24: whether the player can still cancel online, and until when. */
   can_cancel: boolean;

@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { FormAlert, SelectField } from "@/components/forms/form-field";
+import { FormAlert, FormField, SelectField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import type { ManageVenue, PaymentMode } from "@/features/venues/hooks";
 import {
@@ -12,10 +12,12 @@ import {
   useGoToStripe,
   usePaymentAccount,
   usePaymentsNeedingAttention,
+  useRecordRefund,
   useUpdatePaymentSettings,
 } from "@/features/venues/payments";
 import { ApiError } from "@/lib/api";
 import { formatDate, formatDayTime } from "@/lib/format";
+import { formatRinggit, parseRinggit, senToInput } from "@/lib/money";
 import { formatPhone } from "@/lib/phone";
 
 const NETWORK_ERROR = "Could not reach CourtKu. Check your connection and try again.";
@@ -239,19 +241,19 @@ export function PaymentsNeedingAttention({ venueId }: { venueId: string }) {
   if (payments.isPending) return <p className="text-sm text-muted-foreground">Loading...</p>;
   if (payments.isError) return <p className="text-sm text-destructive">Could not load the payments. Please refresh the page.</p>;
   if (payments.data.length === 0) {
-    return <p className="text-sm text-muted-foreground">Nothing needs your attention. Every online payment confirmed its booking.</p>;
+    return <p className="text-sm text-muted-foreground">Nothing needs your attention: no online payments to refund.</p>;
   }
 
   return (
     <ul className="grid gap-3">
       {payments.data.map((payment) => (
-        <AttentionItem key={payment.id} payment={payment} />
+        <AttentionItem key={payment.id} venueId={venueId} payment={payment} />
       ))}
     </ul>
   );
 }
 
-function AttentionItem({ payment }: { payment: AttentionPayment }) {
+function AttentionItem({ venueId, payment }: { venueId: string; payment: AttentionPayment }) {
   const { booking } = payment;
   const customer = booking.customer;
   return (
@@ -267,8 +269,45 @@ function AttentionItem({ payment }: { payment: AttentionPayment }) {
         {payment.paid_at && ` · paid ${formatDayTime(payment.paid_at)}`}
       </p>
       <p className="text-muted-foreground">
-        Refund it in your Stripe dashboard (search for <span className="font-mono break-all">{payment.checkout_id}</span>).
+        Refund it in your Stripe dashboard (search for <span className="font-mono break-all">{payment.checkout_id}</span>),
+        then record it here.
+        {payment.refunded_sen > 0 && ` Already refunded: ${payment.refunded}.`}
       </p>
+      <RecordRefundForm venueId={venueId} payment={payment} />
     </li>
+  );
+}
+
+/** FR-25: the owner records a refund they made in Stripe. Part refunds are fine; never more than what is left. */
+function RecordRefundForm({ venueId, payment }: { venueId: string; payment: AttentionPayment }) {
+  const record = useRecordRefund(venueId);
+  const [amount, setAmount] = useState(senToInput(payment.refundable_sen));
+  const [reason, setReason] = useState(payment.problem_text.replace(/\.$/, ""));
+  const [error, setError] = useState<string>();
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(undefined);
+    const sen = parseRinggit(amount);
+    if (sen === null || sen <= 0) return setError("Enter the amount you refunded, e.g. 20.00.");
+    if (sen > payment.refundable_sen) return setError(`You can record at most ${formatRinggit(payment.refundable_sen)}.`);
+    try {
+      await record.mutateAsync({ paymentId: payment.id, amount_sen: sen, reason });
+    } catch (err) {
+      setError(errorText(err));
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="mt-2 grid gap-2 sm:grid-cols-[8rem_1fr_auto] sm:items-end" noValidate>
+      <FormField label="Refunded (RM)" name={`refund-amount-${payment.id}`} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <FormField label="Reason" name={`refund-reason-${payment.id}`} maxLength={200} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <Button type="submit" variant="outline" className="h-11 px-4" disabled={record.isPending}>
+        {record.isPending ? "Saving..." : "Record refund"}
+      </Button>
+      <div className="sm:col-span-3">
+        <FormAlert message={error} />
+      </div>
+    </form>
   );
 }

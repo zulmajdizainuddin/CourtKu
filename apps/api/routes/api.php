@@ -12,6 +12,7 @@ use App\Http\Controllers\V1\Manage\CourtController;
 use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\PaymentAccountController;
 use App\Http\Controllers\V1\Manage\PriceRuleController;
+use App\Http\Controllers\V1\Manage\RefundController;
 use App\Http\Controllers\V1\Manage\ScheduleController;
 use App\Http\Controllers\V1\Manage\SlotBlockController;
 use App\Http\Controllers\V1\Manage\StaffController;
@@ -78,6 +79,11 @@ Route::prefix('v1')->group(function () {
             Route::delete('/venues/{venue}/payment-account', [PaymentAccountController::class, 'destroy'])->can('update', 'venue');
             Route::put('/venues/{venue}/payment-settings', [PaymentAccountController::class, 'updateSettings'])->can('update', 'venue');
             Route::get('/venues/{venue}/payments/attention', [PaymentAccountController::class, 'needingAttention'])->can('update', 'venue');
+            // FR-25: the owner records a refund they made in Stripe. scopeBindings: {payment} must be this {venue}'s.
+            Route::post('/venues/{venue}/payments/{payment}/refunds', [RefundController::class, 'store'])
+                ->whereNumber('payment')
+                ->scopeBindings()
+                ->can('update', 'venue');
 
             // The day schedule for the counter (FR-31): owners and staff.
             Route::get('/venues/{venue}/schedule', [ScheduleController::class, 'show'])->can('view', 'venue');

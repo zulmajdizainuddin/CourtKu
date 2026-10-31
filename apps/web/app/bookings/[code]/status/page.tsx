@@ -93,7 +93,12 @@ function Details({ booking }: { booking: PlayerBooking }) {
     }[payment.problem];
     return (
       <div className="grid gap-3 text-sm">
-        <p>{why} The venue can see this and will refund you. Questions? Contact the venue with your booking code.</p>
+        <p>
+          {why}{" "}
+          {payment.refunded
+            ? `The venue has refunded ${payment.refunded}. It reaches your card or bank in a few days.`
+            : "The venue can see this and will refund you. Questions? Contact the venue with your booking code."}
+        </p>
         <ButtonLink href={`/bookings/${booking.code}`} variant="outline" className="h-11 justify-self-start px-6">
           View booking
         </ButtonLink>

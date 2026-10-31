@@ -117,6 +117,16 @@ class Venue extends Model
     }
 
     /**
+     * Online payments for this venue's bookings (FR-22). Also lets routes find a {payment} only within its {venue}.
+     *
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
      * Times courts are closed for repairs or a private event (FR-21).
      *
      * @return HasMany<SlotBlock, $this>

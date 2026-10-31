@@ -143,6 +143,10 @@ function CancelSection({ booking }: { booking: PlayerBooking }) {
     return (
       <p className="text-sm text-muted-foreground">
         Cancelled{booking.cancelled_at && ` on ${formatDayTime(booking.cancelled_at)}`}. The time is free for others again.
+        {booking.payment_method === "online" &&
+          (booking.payment?.refunded
+            ? ` The venue has refunded ${booking.payment.refunded}.`
+            : " The venue will refund your online payment.")}
       </p>
     );
   }
@@ -152,7 +156,8 @@ function CancelSection({ booking }: { booking: PlayerBooking }) {
   if (booking.status !== "confirmed" && booking.status !== "pending_payment") return null;
 
   const onCancel = () => {
-    if (window.confirm(`Cancel ${booking.code} at ${booking.venue.name}? The time goes back to other players.`)) {
+    const refund = booking.paid && booking.payment_method === "online" ? " The venue refunds your online payment." : "";
+    if (window.confirm(`Cancel ${booking.code} at ${booking.venue.name}? The time goes back to other players.${refund}`)) {
       cancel.mutate();
     }
   };

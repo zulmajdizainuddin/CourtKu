@@ -9,4 +9,5 @@ enum PaymentStatus: string
     case Paid = 'paid'; // the money came in
     case Failed = 'failed'; // the bank or card said no; the player can try again while the hold lasts
     case Expired = 'expired'; // the payment page closed without payment
+    case Refunded = 'refunded'; // paid, then fully refunded by the owner (FR-25)
 }
