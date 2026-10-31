@@ -50,6 +50,12 @@ return [
         'secret' => env('CRON_SECRET'),
     ],
 
+    // The web app sends this with every request it forwards, so the API knows it may believe the
+    // visitor's IP and host the web app reports (ADR-025). Empty = trust forwarded headers from anyone.
+    'web_proxy' => [
+        'secret' => env('WEB_PROXY_SECRET'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

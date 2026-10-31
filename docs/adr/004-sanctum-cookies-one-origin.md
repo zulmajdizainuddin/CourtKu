@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-10-09
+- **Changed by:** [ADR-025](025-web-app-proves-itself-with-a-secret.md): Laravel only believes the forwarded headers when the web app's secret comes along.
 
 ## Context
 
@@ -20,5 +21,5 @@ The browser only talks to the Next.js app. Next.js rewrites forward /api/*, /aut
 
 - JavaScript never sees a token; no CORS configuration.
 - Every browser-facing API path must be listed in next.config.ts rewrites.
-- Laravel currently trusts X-Forwarded-* from anyone. Before going live (M5) the API must only accept requests that come through the proxy, or a direct caller could fake their IP.
+- ~~Laravel currently trusts X-Forwarded-* from anyone.~~ Fixed in M5 by ADR-025: the web app sends a shared secret, and only then are the forwarded headers believed.
 - Sanctum tokens remain available for a mobile app later.

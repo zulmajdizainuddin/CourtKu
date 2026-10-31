@@ -29,3 +29,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [022](022-timed-jobs-without-a-scheduler.md) | Timed jobs run lazily and from a cron-called endpoint | 2026-11-04 |
 | [023](023-stripe-test-mode-instead-of-billplz.md) | Online payments use Stripe in test mode, not the Billplz Sandbox | 2026-11-05 |
 | [024](024-venues-connect-through-stripe-connect.md) | Venues connect their Stripe accounts through Stripe Connect; CourtKu never holds their keys | 2026-11-05 |
+| [025](025-web-app-proves-itself-with-a-secret.md) | The web app proves itself to the API with a shared secret | 2026-11-06 |

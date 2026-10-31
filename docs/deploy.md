@@ -89,6 +89,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `SESSION_SECURE_COOKIE` | `true` | Cookie is only sent over HTTPS |
 | `CACHE_STORE` | `database` | |
 | `QUEUE_CONNECTION` | `sync` | No background worker yet |
+| `WEB_PROXY_SECRET` | a long random text, the **same** value as in Vercel, see *Web app secret* below | Only requests carrying it may say who the visitor is ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Empty = forwarded headers are believed from anyone |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
 | `STRIPE_WEBHOOK_SECRET` | the Connect webhook's **Signing secret** (`whsec_...`), see *Payment webhook* below | Proves each payment message really comes from Stripe ([ADR-006](adr/006-hosted-payment-page-webhook.md)). Without it every webhook is refused with 401 |
@@ -150,10 +151,21 @@ Stripe can't reach a laptop, so locally payments are confirmed by CourtKu asking
 | Variable | Value |
 | --- | --- |
 | `API_URL` | `https://courtku-api.onrender.com` |
+| `WEB_PROXY_SECRET` | the **same** value as in Render ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Not `NEXT_PUBLIC_`, so it never reaches browsers |
 
 Vercel project settings: **Root Directory** `apps/web`, framework **Next.js**.
 
+## Web app secret
+
+The web app sends `WEB_PROXY_SECRET` with every request it forwards to the API, so the API knows it may believe the visitor's IP and host ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). To set it up or change it:
+
+1. Make a long random secret (e.g. 40 letters and digits from a password manager).
+2. Vercel → the project → **Settings → Environment Variables**: add `WEB_PROXY_SECRET` for **Production** (and **Preview**). Then **Deployments → Redeploy** the latest production deployment, because Vercel only reads variables when it builds.
+3. Render → the API → **Environment**: add `WEB_PROXY_SECRET` with the same value. Render redeploys.
+4. Check: open `https://courtku.vercel.app/api/health`. It should end with `"via":"browser"`. Opening `https://courtku-api.onrender.com/api/health` directly should say `"via":"direct"`. If the first one says `direct`, the two values differ.
+
+Do Vercel before Render. While only Vercel has the secret, the API still believes forwarded headers like before. The other way round, the API would treat every visitor as a direct caller until the web app is redeployed.
+
 ## Known gaps before real customers
 
-- Laravel trusts `X-Forwarded-*` headers from any source ([ADR-004](adr/004-sanctum-cookies-one-origin.md)). The API must only accept traffic from the proxy before it handles real bookings.
 - No queue worker, backups or staging environment yet. Timed jobs depend on cron-job.org calling `/api/tick`.
