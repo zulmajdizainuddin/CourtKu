@@ -35,6 +35,8 @@ export type ManageVenue = {
   min_notice_minutes: number;
   /** Players cancel online until this many hours before the start (FR-24). */
   cancel_cutoff_hours: number;
+  /** Owners and staff get an email for each player booking and player cancel (FR-27). */
+  booking_emails: boolean;
   /** How players pay (FR-17); online needs the venue's own Stripe account. */
   payment_mode: PaymentMode;
   /** How long a player has to pay online before the time is freed (FR-16). */
@@ -83,7 +85,13 @@ export function useUpdateVenue(venueId: string) {
 
 export type BookingSettings = Pick<
   ManageVenue,
-  "slot_minutes" | "min_minutes" | "max_minutes" | "booking_window_days" | "min_notice_minutes" | "cancel_cutoff_hours"
+  | "slot_minutes"
+  | "min_minutes"
+  | "max_minutes"
+  | "booking_window_days"
+  | "min_notice_minutes"
+  | "cancel_cutoff_hours"
+  | "booking_emails"
 >;
 
 /** Saves the booking settings (FR-13). Owners only. */

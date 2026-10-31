@@ -34,11 +34,12 @@ use Illuminate\Support\Carbon;
  * @property int $booking_window_days
  * @property int $min_notice_minutes 0 = players can book right up to the start time
  * @property int $cancel_cutoff_hours players cancel online until this many hours before the start (FR-24)
+ * @property bool $booking_emails owners and staff get an email for each player booking and player cancel (FR-27)
  * @property int $hold_minutes how long a player has to pay online before the time is freed (FR-16)
  * @property PaymentMode $payment_mode counter, online or both (FR-17)
  * @property VenuePaymentAccount|null $paymentAccount
  */
-#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'hold_minutes', 'payment_mode'])]
+#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'booking_emails', 'hold_minutes', 'payment_mode'])]
 class Venue extends Model
 {
     /** @use HasFactory<VenueFactory> */
@@ -53,6 +54,7 @@ class Venue extends Model
         'booking_window_days' => 14,
         'min_notice_minutes' => 0,
         'cancel_cutoff_hours' => 24,
+        'booking_emails' => true,
         'hold_minutes' => 15,
         'payment_mode' => 'counter',
     ];
@@ -72,6 +74,7 @@ class Venue extends Model
             'booking_window_days' => 'integer',
             'min_notice_minutes' => 'integer',
             'cancel_cutoff_hours' => 'integer',
+            'booking_emails' => 'boolean',
             'hold_minutes' => 'integer',
             'payment_mode' => PaymentMode::class,
             'approved_at' => 'datetime',

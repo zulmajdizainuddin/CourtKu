@@ -21,6 +21,7 @@ const venue = (overrides: Partial<ManageVenue>): ManageVenue => ({
   booking_window_days: 14,
   min_notice_minutes: 0,
   cancel_cutoff_hours: 24,
+  booking_emails: true,
   payment_mode: "counter",
   hold_minutes: 15,
   payment_connected: false,

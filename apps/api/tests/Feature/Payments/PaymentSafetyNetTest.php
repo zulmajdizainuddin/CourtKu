@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\Venue;
 use App\Models\VenuePaymentAccount;
+use App\Notifications\BookingConfirmed;
 use App\Notifications\PaymentNeedsAttention;
 use App\Payments\CheckoutStatus;
 use App\Payments\FakeGateway;
@@ -181,7 +182,10 @@ it('plan section 7: a late payment takes the time back when nobody has booked it
         ->and($booking->slots()->count())->toBe(2) // its half hours are back
         ->and($payment->fresh()->problem)->toBeNull()
         ->and(AuditLog::where('action', 'booking.reclaimed')->exists())->toBeTrue();
-    Notification::assertNothingSent();
+    // Nothing for the owner to sort out; the player just gets the usual "Booked" email.
+    Notification::assertNotSentTo($owner, PaymentNeedsAttention::class);
+    Notification::assertNotSentTo($player, PaymentNeedsAttention::class);
+    Notification::assertSentTo($player, BookingConfirmed::class);
 });
 
 it('plan section 7: a late payment is flagged for a refund, and the owner and player told, when the time was taken', function () {

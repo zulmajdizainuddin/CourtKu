@@ -9,7 +9,10 @@ import { type BookingSettings, type ManageVenue, useUpdateSettings } from "@/fea
 import { ApiError } from "@/lib/api";
 import { durationOptions, formatDuration } from "@/lib/duration";
 
-/** How players may book (FR-13): slot length, shortest and longest booking, days ahead, last-minute notice. */
+/**
+ * How players may book (FR-13): slot length, shortest and longest booking, days ahead, last-minute notice,
+ * cancel cutoff (FR-24), and whether the venue team is emailed about player bookings (FR-27).
+ */
 export default function VenueSettingsPage() {
   return (
     <VenuePage>
@@ -64,6 +67,7 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
     booking_window_days: venue.booking_window_days,
     min_notice_minutes: venue.min_notice_minutes,
     cancel_cutoff_hours: venue.cancel_cutoff_hours,
+    booking_emails: venue.booking_emails,
   });
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string>();
@@ -151,6 +155,21 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
         value={String(settings.cancel_cutoff_hours)}
         onChange={(e) => change({ cancel_cutoff_hours: Number(e.target.value) })}
       />
+      <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          name="booking_emails"
+          className="mt-0.5 size-4 accent-foreground"
+          checked={settings.booking_emails}
+          onChange={(e) => change({ booking_emails: e.target.checked })}
+        />
+        <span>
+          Email me and my staff about each booking a player makes or cancels
+          <span className="block text-muted-foreground">
+            Bookings you add at the counter are not emailed. Players always get their own emails.
+          </span>
+        </span>
+      </label>
       <FormAlert message={error} />
       {saved && <FormAlert tone="success" message="Booking settings saved." />}
       <Button type="submit" size="lg" className="h-11 justify-self-start px-6" disabled={save.isPending}>
@@ -168,6 +187,7 @@ function SettingsView({ venue }: { venue: ManageVenue }) {
     ["Book ahead", `${venue.booking_window_days} days`],
     ["Players can book", noticeLabel(venue.min_notice_minutes)],
     ["Players can cancel online", `Until ${venue.cancel_cutoff_hours} hours before`],
+    ["Booking emails", venue.booking_emails ? "Owners and staff are emailed about player bookings" : "Off"],
   ];
   return (
     <dl className="grid gap-2 text-sm sm:grid-cols-[12rem_1fr]">

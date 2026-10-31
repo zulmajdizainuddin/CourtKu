@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-04
+- **Changed by:** [ADR-027](027-emails-queued-and-sent-by-the-tick.md): the tick also sends the queued emails.
 
 ## Context
 
