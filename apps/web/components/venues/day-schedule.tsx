@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { BlockForm, CounterBookingForm } from "@/components/venues/schedule-forms";
@@ -19,6 +19,7 @@ import { ApiError } from "@/lib/api";
 import { endLabel } from "@/lib/booking";
 import { formatDuration } from "@/lib/duration";
 import { formatDay, todayInMalaysia } from "@/lib/format";
+import { HIGHLIGHT_MS, newPlayerBookings } from "@/lib/live-schedule";
 import { formatTime } from "@/lib/opening-hours";
 import { formatPhone } from "@/lib/phone";
 import { sportLabel } from "@/lib/sports";
@@ -69,6 +70,22 @@ export function DaySchedule({
   // Never show a schedule the API just refused, even if the browser still remembers it.
   const data = schedule.isError ? undefined : schedule.data;
 
+  // FR-14: bookings players just made glow for a few seconds when the schedule reloads on its own.
+  // Worked out while rendering, when the schedule changes (React's "adjust state on a prop change").
+  const [shown, setShown] = useState(data);
+  const [fresh, setFresh] = useState<string[]>([]);
+  if (data !== shown) {
+    setShown(data);
+    const added = data && shown && data.date === shown.date ? newPlayerBookings(shown.bookings, data.bookings) : [];
+    if (added.length > 0) setFresh(added.map((b) => b.code));
+  }
+  useEffect(() => {
+    if (fresh.length === 0) return;
+    const timer = setTimeout(() => setFresh([]), HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
+  }, [fresh]);
+  const freshBookings = data?.bookings.filter((b) => fresh.includes(b.code)) ?? [];
+
   // From the latest date, so tapping an arrow quickly several times moves several days.
   const go = (next: (current: string) => string) => {
     setDate(next);
@@ -116,6 +133,16 @@ export function DaySchedule({
           )}
         </div>
       )}
+
+      {/* Read out by screen readers too. */}
+      <div aria-live="polite">
+        {freshBookings.map((b) => (
+          <p key={b.code} className="rounded-md bg-series-1/10 px-3 py-2 text-sm ring-1 ring-series-1/40">
+            <span className="font-medium">New booking:</span> {data?.courts.find((c) => c.id === b.court_id)?.name},{" "}
+            {formatTime(b.starts_at.slice(11, 16))} ({b.code}, {b.customer.name ?? "player"})
+          </p>
+        ))}
+      </div>
 
       {schedule.isPending && <p className="text-sm text-muted-foreground">Loading...</p>}
       {schedule.isError && <p className="text-sm text-destructive">Could not load the schedule. Please refresh the page.</p>}
@@ -184,6 +211,7 @@ export function DaySchedule({
                           ? "bg-amber-100 text-amber-950 ring-1 ring-amber-500 ring-inset dark:bg-amber-950 dark:text-amber-100"
                           : "bg-primary text-primary-foreground",
                     selected === b.code && "ring-2 ring-ring ring-offset-1",
+                    fresh.includes(b.code) && "ring-4 ring-series-1 motion-safe:animate-pulse",
                   )}
                   style={{ gridColumn: column + 2, gridRow: `${row + 2} / span ${b.minutes / 30}` }}
                 >

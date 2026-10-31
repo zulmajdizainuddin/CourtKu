@@ -8,6 +8,7 @@ use App\Http\Resources\ManageBookingResource;
 use App\Models\Court;
 use App\Models\SlotBlock;
 use App\Models\Venue;
+use App\Services\AvailabilityCache;
 use App\Services\AvailabilityService;
 use App\Services\Holds;
 use App\Support\MalaysiaTime;
@@ -20,6 +21,18 @@ use Illuminate\Http\Request;
  */
 class ScheduleController extends Controller
 {
+    /**
+     * GET /api/v1/manage/venues/{venue}/schedule/version (FR-14)
+     *
+     * A tiny answer the Schedule tab asks for every 10 seconds: a word that changes whenever a booking,
+     * cancel, block or setting at this venue is saved (AvailabilityCache, ADR-028). The page reloads the
+     * whole schedule only when it changes, so the counter sees new online bookings within seconds.
+     */
+    public function version(Venue $venue): JsonResponse
+    {
+        return response()->json(['data' => ['version' => AvailabilityCache::version($venue->id)]]);
+    }
+
     /**
      * GET /api/v1/manage/venues/{venue}/schedule?date=2026-11-06 (today in Malaysia when left out)
      *

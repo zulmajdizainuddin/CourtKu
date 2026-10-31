@@ -14,7 +14,7 @@ export default function VenueSchedulePage() {
             <CardTitle>Schedule</CardTitle>
             <CardDescription>
               Every court and booking of the day. Tap a booking or block to see the details. Add walk-in and phone
-              bookings, or block a time for repairs or a private event. New online bookings appear within a minute.
+              bookings, or block a time for repairs or a private event. New online bookings appear by themselves within about 10 seconds.
             </CardDescription>
           </CardHeader>
           <CardContent>
