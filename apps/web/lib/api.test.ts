@@ -25,6 +25,21 @@ describe("toApiError", () => {
   });
 });
 
+describe("toApiError details", () => {
+  it("FR-38 keeps the bookings in the way, so the form can list them", () => {
+    const err = toApiError(409, {
+      error: {
+        code: "BOOKINGS_CONFLICT",
+        message: "1 upcoming booking is on these days.",
+        details: { bookings: [{ code: "CK-7F3K2" }] },
+      },
+    });
+
+    expect(err.code).toBe("BOOKINGS_CONFLICT");
+    expect(err.details.bookings).toEqual([{ code: "CK-7F3K2" }]);
+  });
+});
+
 describe("api", () => {
   afterEach(() => vi.unstubAllGlobals());
 

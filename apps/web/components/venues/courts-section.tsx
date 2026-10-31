@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormAlert, FormField } from "@/components/forms/form-field";
+import { BookingConflictList } from "@/components/venues/booking-conflict-list";
 import { Button } from "@/components/ui/button";
 import { type Court, useAddCourt, useCourts, useDeleteCourt, useReorderCourts, useUpdateCourt } from "@/features/venues/courts";
 import { ApiError } from "@/lib/api";
@@ -219,6 +220,7 @@ function CourtForm({
       )}
 
       <FormAlert message={formError} />
+      <BookingConflictList error={update.error} venueId={venueId} />
       <div className="flex flex-wrap gap-2">
         <Button type="submit" className="h-11 px-6" disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : court ? "Save court" : "Add court"}

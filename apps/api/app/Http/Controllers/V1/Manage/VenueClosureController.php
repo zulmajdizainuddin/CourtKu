@@ -7,6 +7,7 @@ use App\Http\Requests\StoreClosureRequest;
 use App\Http\Resources\VenueClosureResource;
 use App\Models\Venue;
 use App\Models\VenueClosure;
+use App\Services\BookingConflicts;
 use App\Support\MalaysiaTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -29,9 +30,13 @@ class VenueClosureController extends Controller
     }
 
     /** POST /api/v1/manage/venues/{venue}/closures */
-    public function store(StoreClosureRequest $request, Venue $venue): JsonResponse
+    public function store(StoreClosureRequest $request, Venue $venue, BookingConflicts $conflicts): JsonResponse
     {
-        // TODO(M3, FR-38): refuse when bookings already exist on these days.
+        // FR-38: a closure can't silently cancel bookings; the owner cancels them first.
+        $stranded = $conflicts->onDays($venue, $request->string('starts_on')->value(), $request->string('ends_on')->value());
+        if ($stranded->isNotEmpty()) {
+            throw BookingConflicts::refuse($stranded, '{is} on these days', 'add the closure again');
+        }
         $closure = $venue->closures()->create($request->validated());
 
         return (new VenueClosureResource($closure))->response()->setStatusCode(201);

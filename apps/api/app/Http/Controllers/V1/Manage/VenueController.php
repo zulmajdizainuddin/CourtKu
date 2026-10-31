@@ -70,7 +70,8 @@ class VenueController extends Controller
     /** PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13). Owners only. */
     public function updateSettings(UpdateBookingSettingsRequest $request, Venue $venue): ManageVenueResource
     {
-        // TODO(M3, FR-38): refuse changes that make existing future bookings impossible.
+        // FR-38 doesn't apply here: lengths, days ahead, notice and the cancel cutoff only shape new
+        // bookings. A booking already made keeps its time, length and price.
         $venue->update($request->validated());
 
         return new ManageVenueResource($venue);

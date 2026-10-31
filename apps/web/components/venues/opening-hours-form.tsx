@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormAlert } from "@/components/forms/form-field";
+import { BookingConflictList } from "@/components/venues/booking-conflict-list";
 import { Button } from "@/components/ui/button";
 import { type SavedPeriod, useSaveOpeningHours } from "@/features/venues/hours";
 import { ApiError } from "@/lib/api";
@@ -86,6 +87,7 @@ export function OpeningHoursForm({ venueId, saved }: { venueId: string; saved: S
           ))}
         </ul>
       )}
+      <BookingConflictList error={save.error} venueId={venueId} />
       {done && <FormAlert tone="success" message="Opening hours saved." />}
 
       <Button type="submit" size="lg" className="h-11 justify-self-start px-6" disabled={save.isPending}>
