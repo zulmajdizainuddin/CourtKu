@@ -6,6 +6,7 @@ use App\Enums\PaymentProblem;
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -23,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property PaymentStatus $status
  * @property PaymentProblem|null $problem
  * @property int|null $paid_amount_sen
+ * @property int $refunded_sen how much the owner has refunded so far (FR-25)
  * @property Carbon|null $paid_at
  * @property Carbon|null $checked_at when CourtKu last asked the gateway
  */
@@ -35,6 +37,7 @@ class Payment extends Model
             'problem' => PaymentProblem::class,
             'amount_sen' => 'integer',
             'paid_amount_sen' => 'integer',
+            'refunded_sen' => 'integer',
             'paid_at' => 'datetime',
             'checked_at' => 'datetime',
         ];
@@ -46,5 +49,21 @@ class Payment extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    /**
+     * The refunds the owner recorded (FR-25).
+     *
+     * @return HasMany<Refund, $this>
+     */
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    /** What can still be refunded: what was paid, minus earlier refunds. */
+    public function refundableSen(): int
+    {
+        return max(0, (int) $this->paid_amount_sen - $this->refunded_sen);
     }
 }

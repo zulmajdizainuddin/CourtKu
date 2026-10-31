@@ -51,6 +51,8 @@ class PlayerBookingResource extends JsonResource
             'payment' => $this->whenLoaded('latestPayment', fn () => $this->latestPayment === null ? null : [
                 'status' => $this->latestPayment->status->value,
                 'problem' => $this->latestPayment->problem?->value,
+                // Refunded by the venue so far (FR-25), e.g. "RM 20.00"; null when nothing was.
+                'refunded' => $this->latestPayment->refunded_sen > 0 ? Money::format($this->latestPayment->refunded_sen) : null,
             ]),
             // FR-24: whether the player can still cancel online, and until when.
             'can_cancel' => $this->playerCanCancel(),

@@ -116,6 +116,10 @@ export type AttentionPayment = {
   amount_sen: number;
   paid_amount_sen: number | null;
   paid_amount: string | null;
+  /** Recorded refunds so far, and what can still be refunded (FR-25). */
+  refunded_sen: number;
+  refunded: string;
+  refundable_sen: number;
   paid_at: string | null;
   /** Search for it in your Stripe dashboard. */
   checkout_id: string;
@@ -134,5 +138,15 @@ export function usePaymentsNeedingAttention(venueId: string) {
     queryKey: ["manage", "venues", venueId, "payments", "attention"],
     queryFn: async () =>
       (await api<{ data: AttentionPayment[] }>(`/api/v1/manage/venues/${venueId}/payments/attention`)).data,
+  });
+}
+
+/** FR-25: records a refund the owner made in their Stripe dashboard. The list is asked again afterwards. */
+export function useRecordRefund(venueId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ paymentId, ...input }: { paymentId: number; amount_sen: number; reason: string }) =>
+      api(`/api/v1/manage/venues/${venueId}/payments/${paymentId}/refunds`, { method: "POST", body: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["manage", "venues", venueId, "payments", "attention"] }),
   });
 }

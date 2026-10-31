@@ -2,13 +2,15 @@
 
 Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a multi-tenant SaaS: each venue gets its own booking page, players see live availability and pay online, and owners run their day from a dashboard.
 
-> **Status:** M2 Pricing and availability is live. Venue owners sign up (with two-factor login), wait for approval, and set up their profile, opening hours, courts, photos, staff, prices (including peak and off-peak) and booking rules; anyone can see an approved venue's page at `/v/<venue>` and its free times and prices at `/v/<venue>/book`. Online booking and payment come next (M3).
+> **Status:** M4 Payments is live. Venue owners sign up (with two-factor login), wait for approval, set up their venue, prices and booking rules, and connect their own Stripe account (Stripe Connect). Players book at `/v/<venue>/book` and pay online on Stripe's page while the court is held for them, or pay at the counter. Staff run the day from a schedule (walk-ins, blocks, check-in, paid at the counter), and owners record refunds. Notifications, reports and production hardening come next (M5).
 
 ## Live demo
 
 **https://courtku.vercel.app**
 
 Log in with the demo account `player@example.com` / `CourtKu-Demo-2026`, or register your own.
+
+Online payments run in **Stripe test mode: no real money is charged.** Pay with the test card `4242 4242 4242 4242`, any future expiry date and any CVC (`4000 0000 0000 0002` is always declined).
 
 The API runs on a free plan that sleeps when nobody uses it, so the first request after a quiet period can take up to a minute.
 
@@ -74,7 +76,9 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 **Local demo data** (created by `--seed`): the account `player@example.com` / `CourtKu-Demo-2026`, and a fictional approved venue at http://localhost:3000/v/arena-demo
 
-**Photo uploads** need a free Cloudinary account; see the `CLOUDINARY_*` lines in `apps/api/.env.example` ([ADR-018](docs/adr/018-photos-on-cloudinary.md)). Everything else works without it.
+**Photo uploads** need a free Cloudinary account; see the `CLOUDINARY_*` lines in `apps/api/.env.example` ([ADR-018](docs/adr/018-photos-on-cloudinary.md)).
+
+**Online payments** need a free Stripe account in test mode with **Connect** turned on; put its secret key (`sk_test_...`) in `STRIPE_SECRET_KEY` ([ADR-023](docs/adr/023-stripe-test-mode-instead-of-billplz.md), [ADR-024](docs/adr/024-venues-connect-through-stripe-connect.md)). Stripe can't reach your laptop, so locally a payment is confirmed when the player comes back from Stripe's page. Run `php artisan schedule:work` for the every-minute jobs (hold expiry, payment checks). Everything else works without these.
 
 ## Tests and checks
 

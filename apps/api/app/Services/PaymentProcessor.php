@@ -119,8 +119,8 @@ class PaymentProcessor
      */
     private function paid(Payment $payment, int $paidSen, string $currency): void
     {
-        if ($payment->status === PaymentStatus::Paid) {
-            return; // already done: a repeated or late copy of the news changes nothing
+        if (in_array($payment->status, [PaymentStatus::Paid, PaymentStatus::Refunded], true)) {
+            return; // already done (or even refunded): a repeated or late copy of the news changes nothing
         }
 
         $payment->forceFill(['status' => PaymentStatus::Paid, 'paid_amount_sen' => $paidSen, 'paid_at' => now()]);

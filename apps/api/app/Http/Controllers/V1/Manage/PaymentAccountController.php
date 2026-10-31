@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1\Manage;
 
 use App\Enums\BookingStatus;
 use App\Enums\PaymentMode;
+use App\Enums\PaymentStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdatePaymentSettingsRequest;
@@ -111,15 +112,18 @@ class PaymentAccountController extends Controller
     }
 
     /**
-     * GET /api/v1/manage/venues/{venue}/payments/attention: online payments whose money came in but couldn't
-     * simply confirm the booking (wrong amount, too late, after a cancel, paid twice), newest first. The owner
-     * refunds them in Stripe (FR-25).
+     * GET /api/v1/manage/venues/{venue}/payments/attention: online payments the owner should refund (FR-25),
+     * newest first, until they are fully refunded:
+     *   - money that came in but couldn't confirm the booking (wrong amount, too late, after a cancel, paid twice);
+     *   - bookings paid online and cancelled afterwards (by the player before the cutoff, or by staff).
      */
     public function needingAttention(Venue $venue): AnonymousResourceCollection
     {
         return ManagePaymentResource::collection(
             Payment::where('venue_id', $venue->id)
-                ->whereNotNull('problem')
+                ->where('status', PaymentStatus::Paid->value)
+                ->where(fn ($query) => $query->whereNotNull('problem')
+                    ->orWhereHas('booking', fn ($q) => $q->where('status', BookingStatus::Cancelled->value)))
                 ->with(['booking.court', 'booking.user'])
                 ->latest('paid_at')
                 ->latest('id')
