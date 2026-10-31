@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\TickController;
+use App\Http\Controllers\V1\Admin\StatsController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\BookingController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\V1\Manage\OpeningHoursController;
 use App\Http\Controllers\V1\Manage\PaymentAccountController;
 use App\Http\Controllers\V1\Manage\PriceRuleController;
 use App\Http\Controllers\V1\Manage\RefundController;
+use App\Http\Controllers\V1\Manage\ReportController;
 use App\Http\Controllers\V1\Manage\ScheduleController;
 use App\Http\Controllers\V1\Manage\SlotBlockController;
 use App\Http\Controllers\V1\Manage\StaffController;
@@ -79,6 +81,12 @@ Route::prefix('v1')->group(function () {
             Route::delete('/venues/{venue}/payment-account', [PaymentAccountController::class, 'destroy'])->can('update', 'venue');
             Route::put('/venues/{venue}/payment-settings', [PaymentAccountController::class, 'updateSettings'])->can('update', 'venue');
             Route::get('/venues/{venue}/payments/attention', [PaymentAccountController::class, 'needingAttention'])->can('update', 'venue');
+
+            // Reports (FR-32): totals for a range of days, and every booking as a CSV file. Owners only: it shows money.
+            Route::get('/venues/{venue}/reports', [ReportController::class, 'show'])->can('update', 'venue');
+            Route::get('/venues/{venue}/reports/bookings.csv', [ReportController::class, 'bookingsCsv'])
+                ->middleware('throttle:10,1')
+                ->can('update', 'venue');
             // FR-25: the owner records a refund they made in Stripe. scopeBindings: {payment} must be this {venue}'s.
             Route::post('/venues/{venue}/payments/{payment}/refunds', [RefundController::class, 'store'])
                 ->whereNumber('payment')
@@ -169,6 +177,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/venues', [AdminVenueController::class, 'index']);
             Route::post('/venues/{venue}/approve', [AdminVenueController::class, 'approve']);
             Route::post('/venues/{venue}/suspend', [AdminVenueController::class, 'suspend']);
+            // Platform totals (FR-33).
+            Route::get('/stats', StatsController::class);
         });
     });
 });

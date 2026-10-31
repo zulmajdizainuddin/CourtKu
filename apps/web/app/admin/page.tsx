@@ -5,11 +5,14 @@ import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { FormAlert } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { VenueStatusBadge } from "@/components/venues/venue-status-badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { type AdminVenue, useAdminVenues, useChangeVenueStatus } from "@/features/admin/hooks";
 import { RequireUser } from "@/features/auth/require-user";
+import { useAdminStats } from "@/features/reports/hooks";
 import type { VenueStatus } from "@/features/venues/hooks";
 import { ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { formatRinggit } from "@/lib/money";
 import { stateLabel } from "@/lib/states";
 
 /** The platform admin's page: approve new venues, suspend bad ones (FR-04, FR-33). */
@@ -19,6 +22,7 @@ export default function AdminPage() {
       {(user) =>
         user.is_platform_admin ? (
           <TwoFactorGate user={user}>
+            <PlatformTotals />
             <AdminVenues />
           </TwoFactorGate>
         ) : (
@@ -29,6 +33,34 @@ export default function AdminPage() {
         )
       }
     </RequireUser>
+  );
+}
+
+/** FR-33: CourtKu at a glance. Demo venues are left out by the API. */
+function PlatformTotals() {
+  const stats = useAdminStats();
+  if (!stats.data) return null;
+  const { venues, accounts, bookings, booked_sen } = stats.data;
+
+  const tiles: [string, string, string][] = [
+    ["Live venues", String(venues.active), `${venues.pending} waiting, ${venues.suspended} suspended`],
+    ["Accounts", String(accounts), "Players, owners and staff"],
+    ["Bookings this month", String(bookings.this_month), `${bookings.all_time} in total`],
+    ["Booked this month", formatRinggit(booked_sen.this_month), `${formatRinggit(booked_sen.all_time)} in total`],
+  ];
+
+  return (
+    <section aria-label="CourtKu totals" className="mx-auto grid w-full max-w-3xl gap-3 px-4 pt-10 sm:grid-cols-2">
+      {tiles.map(([label, value, note]) => (
+        <Card key={label} size="sm">
+          <CardContent className="grid gap-1">
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-2xl font-semibold tabular-nums">{value}</p>
+            <p className="text-xs text-muted-foreground">{note}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </section>
   );
 }
 
