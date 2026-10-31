@@ -16,6 +16,7 @@ Browser ──► courtku.vercel.app (Vercel, Singapore) ──► courtku-api.o
 | Venue photos | Cloudinary free plan (25 credits/month), [ADR-018](adr/018-photos-on-cloudinary.md) | n/a |
 | Uptime | UptimeRobot, every 5 minutes on `/api/health` and the web home page | n/a |
 | Error alerts | Sentry free plan (5,000 errors a month): one project for the API, one for the web app | n/a |
+| Backups | GitHub Actions in the private `courtku-backups` repository, every night at 3 am, kept 30 days ([ADR-029](adr/029-nightly-locked-backups-in-a-private-repo.md)) | n/a |
 | Timed jobs | cron-job.org, every minute on `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)) | n/a |
 | After-deploy check | GitHub Actions, after every merge to `main` ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)) | n/a |
 
@@ -26,6 +27,53 @@ Free plan limits to know:
 - Aiven powers off free databases it considers inactive (health checks don't count as activity) and emails a warning first. The API keeps running without it: pages that need the database fail and `/api/health` returns 503, so UptimeRobot alerts.
 - There is no Redis yet: cache and sessions use MySQL. Redis returns with the background worker in a later milestone.
 - Moving to an always-on server (e.g. Oracle Cloud with Coolify) only needs the same Docker image and these variables.
+
+## Nightly backups
+
+Every night at 3 am (Malaysia time) a copy of the live database is made, locked with a password, and restored into an empty database to prove it works ([ADR-029](adr/029-nightly-locked-backups-in-a-private-repo.md)). The script is `.github/scripts/backup.sh` in this repository. It runs from a separate **private** repository, `courtku-backups`, so the locked copies are visible only to you. They are kept for 30 days.
+
+### Set up once
+
+1. **Make the backup password.** A long random text (at least 20 characters, e.g. 40 from a password manager's generator). Save it in your password manager as "CourtKu backup password". Without it, no backup can ever be opened.
+2. **Create the private repository.** GitHub → **New repository** → name `courtku-backups`, **Private**, tick **Add a README file** → **Create repository**.
+3. **Add the workflow.** In `courtku-backups`: **Add file → Create new file**, name it `.github/workflows/backup.yml`, paste the whole of [`docs/backups/backup-workflow.yml`](backups/backup-workflow.yml) from this repository, and **Commit changes**.
+4. **Add the secrets.** In `courtku-backups`: **Settings → Secrets and variables → Actions → New repository secret**, once for each:
+
+   | Secret | Value |
+   | --- | --- |
+   | `BACKUP_DB_HOST` | Aiven → the MySQL service → **Overview → Connection information → Host** |
+   | `BACKUP_DB_PORT` | the same page, **Port** |
+   | `BACKUP_DB_USER` | the same page, **User** (e.g. `avnadmin`) |
+   | `BACKUP_DB_PASSWORD` | the same page, **Password** (click to show) |
+   | `BACKUP_DB_CA_CERT` | the same page, **CA certificate → Show**: all of it, from `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----` |
+   | `BACKUP_PASSWORD` | the backup password from step 1 |
+
+5. **Run it once.** `courtku-backups` → **Actions → Nightly backup → Run workflow**. After a few minutes the run should be green and end with "Backup OK: it unlocks with the password and restores into an empty database." Its page lists the locked file under **Artifacts**.
+
+GitHub emails you when a run fails. Typical causes: Aiven powered the database off (see *When something is down*), a changed Aiven password, or Aiven only allowing certain IP addresses (GitHub's machines change address; the service's **Allowed IP addresses** must include `0.0.0.0/0`).
+
+### Restore a backup
+
+Restoring overwrites data, so do it only on purpose. To look at a backup or practise, restore it into your **local** Docker MySQL first.
+
+1. `courtku-backups` → **Actions** → the run of the night you want → **Artifacts** → download `courtku-backup-…`. It's a zip with one file, e.g. `courtku-2026-11-09-0300.sql.gz.gpg`. Unzip it.
+2. In Git Bash, in that folder, unlock it (it asks for the backup password):
+
+   ```bash
+   gpg --output courtku.sql.gz --decrypt courtku-2026-11-09-0300.sql.gz.gpg
+   ```
+
+3. Load it into a new local database (Docker MySQL running, `docker compose up -d`):
+
+   ```bash
+   docker exec -i courtku-mysql-1 mysql -uroot -proot -e "CREATE DATABASE courtku_restored"
+   gunzip -c courtku.sql.gz | docker exec -i courtku-mysql-1 mysql -uroot -proot courtku_restored
+   ```
+
+4. Look at it (e.g. `docker exec -it courtku-mysql-1 mysql -uroot -proot courtku_restored`), or point `DB_DATABASE` in `apps/api/.env` at it.
+5. Delete the unlocked files when you're done: they hold players' details.
+
+To bring the live site back after real data loss, load the unlocked copy into the Aiven database instead (with the Aiven host, port, user, password and CA certificate, as in *Make an account the platform admin*). Players' logins are not in backups, so everyone logs in again.
 
 ## When something is down
 
@@ -206,5 +254,5 @@ Do Vercel before Render. While only Vercel has the secret, the API still believe
 
 ## Known gaps before real customers
 
-- No queue worker or backups yet. Timed jobs and booking emails depend on cron-job.org calling `/api/tick` ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)).
+- No queue worker yet. Timed jobs and booking emails depend on cron-job.org calling `/api/tick` ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)).
 - No staging server ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)): each merge goes straight to the live site, checked afterwards by the After deploy workflow.

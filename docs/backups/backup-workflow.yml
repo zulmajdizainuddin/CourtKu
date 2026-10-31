@@ -1,0 +1,75 @@
+# The nightly backup workflow (ADR-029). It does NOT run in this public repository: it lives in a
+# separate PRIVATE repository (courtku-backups) as .github/workflows/backup.yml, so the locked
+# backups it keeps are visible only to the owner. Steps to set it up: docs/deploy.md, "Nightly backups".
+#
+# Every night it fetches this repository (for .github/scripts/backup.sh and the list of migrations),
+# backs up the live database, locks the copy with BACKUP_PASSWORD and proves it restores into an empty
+# database. The locked file is kept for 30 days on the run's page. A failed run emails the owner.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: "0 19 * * *" # 19:00 UTC = 3:00 am in Malaysia, the quietest time
+  workflow_dispatch:
+
+# Never two at once.
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Back up and test restore
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # The empty database the copy is restored into, thrown away with the run.
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: restore-check
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -prestore-check"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    steps:
+      # The public CourtKu code: the backup script and the migrations it checks for.
+      - uses: actions/checkout@v4
+        with:
+          repository: zulmajdizainuddin/CourtKu
+          ref: main
+
+      # The script runs in the mysql:8.4 image (mysqldump, mysql, gzip, gpg), on the runner's
+      # network so it reaches both Aiven and the empty database above.
+      - name: Back up the live database, then restore the copy and check it
+        run: >-
+          docker run --rm --network host -v "$PWD:/work" -w /work
+          -e SOURCE_HOST -e SOURCE_PORT -e SOURCE_USER -e SOURCE_PASSWORD -e SOURCE_DATABASE -e SOURCE_CA_CERT
+          -e RESTORE_HOST -e RESTORE_PORT -e RESTORE_USER -e RESTORE_PASSWORD
+          -e BACKUP_PASSWORD -e MIGRATIONS_DIR -e OUT_DIR
+          mysql:8.4 bash .github/scripts/backup.sh
+        env:
+          SOURCE_HOST: ${{ secrets.BACKUP_DB_HOST }}
+          SOURCE_PORT: ${{ secrets.BACKUP_DB_PORT }}
+          SOURCE_USER: ${{ secrets.BACKUP_DB_USER }}
+          SOURCE_PASSWORD: ${{ secrets.BACKUP_DB_PASSWORD }}
+          SOURCE_DATABASE: courtku
+          SOURCE_CA_CERT: ${{ secrets.BACKUP_DB_CA_CERT }}
+          RESTORE_HOST: 127.0.0.1
+          RESTORE_PORT: 3306
+          RESTORE_USER: root
+          RESTORE_PASSWORD: restore-check
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+          MIGRATIONS_DIR: apps/api/database/migrations
+          OUT_DIR: backup-out
+
+      # Only the locked file, in this private repository.
+      - name: Keep the locked backup for 30 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: courtku-backup-${{ github.run_number }}
+          path: backup-out/*.gpg
+          retention-days: 30
+          if-no-files-found: error
