@@ -45,7 +45,7 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 
 ## Browser safety headers
 
-- [x] **API** (`App\Http\Middleware\SecurityHeaders`): `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, and `Strict-Transport-Security` over HTTPS.
+- [x] **API** (`App\Http\Middleware\SecurityHeaders`): `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` (no framing), `Referrer-Policy: no-referrer`, and `Strict-Transport-Security` over HTTPS. `X-Frame-Options` comes from the Docker image's nginx, so Laravel doesn't send a second, different one.
 - [x] **Web pages** (`apps/web/next.config.ts`): `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (no camera, microphone or location), and a CSP that blocks framing, plugins, outside `<base>` links and outside form targets. Vercel adds `Strict-Transport-Security`.
 - [x] **No raw HTML from users.** React escapes everything it shows, and the web app has no `dangerouslySetInnerHTML`.
 - [x] **No SQL built from user input.** All queries go through Eloquent or the query builder with bound values.
@@ -60,7 +60,7 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 - [ ] **Scripts in the web CSP.** A full `script-src` needs a fresh nonce on every page, which turns off Next.js' static and cached pages. Revisit if we add anything that shows user-written HTML.
 - [ ] **Error alerts** (Sentry) and **uptime alerts**: M5 PR 8.
 - [ ] **Nightly backups with a tested restore**: M5 PR 9.
-- [ ] **A staging copy** to try changes before the live site: M5 PR 2.
+- [ ] **A staging copy** to try changes before the live site. Not on free plans ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)); instead every deploy is checked automatically by the After deploy workflow.
 - [ ] **Own domain and email sender**, so emails stop landing in spam and DMARC passes.
 - [ ] **A general limit on dashboard routes.** Only the routes above are limited; the rest need a logged-in owner or staff member with two-factor login, but a per-user limit (e.g. 120 a minute) would still help.
 - [ ] **Stronger password rule** (e.g. refuse passwords found in known leaks with `Password::uncompromised()`), before real customers.

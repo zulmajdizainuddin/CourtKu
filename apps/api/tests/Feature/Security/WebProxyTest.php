@@ -93,6 +93,12 @@ it('believes forwarded headers like before while no secret is set', function () 
         ->assertJson(['ip' => '49.50.60.7', 'via' => 'direct']);
 });
 
+it('says in the health check which commit is running', function () {
+    config(['app.version' => 'abc123']);
+
+    $this->getJson('/api/health')->assertJsonPath('version', 'abc123');
+});
+
 it('says in the health check who the API thinks is asking', function () {
     $this->withHeaders([TrustWebProxy::SECRET_HEADER => 'test-proxy-secret', TrustWebProxy::CLIENT_IP_HEADER => '49.50.60.7'])
         ->getJson('/api/health')
@@ -126,9 +132,10 @@ it('adds the safety headers to every answer', function () {
     $this->getJson('/api/v1/does-not-exist')
         ->assertNotFound()
         ->assertHeader('X-Content-Type-Options', 'nosniff')
-        ->assertHeader('X-Frame-Options', 'DENY')
         ->assertHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
-        ->assertHeader('Referrer-Policy', 'no-referrer');
+        ->assertHeader('Referrer-Policy', 'no-referrer')
+        // The Docker image's nginx sends X-Frame-Options; a second, different one would clash.
+        ->assertHeaderMissing('X-Frame-Options');
 });
 
 it('tells browsers to stay on HTTPS only when the request came over HTTPS', function () {

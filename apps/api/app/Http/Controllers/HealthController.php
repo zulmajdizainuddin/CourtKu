@@ -14,6 +14,7 @@ use Throwable;
  * (GET /up only says "the app is running" and is what the host's health check uses.)
  * "via" says whether the API recognised the web app (ADR-025): through courtku.vercel.app it
  * should say "browser", called directly "direct". A quick check after changing WEB_PROXY_SECRET.
+ * "version" is the commit that is running, for the after-deploy check (ADR-026).
  */
 class HealthController extends Controller
 {
@@ -32,7 +33,12 @@ class HealthController extends Controller
         $healthy = $database && $cache;
 
         return response()->json(
-            ['status' => $healthy ? 'ok' : 'down', 'checks' => $checks, 'via' => $request->attributes->get('via')],
+            [
+                'status' => $healthy ? 'ok' : 'down',
+                'checks' => $checks,
+                'via' => $request->attributes->get('via'),
+                'version' => config('app.version'),
+            ],
             $healthy ? 200 : 503,
         );
     }

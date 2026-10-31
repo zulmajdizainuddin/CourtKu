@@ -18,9 +18,10 @@ class SecurityHeaders
 
         // Browsers must not guess that a JSON answer is HTML or a script.
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        // No other site may show API answers inside a frame.
-        $response->headers->set('X-Frame-Options', 'DENY');
-        // Nothing an API answer could load is allowed, so even injected HTML can't run anything.
+        // Nothing an API answer could load is allowed, so even injected HTML can't run anything,
+        // and no other site may show an API answer inside a frame (frame-ancestors). No
+        // X-Frame-Options here: the Docker image's nginx already sends one, and two different
+        // values would confuse browsers. frame-ancestors wins over it in every current browser.
         $response->headers->set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
         // Links followed from an API answer don't tell the next site the full address.
         $response->headers->set('Referrer-Policy', 'no-referrer');
