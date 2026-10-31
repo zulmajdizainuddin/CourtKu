@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,8 @@ use Illuminate\Support\Carbon;
 #[Fillable(['starts_on', 'ends_on', 'reason'])]
 class VenueClosure extends Model
 {
+    use ClearsAvailabilityCache;
+
     protected function casts(): array
     {
         return [

@@ -8,6 +8,7 @@ use App\Http\Requests\CourtRequest;
 use App\Http\Resources\CourtResource;
 use App\Models\Court;
 use App\Models\Venue;
+use App\Services\AvailabilityCache;
 use App\Services\BookingConflicts;
 use App\Support\SortOrder;
 use Illuminate\Http\JsonResponse;
@@ -103,6 +104,8 @@ class CourtController extends Controller
             'court_ids.*' => ['integer', 'distinct'],
         ]);
         SortOrder::apply($venue->courts(), array_map(intval(...), $data['court_ids']), 'court_ids');
+        // A plain query update sends no model events: the time grid shows courts in this order (ADR-028).
+        AvailabilityCache::forget($venue->id);
 
         return $this->index($venue);
     }

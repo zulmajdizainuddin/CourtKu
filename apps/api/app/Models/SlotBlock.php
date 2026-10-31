@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,8 @@ use Illuminate\Support\Carbon;
 #[Fillable(['venue_id', 'court_id', 'starts_at', 'ends_at', 'business_date', 'reason', 'created_by'])]
 class SlotBlock extends Model
 {
+    use ClearsAvailabilityCache;
+
     protected function casts(): array
     {
         return [

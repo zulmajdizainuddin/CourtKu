@@ -7,6 +7,7 @@ use App\Enums\PaymentMode;
 use App\Enums\VenueRole;
 use App\Enums\VenueStatus;
 use App\Exceptions\ApiException;
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Database\Factories\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,6 +43,8 @@ use Illuminate\Support\Carbon;
 #[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'booking_emails', 'hold_minutes', 'payment_mode'])]
 class Venue extends Model
 {
+    use ClearsAvailabilityCache;
+
     /** @use HasFactory<VenueFactory> */
     use HasFactory;
 

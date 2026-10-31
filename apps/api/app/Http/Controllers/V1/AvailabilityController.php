@@ -7,9 +7,11 @@ use App\Http\Requests\AvailabilityRequest;
 use App\Http\Requests\QuoteRequest;
 use App\Models\Court;
 use App\Models\Venue;
+use App\Services\AvailabilityCache;
 use App\Services\AvailabilityService;
 use App\Services\PricingService;
 use App\Support\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -27,10 +29,21 @@ class AvailabilityController extends Controller
     public function show(AvailabilityRequest $request, Venue $venue): JsonResponse
     {
         $date = AvailabilityService::date($request->string('date')->value());
+        $sport = $request->string('sport')->value();
+
+        // Kept for 30 seconds, and thrown away as soon as a booking or setting changes (ADR-028).
+        return response()->json(['data' => AvailabilityCache::remember($venue, $date->toDateString(), $sport,
+            fn () => $this->grid($venue, $date, $sport))]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function grid(Venue $venue, CarbonImmutable $date, string $sport): array
+    {
         $availability = new AvailabilityService($venue);
         $pricing = PricingService::forVenue($venue);
         $minutes = $availability->bookableMinutes($date);
-        $sport = $request->string('sport')->value();
 
         $courts = $venue->courts()
             ->bookable()
@@ -41,7 +54,7 @@ class AvailabilityController extends Controller
             ->get();
         $taken = $availability->takenSlots($courts->modelKeys(), $date);
 
-        return response()->json(['data' => [
+        return [
             'date' => $date->toDateString(),
             // The closure's reason (e.g. "Hari Raya") when the venue is closed that day.
             'closed_reason' => $availability->closureOn($date)?->reason,
@@ -62,8 +75,8 @@ class AvailabilityController extends Controller
                     // false when a booking already holds this half hour.
                     'available' => ! isset($taken[AvailabilityService::slotKey($court->id, AvailabilityService::startsAt($date, $minute))]),
                 ], $minutes),
-            ])->values(),
-        ]]);
+            ])->values()->all(),
+        ];
     }
 
     /**
