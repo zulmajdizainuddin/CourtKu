@@ -40,6 +40,8 @@ return [
     // Stripe Connect and never give CourtKu a key (ADR-024). Test keys (sk_test_) only.
     'stripe' => [
         'secret' => env('STRIPE_SECRET_KEY'),
+        // The signing secret (whsec_...) of CourtKu's one Connect webhook: Stripe signs every payment event with it.
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
     // The every-minute jobs (ADR-022): a cron service calls POST /api/tick with this secret.

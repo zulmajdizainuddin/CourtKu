@@ -19,6 +19,7 @@ use App\Http\Controllers\V1\Manage\VenueClosureController;
 use App\Http\Controllers\V1\Manage\VenueController as ManageVenueController;
 use App\Http\Controllers\V1\Manage\VenuePhotoController;
 use App\Http\Controllers\V1\MeController;
+use App\Http\Controllers\V1\PaymentWebhookController;
 use App\Http\Controllers\V1\PublicVenueController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,9 @@ Route::get('/health', HealthController::class);
 Route::post('/tick', TickController::class)->middleware('throttle:10,1');
 
 Route::prefix('v1')->group(function () {
+    // Stripe tells CourtKu about payments (ADR-006, ADR-024). No login: the signature proves it is Stripe.
+    Route::post('/webhooks/payments/stripe', [PaymentWebhookController::class, 'stripe'])->middleware('throttle:120,1');
+
     // Public: anyone can read an approved venue's page (plan: public reads 60 a minute).
     // TODO(M5): a key of its own for the web app's server, which fetches from one IP for everyone.
     Route::middleware('throttle:60,1')->group(function () {

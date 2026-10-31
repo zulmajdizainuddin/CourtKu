@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BlockForm, CounterBookingForm } from "@/components/venues/schedule-forms";
 import {
   type BookingAction,
+  PAYMENT_METHOD_LABELS,
   PAYMENT_METHODS,
   type ScheduleBlock,
   type ScheduleBooking,
@@ -295,7 +296,7 @@ function BookingDetails({
         <dd>
           {booking.total}
           {booking.paid_at
-            ? `, paid by ${PAYMENT_METHODS.find((m) => m.value === booking.payment_method)?.label ?? "the counter"} at ${formatTime(booking.paid_at.slice(11, 16))}${booking.paid_by ? ` (${booking.paid_by})` : ""}`
+            ? `, paid by ${booking.payment_method ? PAYMENT_METHOD_LABELS[booking.payment_method] : "the counter"} at ${formatTime(booking.paid_at.slice(11, 16))}${booking.paid_by ? ` (${booking.paid_by})` : ""}`
             : ", not paid yet"}
         </dd>
         <dt className="text-muted-foreground">How</dt>

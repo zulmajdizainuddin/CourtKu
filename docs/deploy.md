@@ -91,6 +91,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `QUEUE_CONNECTION` | `sync` | No background worker yet |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
+| `STRIPE_WEBHOOK_SECRET` | the Connect webhook's **Signing secret** (`whsec_...`), see *Payment webhook* below | Proves each payment message really comes from Stripe ([ADR-006](adr/006-hosted-payment-page-webhook.md)). Without it every webhook is refused with 401 |
 | `DB_CONNECTION` | `mysql` | |
 | `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` | from the Aiven service's connection information | |
 | `DB_DATABASE` | `courtku` | Created in Aiven under Databases |
@@ -130,6 +131,19 @@ Unpaid holds expire and finished bookings complete through `POST /api/tick` ([AD
 3. Save, then open the job's history: each run should answer **200** with `{"data":{"expired_holds":0,"completed_bookings":0}}`. A 403 means the header doesn't match `CRON_SECRET`; a 404 means `CRON_SECRET` isn't set in Render.
 
 Locally, run `php artisan schedule:work` in a terminal (or `php artisan courtku:tick` once). Players never wait on this job: whatever reads free times expires overdue holds first.
+
+## Payment webhook (Stripe Connect)
+
+Stripe tells CourtKu when a player has paid by calling `POST /api/v1/webhooks/payments/stripe`. One webhook covers every venue's connected account ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Set it up once, in the Stripe dashboard (Sandbox):
+
+1. **Developers → Webhooks → Add destination** (or **Add endpoint**).
+2. **Events from:** **Connected accounts** (not "Your account").
+3. **Events:** `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`.
+4. **Endpoint URL:** `https://courtku-api.onrender.com/api/v1/webhooks/payments/stripe`
+5. Save, open the new destination and reveal its **Signing secret** (`whsec_...`). Put it in Render as `STRIPE_WEBHOOK_SECRET`. Render redeploys.
+6. After a test payment, the destination's event list should show **200** responses. A **401** means the signing secret in Render doesn't match.
+
+Stripe can't reach a laptop, so locally payments are confirmed by CourtKu asking Stripe when the player returns (M4 PR 5).
 
 ## Web environment variables (set in Vercel)
 

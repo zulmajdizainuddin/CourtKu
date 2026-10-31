@@ -31,13 +31,22 @@ export type ScheduleBooking = {
   actions: { check_in: boolean; no_show: boolean; cancel: boolean; mark_paid: boolean };
 };
 
-export type PaymentMethod = "cash" | "qr" | "card";
+/** How a booking was paid: at the counter (staff choose), or online (set by the payment itself). */
+export type PaymentMethod = "cash" | "qr" | "card" | "online";
 
-export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
+/** What staff can choose at the counter. */
+export const PAYMENT_METHODS: { value: Exclude<PaymentMethod, "online">; label: string }[] = [
   { value: "cash", label: "Cash" },
   { value: "qr", label: "QR / DuitNow" },
   { value: "card", label: "Card" },
 ];
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: "Cash",
+  qr: "QR / DuitNow",
+  card: "Card",
+  online: "online payment",
+};
 
 /** A time a court is closed for repairs or a private event (FR-21). */
 export type ScheduleBlock = {
@@ -117,7 +126,7 @@ export function useLiftBlock(venueId: string) {
 export type BookingAction =
   | { action: "check-in" }
   | { action: "no-show" }
-  | { action: "paid"; method: PaymentMethod }
+  | { action: "paid"; method: Exclude<PaymentMethod, "online"> }
   | { action: "cancel"; reason: string };
 
 /** Check in, no-show, paid or cancel (FR-28), at the counter. */

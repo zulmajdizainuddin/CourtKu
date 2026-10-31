@@ -49,7 +49,7 @@ class BookingActionController extends Controller
     public function markPaid(Request $request, Venue $venue, Booking $booking): ManageBookingResource
     {
         $data = $request->validate(
-            ['method' => ['required', Rule::enum(PaymentMethod::class)]],
+            ['method' => ['required', Rule::enum(PaymentMethod::class)->only(PaymentMethod::atCounter())]],
             ['method.required' => 'Choose how they paid.', 'method.enum' => 'Choose cash, QR / DuitNow or card.'],
         );
 
