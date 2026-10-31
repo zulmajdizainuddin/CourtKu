@@ -15,6 +15,7 @@ Browser ──► courtku.vercel.app (Vercel, Singapore) ──► courtku-api.o
 | Email | Brevo free plan (300 emails/day), SMTP on port 2525 | n/a |
 | Venue photos | Cloudinary free plan (25 credits/month), [ADR-018](adr/018-photos-on-cloudinary.md) | n/a |
 | Uptime | UptimeRobot, every 5 minutes on `/api/health` and the web home page | n/a |
+| Timed jobs | cron-job.org, every minute on `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)) | n/a |
 
 Free plan limits to know:
 
@@ -88,6 +89,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `SESSION_SECURE_COOKIE` | `true` | Cookie is only sent over HTTPS |
 | `CACHE_STORE` | `database` | |
 | `QUEUE_CONNECTION` | `sync` | No background worker yet |
+| `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `DB_CONNECTION` | `mysql` | |
 | `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` | from the Aiven service's connection information | |
 | `DB_DATABASE` | `courtku` | Created in Aiven under Databases |
@@ -114,6 +116,20 @@ Render settings:
 
 On every start, the container runs the database migrations (`apps/api/docker/45-courtku-migrate.sh`). If the database doesn't answer within 60 seconds, it skips them and starts the API anyway.
 
+## Timed jobs (every minute)
+
+Unpaid holds expire and finished bookings complete through `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Render's free plan has no scheduler, so a free cron service calls it:
+
+1. Make a long random secret (e.g. 40 letters and digits from a password manager) and set it as `CRON_SECRET` in Render. Render redeploys.
+2. Sign up at [cron-job.org](https://cron-job.org) (free) and create a cron job:
+   - **URL** `https://courtku-api.onrender.com/api/tick`
+   - **Schedule** every 1 minute
+   - **Advanced → Request method** `POST`
+   - **Advanced → Headers** `X-Cron-Secret` = the same secret
+3. Save, then open the job's history: each run should answer **200** with `{"data":{"expired_holds":0,"completed_bookings":0}}`. A 403 means the header doesn't match `CRON_SECRET`; a 404 means `CRON_SECRET` isn't set in Render.
+
+Locally, run `php artisan schedule:work` in a terminal (or `php artisan courtku:tick` once). Players never wait on this job: whatever reads free times expires overdue holds first.
+
 ## Web environment variables (set in Vercel)
 
 | Variable | Value |
@@ -125,4 +141,4 @@ Vercel project settings: **Root Directory** `apps/web`, framework **Next.js**.
 ## Known gaps before real customers
 
 - Laravel trusts `X-Forwarded-*` headers from any source ([ADR-004](adr/004-sanctum-cookies-one-origin.md)). The API must only accept traffic from the proxy before it handles real bookings.
-- No queue worker, scheduler, backups or staging environment yet.
+- No queue worker, backups or staging environment yet. Timed jobs depend on cron-job.org calling `/api/tick`.

@@ -29,11 +29,13 @@ function addDays(day: string, days: number): string {
 }
 
 const STATUS_LABELS: Record<ScheduleBooking["status"], string> = {
+  pending_payment: "Waiting for payment",
   confirmed: "Booked",
   checked_in: "Checked in",
   completed: "Played",
   no_show: "No-show",
   cancelled: "Cancelled",
+  expired: "Not paid in time",
 };
 
 const SOURCE_LABELS: Record<ScheduleBooking["source"], string> = {
@@ -177,7 +179,9 @@ export function DaySchedule({
                       ? "bg-muted text-muted-foreground line-through"
                       : b.status === "checked_in"
                         ? "bg-emerald-700 text-white"
-                        : "bg-primary text-primary-foreground",
+                        : b.status === "pending_payment"
+                          ? "bg-amber-100 text-amber-950 ring-1 ring-amber-500 ring-inset dark:bg-amber-950 dark:text-amber-100"
+                          : "bg-primary text-primary-foreground",
                     selected === b.code && "ring-2 ring-ring ring-offset-1",
                   )}
                   style={{ gridColumn: column + 2, gridRow: `${row + 2} / span ${b.minutes / 30}` }}

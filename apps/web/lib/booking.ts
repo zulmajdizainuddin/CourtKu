@@ -36,10 +36,25 @@ export type Quote = {
   price: string; // "RM 30.00"
 };
 
+/**
+ * Where a booking is in its life (the API's BookingStatus). A booking paid online waits as
+ * pending_payment while the player pays; not paid in time, it becomes expired (FR-16).
+ */
+export type BookingStatus =
+  | "pending_payment"
+  | "confirmed"
+  | "checked_in"
+  | "completed"
+  | "no_show"
+  | "cancelled"
+  | "expired";
+
 /** The API's PlayerBookingResource: a booking as its player sees it. */
 export type PlayerBooking = {
   code: string; // "CK-7F3K2"
-  status: "confirmed" | "checked_in" | "completed" | "no_show" | "cancelled";
+  status: BookingStatus;
+  /** While waiting for payment: when the held time is freed. */
+  hold_expires_at: string | null;
   venue: { name: string; slug: string; phone: string | null };
   court: { id: number; name: string };
   sport: string | null;

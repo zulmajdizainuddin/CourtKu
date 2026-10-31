@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Collection;
  * a court off is refused while upcoming bookings would no longer fit, and the owner gets the list
  * of those bookings to cancel first (plan section 7, "Settings never orphan bookings").
  *
- * "Upcoming" = confirmed or checked in, and not over yet. Past, cancelled and no-show bookings
- * are history and never block a change.
+ * "Upcoming" = waiting for payment, confirmed or checked in, and not over yet. Past, cancelled,
+ * expired and no-show bookings are history and never block a change.
  */
 class BookingConflicts
 {
@@ -42,7 +42,7 @@ class BookingConflicts
             }
         }
 
-        return $this->upcoming()->where('venue_id', $venue->id)->get()->filter(function (Booking $booking) use ($open) {
+        return $this->upcoming($venue)->get()->filter(function (Booking $booking) use ($open) {
             $day = AvailabilityService::date($booking->business_date->toDateString());
             $start = (int) $day->diffInMinutes($booking->starts_at->toImmutable()->setTimezone(MalaysiaTime::TIMEZONE));
             $length = (int) $booking->starts_at->diffInMinutes($booking->ends_at);
@@ -63,7 +63,7 @@ class BookingConflicts
      */
     public function onDays(Venue $venue, string $from, string $to): Collection
     {
-        return $this->upcoming()->where('venue_id', $venue->id)->whereBetween('business_date', [$from, $to])->get();
+        return $this->upcoming($venue)->whereBetween('business_date', [$from, $to])->get();
     }
 
     /**
@@ -73,7 +73,7 @@ class BookingConflicts
      */
     public function onCourt(Court $court): Collection
     {
-        return $this->upcoming()->where('court_id', $court->id)->get();
+        return $this->upcoming($court->venue)->where('court_id', $court->id)->get();
     }
 
     /**
@@ -102,12 +102,17 @@ class BookingConflicts
     }
 
     /**
+     * This venue's upcoming bookings. Holds whose payment time is up are freed first, so they never block a change.
+     *
      * @return Builder<Booking>
      */
-    private function upcoming(): Builder
+    private function upcoming(Venue $venue): Builder
     {
+        (new Holds)->releaseExpired(venue: $venue);
+
         return Booking::query()
-            ->whereIn('status', [BookingStatus::Confirmed->value, BookingStatus::CheckedIn->value])
+            ->where('venue_id', $venue->id)
+            ->whereIn('status', BookingStatus::activeValues())
             ->where('ends_at', '>', now())
             ->with(['court', 'user'])
             ->orderBy('starts_at');

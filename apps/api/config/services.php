@@ -36,6 +36,12 @@ return [
         'folder' => env('CLOUDINARY_FOLDER', 'courtku'),
     ],
 
+    // The every-minute jobs (ADR-022): a cron service calls POST /api/tick with this secret.
+    // Empty = the endpoint is off (404); the scheduler can still run `php artisan courtku:tick`.
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

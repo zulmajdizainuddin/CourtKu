@@ -50,7 +50,7 @@ function Confirmation() {
           <header className="grid gap-1">
             <p
               className={
-                booking.status === "cancelled"
+                booking.status === "cancelled" || booking.status === "expired"
                   ? "text-sm font-medium text-destructive"
                   : "text-sm font-medium text-emerald-700 dark:text-emerald-400"
               }
@@ -116,11 +116,13 @@ function Confirmation() {
 }
 
 const STATUS_HEADINGS: Record<PlayerBooking["status"], string> = {
+  pending_payment: "Waiting for payment",
   confirmed: "You're booked",
   checked_in: "Checked in",
   completed: "Played",
   no_show: "Marked as a no-show",
   cancelled: "Cancelled",
+  expired: "Not paid in time",
 };
 
 /** Cancel until the venue's cutoff (FR-24); after it, the player calls the venue. */
@@ -134,7 +136,10 @@ function CancelSection({ booking }: { booking: PlayerBooking }) {
       </p>
     );
   }
-  if (booking.status !== "confirmed") return null;
+  if (booking.status === "expired") {
+    return <p className="text-sm text-muted-foreground">It wasn&apos;t paid in time, so the time is free for others again.</p>;
+  }
+  if (booking.status !== "confirmed" && booking.status !== "pending_payment") return null;
 
   const onCancel = () => {
     if (window.confirm(`Cancel ${booking.code} at ${booking.venue.name}? The time goes back to other players.`)) {
@@ -144,7 +149,11 @@ function CancelSection({ booking }: { booking: PlayerBooking }) {
 
   return booking.can_cancel ? (
     <div className="grid gap-2">
-      <p className="text-sm text-muted-foreground">Free cancellation online until {formatDayTime(booking.cancel_until)}.</p>
+      <p className="text-sm text-muted-foreground">
+        {booking.status === "pending_payment" && booking.hold_expires_at
+          ? `Not paid yet. If it isn't paid by ${formatDayTime(booking.hold_expires_at)}, the time goes back to other players.`
+          : `Free cancellation online until ${formatDayTime(booking.cancel_until)}.`}
+      </p>
       <Button variant="outline" className="h-11 justify-self-start px-6 text-destructive" disabled={cancel.isPending} onClick={onCancel}>
         {cancel.isPending ? "Cancelling..." : "Cancel booking"}
       </Button>

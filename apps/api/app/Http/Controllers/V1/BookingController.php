@@ -14,6 +14,7 @@ use App\Models\Sport;
 use App\Models\Venue;
 use App\Services\BookingService;
 use App\Services\BookingStateMachine;
+use App\Services\Holds;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -71,7 +72,8 @@ class BookingController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $when = $request->validate(['when' => ['sometimes', 'in:upcoming,past']])['when'] ?? 'upcoming';
-        $active = [BookingStatus::Confirmed->value, BookingStatus::CheckedIn->value];
+        $active = BookingStatus::activeValues();
+        (new Holds)->releaseExpired(player: $request->user());
 
         $bookings = Booking::where('user_id', $request->user()->id)
             ->with(['venue', 'court', 'sport'])
@@ -115,9 +117,13 @@ class BookingController extends Controller
         return new PlayerBookingResource($booking->fresh(['venue', 'court', 'sport']));
     }
 
-    /** Someone else's booking answers 404, exactly like a code that doesn't exist. */
+    /**
+     * Someone else's booking answers 404, exactly like a code that doesn't exist.
+     * A hold whose payment time is up shows as expired, even before the every-minute tick.
+     */
     private function ownBooking(Request $request, string $code): Booking
     {
+        (new Holds)->releaseExpired(player: $request->user());
         $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->with(['venue', 'court', 'sport'])->first();
         abort_if($booking === null, 404);
 

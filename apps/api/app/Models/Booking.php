@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $sport_id
  * @property BookingSource $source
  * @property BookingStatus $status
+ * @property Carbon|null $hold_expires_at while pending_payment: when the held time is freed (FR-16)
  * @property Carbon $starts_at UTC
  * @property Carbon $ends_at UTC
  * @property Carbon $business_date
@@ -45,6 +46,7 @@ class Booking extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'business_date' => 'date',
+            'hold_expires_at' => 'datetime',
             'total_sen' => 'integer',
             'cancelled_at' => 'datetime',
             'checked_in_at' => 'datetime',
@@ -93,10 +95,17 @@ class Booking extends Model
         return $this->starts_at->copy()->subHours($this->venue->cancel_cutoff_hours);
     }
 
-    /** A confirmed booking, before the venue's cutoff. After that the player calls the venue; staff can always cancel. */
+    /**
+     * A confirmed booking, before the venue's cutoff. After that the player calls the venue; staff can always cancel.
+     * A booking still waiting for payment can always be cancelled: nothing was paid yet.
+     */
     public function playerCanCancel(): bool
     {
-        return $this->status === BookingStatus::Confirmed && now()->lessThan($this->playerCancelDeadline());
+        return match ($this->status) {
+            BookingStatus::PendingPayment => true,
+            BookingStatus::Confirmed => now()->lessThan($this->playerCancelDeadline()),
+            default => false,
+        };
     }
 
     /**
@@ -117,10 +126,14 @@ class Booking extends Model
             && now()->lessThan($this->ends_at);
     }
 
-    /** A booking that wasn't cancelled and isn't paid yet. A no-show can still pay, if the venue charges it. */
+    /**
+     * A booking that isn't paid yet. A no-show can still pay, if the venue charges it. A booking waiting
+     * for online payment can't be marked paid at the counter, and cancelled or expired ones can't be paid.
+     */
     public function canMarkPaid(): bool
     {
-        return $this->status !== BookingStatus::Cancelled && $this->paid_at === null;
+        return in_array($this->status, [BookingStatus::Confirmed, BookingStatus::CheckedIn, BookingStatus::NoShow, BookingStatus::Completed], true)
+            && $this->paid_at === null;
     }
 
     /**

@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property int $booking_window_days
  * @property int $min_notice_minutes 0 = players can book right up to the start time
  * @property int $cancel_cutoff_hours players cancel online until this many hours before the start (FR-24)
+ * @property int $hold_minutes how long a player has to pay online before the time is freed (FR-16)
  */
 #[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours'])]
 class Venue extends Model
@@ -48,6 +49,7 @@ class Venue extends Model
         'booking_window_days' => 14,
         'min_notice_minutes' => 0,
         'cancel_cutoff_hours' => 24,
+        'hold_minutes' => 15,
     ];
 
     protected function casts(): array
@@ -65,6 +67,7 @@ class Venue extends Model
             'booking_window_days' => 'integer',
             'min_notice_minutes' => 'integer',
             'cancel_cutoff_hours' => 'integer',
+            'hold_minutes' => 'integer',
             'approved_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];
