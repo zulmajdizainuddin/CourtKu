@@ -10,6 +10,8 @@ use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\WebhookEvent;
+use App\Payments\Checkout;
+use App\Payments\CheckoutStatus;
 use App\Payments\PaymentEvent;
 use App\Payments\PaymentEventType;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -87,6 +89,22 @@ class PaymentProcessor
             }
 
             $locked->forceFill(['processed_at' => now()])->save();
+        });
+    }
+
+    /**
+     * Acts on what CourtKu learned by asking the gateway itself (the player came back, or the
+     * reconciliation): the same rules as a webhook, under the same row lock.
+     */
+    public function applyCheckout(Payment $payment, Checkout $checkout): void
+    {
+        DB::transaction(function () use ($payment, $checkout) {
+            $locked = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+            if ($checkout->paid) {
+                $this->paid($locked, $checkout->amountSen, $checkout->currency);
+            } elseif ($checkout->status === CheckoutStatus::Expired) {
+                $this->endWithout($locked, PaymentStatus::Expired);
+            }
         });
     }
 

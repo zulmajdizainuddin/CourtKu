@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ManageVenue } from "@/features/venues/hooks";
+import { useRefreshPublicPage } from "@/features/venues/refresh-public-page";
 import { api } from "@/lib/api";
 
 // The owner's Payments tab (FR-17, ADR-024): the venue's own Stripe account, connected through
@@ -71,12 +72,14 @@ export function useGoToStripe(venueId: string) {
 /** CourtKu stops using the account; players go back to paying at the counter. */
 export function useDisconnectPaymentAccount(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: () =>
       api(`/api/v1/manage/venues/${venueId}/payment-account`, {
         method: "DELETE",
       }),
     onSuccess: () => {
+      refreshPublicPage(); // players can't pay online there any more
       queryClient.setQueryData(accountKey(venueId), null);
       queryClient.invalidateQueries({
         queryKey: venueKey(venueId),
@@ -88,6 +91,7 @@ export function useDisconnectPaymentAccount(venueId: string) {
 
 export function useUpdatePaymentSettings(venueId: string) {
   const queryClient = useQueryClient();
+  const refreshPublicPage = useRefreshPublicPage(venueId);
   return useMutation({
     mutationFn: async (input: PaymentSettings) =>
       (
@@ -96,6 +100,9 @@ export function useUpdatePaymentSettings(venueId: string) {
           body: input,
         })
       ).data,
-    onSuccess: (venue) => queryClient.setQueryData(venueKey(venueId), venue),
+    onSuccess: (venue) => {
+      refreshPublicPage(venue.slug); // the booking page offers the new way of paying straight away
+      queryClient.setQueryData(venueKey(venueId), venue);
+    },
   });
 }

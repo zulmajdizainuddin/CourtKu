@@ -176,6 +176,21 @@ class Venue extends Model
         return $this->hasMany(VenueClosure::class);
     }
 
+    /**
+     * Players can pay online only when the owner chose it and the venue's own Stripe account can take
+     * payments (ADR-009). If the account stops being ready, players simply pay at the counter.
+     */
+    public function acceptsOnlinePayment(): bool
+    {
+        return $this->payment_mode->needsAccount() && (bool) $this->paymentAccount?->isReady();
+    }
+
+    /** Pay at the counter: always, unless the owner chose online only and online works. */
+    public function acceptsCounterPayment(): bool
+    {
+        return $this->payment_mode !== PaymentMode::Online || ! $this->acceptsOnlinePayment();
+    }
+
     /** The user's role here, or null if they don't work here. */
     public function roleOf(User $user): ?VenueRole
     {

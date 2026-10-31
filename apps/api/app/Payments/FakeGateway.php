@@ -26,6 +26,9 @@ class FakeGateway implements PaymentGateway
     /** @var list<CheckoutRequest> what CourtKu asked for, in order */
     public array $requests = [];
 
+    /** How many times CourtKu asked how a payment page stands. */
+    public int $lookups = 0;
+
     /** true = act as if the gateway can't be reached */
     public bool $down = false;
 
@@ -95,6 +98,7 @@ class FakeGateway implements PaymentGateway
     public function findCheckout(?string $accountId, string $id): Checkout
     {
         $this->failIfDown();
+        $this->lookups++;
         // Like Stripe: a payment page is only found on the account it belongs to.
         if (! isset($this->checkouts[$id]) || $this->checkoutAccounts[$id] !== $accountId) {
             throw new PaymentGatewayException('The payment service doesn\'t know this payment.');

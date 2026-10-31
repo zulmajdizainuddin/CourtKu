@@ -14,6 +14,7 @@ use App\Models\Sport;
 use App\Models\Venue;
 use App\Services\BookingService;
 use App\Services\BookingStateMachine;
+use App\Services\Checkouts;
 use App\Services\Holds;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +24,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Players booking courts online (FR-15, FR-35, FR-36): logged in, with a verified email.
- * In M3 every booking is paid at the venue, so it is confirmed straight away (ADR-021).
+ * Paid at the venue: confirmed straight away (ADR-021). Paid online: held while the player pays on
+ * Stripe's page, and confirmed when Stripe says it was paid (FR-16, FR-22).
  */
 class BookingController extends Controller
 {
@@ -54,9 +56,10 @@ class BookingController extends Controller
             throw ValidationException::withMessages(['sport' => "{$court->name} isn't for {$request->string('sport')}."]);
         }
 
+        $online = $request->paysOnline();
         $draft = $bookings->prepare($court, $request->startsAt(), $request->integer('minutes'));
         try {
-            $booking = $bookings->store($draft, BookingSource::Online, player: $player, createdBy: $player, sportId: $sport->id, idempotencyKey: $key);
+            $booking = $bookings->store($draft, BookingSource::Online, player: $player, createdBy: $player, sportId: $sport->id, idempotencyKey: $key, hold: $online);
         } catch (UniqueConstraintViolationException) {
             // The same key arrived twice at the same moment: the other request made the booking.
             return (new PlayerBookingResource($this->bookingWithKey($player->id, $key)))->response()->setStatusCode(200);
@@ -76,7 +79,7 @@ class BookingController extends Controller
         (new Holds)->releaseExpired(player: $request->user());
 
         $bookings = Booking::where('user_id', $request->user()->id)
-            ->with(['venue', 'court', 'sport'])
+            ->with(['venue', 'court', 'sport', 'latestPayment'])
             ->when(
                 $when === 'upcoming',
                 fn ($query) => $query->whereIn('status', $active)->where('ends_at', '>', now())
@@ -89,10 +92,32 @@ class BookingController extends Controller
         return PlayerBookingResource::collection($bookings);
     }
 
-    /** GET /api/v1/bookings/{code}: the player's own booking, e.g. for the confirmation page. */
-    public function show(Request $request, string $code): PlayerBookingResource
+    /**
+     * GET /api/v1/bookings/{code}: the player's own booking, e.g. for the confirmation page.
+     * While it waits for payment, CourtKu asks Stripe how the payment stands first (at most every few
+     * seconds), so the status page shows "paid" as soon as Stripe knows, webhook or not.
+     */
+    public function show(Request $request, string $code, Checkouts $checkouts): PlayerBookingResource
     {
+        // Ask Stripe first, then free holds whose time is up: a payment that came in while the time was still
+        // held confirms the booking, and one that came too late shows as needing a refund, never as "not charged".
+        $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->first();
+        abort_if($booking === null, 404);
+        $checkouts->refresh($booking);
+
         return new PlayerBookingResource($this->ownBooking($request, $code));
+    }
+
+    /**
+     * POST /api/v1/bookings/{code}/pay: { "data": { "url": "https://checkout.stripe.com/..." } }
+     * Where the player pays for a booking that is waiting for payment: the page already open, or a new
+     * one after a declined card. 409 NOT_AWAITING_PAYMENT once it is paid, cancelled or expired.
+     */
+    public function pay(Request $request, string $code, Checkouts $checkouts): JsonResponse
+    {
+        $payment = $checkouts->start($this->ownBooking($request, $code));
+
+        return response()->json(['data' => ['url' => $payment->checkout_url]]);
     }
 
     /**
@@ -124,7 +149,7 @@ class BookingController extends Controller
     private function ownBooking(Request $request, string $code): Booking
     {
         (new Holds)->releaseExpired(player: $request->user());
-        $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->with(['venue', 'court', 'sport'])->first();
+        $booking = Booking::where('code', $code)->where('user_id', $request->user()->id)->with(['venue', 'court', 'sport', 'latestPayment'])->first();
         abort_if($booking === null, 404);
 
         return $booking;
@@ -132,6 +157,6 @@ class BookingController extends Controller
 
     private function bookingWithKey(int $userId, string $key): ?Booking
     {
-        return Booking::where('user_id', $userId)->where('idempotency_key', $key)->with(['venue', 'court', 'sport'])->first();
+        return Booking::where('user_id', $userId)->where('idempotency_key', $key)->with(['venue', 'court', 'sport', 'latestPayment'])->first();
     }
 }

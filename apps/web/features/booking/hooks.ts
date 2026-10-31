@@ -39,7 +39,7 @@ export function useQuote(slug: string, booking: { court_id: number; starts_at: s
   });
 }
 
-export type BookingInput = { court_id: number; sport: string; starts_at: string; minutes: number };
+export type BookingInput = { court_id: number; sport: string; starts_at: string; minutes: number; pay: "online" | "counter" };
 
 /**
  * Books the chosen court (logged-in players with a verified email).
@@ -96,10 +96,26 @@ export function useCancelBooking(code: string) {
   });
 }
 
-/** One of the player's own bookings, e.g. for the confirmation page. */
-export function useBooking(code: string) {
+/**
+ * One of the player's own bookings, e.g. for the confirmation page. watchPayment: while it waits for
+ * payment, ask again every 3 seconds (the API asks Stripe), so "paid" shows as soon as Stripe knows.
+ */
+export function useBooking(code: string, { watchPayment = false } = {}) {
   return useQuery({
     queryKey: ["bookings", code],
     queryFn: async () => (await api<{ data: PlayerBooking }>(`/api/v1/bookings/${encodeURIComponent(code)}`)).data,
+    refetchInterval: (query) => (watchPayment && query.state.data?.status === "pending_payment" ? 3000 : false),
+  });
+}
+
+/**
+ * Pay online (FR-22): gets the payment page for a held booking from CourtKu (the one already open,
+ * or a new one) and goes to Stripe's own page. The player pays there, never on CourtKu.
+ */
+export function usePay() {
+  return useMutation({
+    mutationFn: async (code: string) =>
+      (await api<{ data: { url: string } }>(`/api/v1/bookings/${encodeURIComponent(code)}/pay`, { method: "POST" })).data.url,
+    onSuccess: (url) => window.location.assign(url),
   });
 }

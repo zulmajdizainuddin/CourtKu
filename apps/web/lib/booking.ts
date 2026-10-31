@@ -64,8 +64,15 @@ export type PlayerBooking = {
   minutes: number;
   total_sen: number;
   total: string; // "RM 20.00"
-  /** In M3 every booking is paid at the venue. */
+  /** true = paid at the counter; false = paid online (held while the player pays). */
   pay_at_venue: boolean;
+  paid: boolean;
+  payment_method: "cash" | "qr" | "card" | "online" | null;
+  /** The newest online payment attempt; problem = the money came in but couldn't confirm the booking. */
+  payment: {
+    status: "pending" | "paid" | "failed" | "expired";
+    problem: "amount_mismatch" | "booking_expired" | "booking_cancelled" | "already_paid" | null;
+  } | null;
   /** FR-24: whether the player can still cancel online, and until when. */
   can_cancel: boolean;
   cancel_until: string;

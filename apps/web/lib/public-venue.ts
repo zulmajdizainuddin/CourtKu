@@ -28,6 +28,11 @@ export type PublicVenue = {
     booking_window_days: number;
     /** Players cancel online until this many hours before the start (FR-24). */
     cancel_cutoff_hours: number;
+    /** How players can pay (FR-17): online on Stripe's page, at the counter, or either. */
+    pay_online: boolean;
+    pay_at_counter: boolean;
+    /** How long the court is held while a player pays online (FR-16). */
+    hold_minutes: number;
   };
 };
 

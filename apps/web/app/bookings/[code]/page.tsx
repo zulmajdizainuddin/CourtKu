@@ -82,10 +82,20 @@ function Confirmation() {
             </dd>
             <dt className="text-muted-foreground">Total</dt>
             <dd className="font-semibold">{booking.total}</dd>
-            {booking.status === "confirmed" && (
+            {(booking.status === "confirmed" || booking.status === "pending_payment" || booking.paid) && (
               <>
                 <dt className="text-muted-foreground">Payment</dt>
-                <dd>Pay at the counter when you arrive</dd>
+                <dd>
+                  {booking.paid ? (
+                    booking.payment_method === "online" ? "Paid online" : "Paid at the counter"
+                  ) : booking.status === "pending_payment" ? (
+                    <Link href={`/bookings/${booking.code}/status`} className="font-medium underline">
+                      Waiting for payment: continue
+                    </Link>
+                  ) : (
+                    "Pay at the counter when you arrive"
+                  )}
+                </dd>
               </>
             )}
           </dl>
