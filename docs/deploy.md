@@ -15,6 +15,7 @@ Browser ──► courtku.vercel.app (Vercel, Singapore) ──► courtku-api.o
 | Email | Brevo free plan (300 emails/day), SMTP on port 2525 | n/a |
 | Venue photos | Cloudinary free plan (25 credits/month), [ADR-018](adr/018-photos-on-cloudinary.md) | n/a |
 | Uptime | UptimeRobot, every 5 minutes on `/api/health` and the web home page | n/a |
+| Error alerts | Sentry free plan (5,000 errors a month): one project for the API, one for the web app | n/a |
 | Timed jobs | cron-job.org, every minute on `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)) | n/a |
 | After-deploy check | GitHub Actions, after every merge to `main` ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)) | n/a |
 
@@ -36,6 +37,25 @@ Free plan limits to know:
 | Every request times out, even `/up` | Render instance stuck or failed to deploy | Render → **Events** and **Logs**; **Manual Deploy → Restart service** |
 | The **After deploy** workflow fails with "still runs ... after 25 minutes" | The new code didn't deploy (build failed, or the deploy is still queued) | Render → **Events**, or Vercel → **Deployments**: read the failed build's log. Then re-run the workflow (Actions → After deploy → **Re-run jobs**) |
 | The **After deploy** workflow fails a check after the deploy | The new code broke something on the live site | Fix forward with a new PR, or go back: Render → **Events** → the previous deploy → **Rollback**; Vercel → **Deployments** → the previous production deployment → **Instant Rollback** |
+
+## Error alerts (Sentry)
+
+UptimeRobot only notices when the whole site is down. Sentry notices errors while it is up: a page that crashes for one venue, a booking email that keeps failing, a button that breaks in one browser. It emails the details (which page, which line of code), so problems are found before someone reports them.
+
+What is sent: the error and where in the code it happened. Never what visitors typed, their IP address, cookies or account details (`config/sentry.php`, `apps/web/lib/sentry.ts`, [security checklist](security.md)). Business rules saying no (e.g. "this time was just booked") are not errors and are never sent; Stripe not answering is.
+
+Set up once:
+
+1. Sign up at [sentry.io](https://sentry.io) (free **Developer** plan) with the CourtKu Gmail address.
+2. Create a project for the API: platform **Laravel**, name `courtku-api`. Copy its **DSN** (Settings → Projects → courtku-api → **Client Keys (DSN)**).
+3. Render → the API → **Environment**: add `SENTRY_LARAVEL_DSN` = that DSN.
+4. Create a second project for the web app: platform **Next.js**, name `courtku-web`. Copy its DSN.
+5. Vercel → the project → **Settings → Environment Variables**: add `NEXT_PUBLIC_SENTRY_DSN` = that DSN, for Production (and Preview). A DSN only lets someone *send* errors, so it is fine for browsers to see it.
+6. Optional, for readable stack traces: Sentry → **Settings → Auth Tokens** → create an organization token, and add `SENTRY_AUTH_TOKEN` (mark it **Sensitive**), `SENTRY_ORG` (the organization slug) and `SENTRY_PROJECT` = `courtku-web` in Vercel. The build then uploads source maps to Sentry; visitors never get them.
+7. Redeploy the web app in Vercel (variables are only read when it builds).
+8. Check: log in as the admin, open **/admin**, scroll to **Error alerts** and press **Test the API** and **Test the web app**. Each test error should show up in its Sentry project within a minute, and Sentry emails about each new kind of error.
+
+Locally nothing is sent unless you add the DSNs to `apps/api/.env` and `apps/web/.env.local`.
 
 ## After every deploy
 
@@ -105,6 +125,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `CACHE_STORE` | `database` | |
 | `QUEUE_CONNECTION` | `database` | Booking emails wait in the `jobs` table and the minute tick sends them ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)). `sync` sends them inside the request instead (slower booking, and lost if Brevo is down) |
 | `WEB_PROXY_SECRET` | a long random text, the **same** value as in Vercel, see *Web app secret* below | Only requests carrying it may say who the visitor is ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Empty = forwarded headers are believed from anyone |
+| `SENTRY_LARAVEL_DSN` | the `courtku-api` project's DSN, see *Error alerts (Sentry)* | Empty = no error alerts from the API |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
 | `STRIPE_WEBHOOK_SECRET` | the Connect webhook's **Signing secret** (`whsec_...`), see *Payment webhook* below | Proves each payment message really comes from Stripe ([ADR-006](adr/006-hosted-payment-page-webhook.md)). Without it every webhook is refused with 401 |
@@ -167,6 +188,8 @@ Stripe can't reach a laptop, so locally payments are confirmed by CourtKu asking
 | --- | --- |
 | `API_URL` | `https://courtku-api.onrender.com` |
 | `WEB_PROXY_SECRET` | the **same** value as in Render ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Not `NEXT_PUBLIC_`, so it never reaches browsers |
+| `NEXT_PUBLIC_SENTRY_DSN` | the `courtku-web` project's DSN, see *Error alerts (Sentry)*. Empty = no error alerts from the web app |
+| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` | optional: upload source maps when building, so errors show the real line of code |
 
 Vercel project settings: **Root Directory** `apps/web`, framework **Next.js**.
 

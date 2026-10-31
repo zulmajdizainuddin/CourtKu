@@ -5,6 +5,7 @@ use App\Http\Middleware\RequirePassword;
 use App\Http\Middleware\RequireTwoFactor;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrustWebProxy;
+use App\Payments\PaymentGatewayException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +14,7 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Sentry\Laravel\Integration;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -48,6 +50,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Unexpected errors go to Sentry, which emails us (docs/deploy.md). Without SENTRY_LARAVEL_DSN
+        // (tests, a laptop without it) nothing is sent.
+        Integration::handles($exceptions);
+
+        // A business rule saying no (SLOT_TAKEN, TOO_LATE_TO_CANCEL, ...) is the API working as it should:
+        // the player gets a clear answer. Never an error to report. Stripe not answering is reported, though.
+        $exceptions->dontReportWhen(fn (Throwable $e) => $e instanceof ApiException && ! $e instanceof PaymentGatewayException);
+
         $isJson = fn (Request $request) => $request->is('api/*') || $request->expectsJson();
 
         $exceptions->shouldRenderJsonWhen($isJson);

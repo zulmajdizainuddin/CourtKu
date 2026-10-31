@@ -3,6 +3,7 @@
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\TickController;
 use App\Http\Controllers\V1\Admin\StatsController;
+use App\Http\Controllers\V1\Admin\TestErrorController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\V1\AvailabilityController;
 use App\Http\Controllers\V1\BookingController;
@@ -181,6 +182,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/venues/{venue}/suspend', [AdminVenueController::class, 'suspend']);
             // Platform totals (FR-33).
             Route::get('/stats', StatsController::class);
+            // Fails on purpose, to check that error alerts reach Sentry (docs/deploy.md).
+            Route::post('/test-error', TestErrorController::class)->middleware('throttle:5,1');
         });
     });
 });
