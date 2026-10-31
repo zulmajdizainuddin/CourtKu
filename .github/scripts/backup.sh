@@ -89,6 +89,9 @@ dump_options=(--single-transaction --quick --routines --triggers --no-tablespace
 gpg --batch --yes --quiet --pinentry-mode loopback --passphrase-fd 3 \
   --symmetric --cipher-algo AES256 --output "$OUT_DIR/$FILE" "$WORK/dump.sql.gz" 3<<<"$BACKUP_PASSWORD"
 rm -f "$WORK/dump.sql.gz"
+# The locked file only: readable by everyone on this machine, so the upload step (which doesn't run as
+# the container's root user) can read it. It's encrypted; everything unlocked stays private (umask 077).
+chmod 644 "$OUT_DIR/$FILE"
 echo "Locked backup: $FILE ($(du -h "$OUT_DIR/$FILE" | cut -f1))"
 
 # --- 3. Restore, from the locked file, into an empty database -------------------------------
