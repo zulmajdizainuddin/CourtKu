@@ -263,7 +263,7 @@ it('ADR-022 finishes a webhook that was saved but not acted on, at the next tick
     app(PaymentProcessor::class)->save('stripe', $event);
 
     $this->travel(2)->minutes();
-    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 1. Reconciled payments: 0. Reminders: 0. Emails sent: 0.');
+    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 1. Reconciled payments: 0. Demo bookings: 0. Reminders: 0. Emails sent: 0.');
 
     expect($booking->fresh()->status)->toBe(BookingStatus::Confirmed)
         ->and(WebhookEvent::firstOrFail()->processed_at)->not->toBeNull();

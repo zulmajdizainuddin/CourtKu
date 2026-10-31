@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Demo\DemoWorld;
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
@@ -28,7 +29,8 @@ use Throwable;
  *
  * Walk-in and phone bookings have no player account, so nobody is emailed about them; an unpaid
  * hold that is given up or runs out was never booked, so neither is. The venue's owner can switch
- * the venue emails off (venues.booking_emails).
+ * the venue emails off (venues.booking_emails). The demo world's made-up players are never emailed
+ * (ADR-030): their bookings would only waste the daily email allowance.
  *
  * The emails are queued once the change is saved and sent by the minute tick (ADR-027), so a slow
  * or failing email server never slows down, or undoes, a booking.
@@ -37,6 +39,10 @@ class BookingEmails
 {
     public function confirmed(Booking $booking): void
     {
+        if ($this->isDemo($booking)) {
+            return;
+        }
+
         $this->afterSaving($booking, function (Booking $booking) {
             $booking->user?->notify(new BookingConfirmed($booking));
 
@@ -48,7 +54,7 @@ class BookingEmails
 
     public function cancelled(Booking $booking, BookingStatus $from, ?User $by): void
     {
-        if ($from !== BookingStatus::Confirmed) {
+        if ($from !== BookingStatus::Confirmed || $this->isDemo($booking)) {
             return;
         }
 
@@ -61,6 +67,14 @@ class BookingEmails
                 $this->tellVenue($booking, new PlayerCancelledBooking($booking));
             }
         });
+    }
+
+    /** Made by the demo world (ADR-030): a demo player, or a walk-in at a demo venue. */
+    private function isDemo(Booking $booking): bool
+    {
+        return $booking->user_id === null
+            ? (bool) $booking->venue?->is_demo
+            : DemoWorld::isDemoPlayer($booking->user);
     }
 
     private function tellVenue(Booking $booking, NewPlayerBooking|PlayerCancelledBooking $email): void

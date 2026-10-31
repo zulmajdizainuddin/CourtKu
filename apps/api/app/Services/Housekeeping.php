@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Demo\DemoWorld;
 use App\Enums\BookingStatus;
 use App\Exceptions\ApiException;
 use App\Models\Booking;
 use App\Models\WebhookEvent;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
+use Throwable;
 
 /**
  * The jobs that run every minute (ADR-022):
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Queue;
  *   - mark checked-in bookings that have ended as completed;
  *   - finish payment webhooks that were saved but failed half way (PaymentProcessor);
  *   - look up payments still pending after 20 minutes with the gateway, each every 15 (reconciliation);
+ *   - keep the demo world up to date, a few seconds at a time (ADR-030, DemoWorld);
  *   - queue the "your game is tomorrow" reminders that are due (FR-26, Reminders);
  *   - send the emails waiting in the queue (ADR-027).
  *
@@ -29,10 +32,11 @@ class Housekeeping
         private readonly BookingStateMachine $machine = new BookingStateMachine,
         private readonly PaymentProcessor $payments = new PaymentProcessor,
         private readonly Reminders $reminders = new Reminders,
+        private readonly DemoWorld $demo = new DemoWorld,
     ) {}
 
     /**
-     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int, reconciled_payments: int, reminders: int, emails_sent: int}
+     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int, reconciled_payments: int, demo_bookings: int, reminders: int, emails_sent: int}
      */
     public function run(): array
     {
@@ -41,6 +45,7 @@ class Housekeeping
         $reconciled = app(Checkouts::class)->reconcile();
         $expired = $this->holds->releaseExpired();
         $completed = $this->completeFinished();
+        $demo = $this->demoStep();
         $reminders = $this->reminders->queueDue();
 
         return [
@@ -48,6 +53,7 @@ class Housekeeping
             'completed_bookings' => $completed,
             'retried_webhooks' => $retried,
             'reconciled_payments' => $reconciled,
+            'demo_bookings' => $demo['bookings'],
             'reminders' => $reminders,
             // Last, so emails queued by the jobs above go out in this same tick.
             'emails_sent' => $this->sendQueuedEmails(),
@@ -69,6 +75,23 @@ class Housekeeping
         Artisan::call('queue:work', ['--stop-when-empty' => true, '--max-jobs' => 50, '--max-time' => 20, '--sleep' => 0]);
 
         return max(0, $waiting - Queue::size());
+    }
+
+    /**
+     * The demo world's few seconds (ADR-030). It must never stop the real jobs around it: a failure is
+     * reported to Sentry (docs/deploy.md) and the tick carries on.
+     *
+     * @return array{bookings: int}
+     */
+    private function demoStep(): array
+    {
+        try {
+            return $this->demo->step();
+        } catch (Throwable $e) {
+            report($e);
+
+            return ['bookings' => 0];
+        }
     }
 
     /** Webhooks saved more than a minute ago but never acted on (the request failed half way). */

@@ -28,6 +28,15 @@ Free plan limits to know:
 - There is no Redis yet: cache and sessions use MySQL. Redis returns with the background worker in a later milestone.
 - Moving to an always-on server (e.g. Oracle Cloud with Coolify) only needs the same Docker image and these variables.
 
+## Demo world
+
+The live site runs on 20 made-up venues full of bookings ([ADR-030](adr/030-a-rolling-demo-world.md)). With `DEMO_WORLD=true` in Render, the minute tick spends up to 10 seconds a minute keeping them right: today and the next days first, then 30 days of history and 13 days ahead. After the first deploy it fills itself within a few hours; after that, each night a new day appears, ended games are finished, and between 3 and 4 am what visitors booked at demo venues is cleared.
+
+- **Progress:** cron-job.org → the CourtKu tick → a run's response shows `"demo_bookings"`, the bookings made in that minute (0 once everything is filled).
+- **Nobody is emailed** about demo bookings, and on the live site nothing is ever sent to `example.com` addresses.
+- **Turn it off:** set `DEMO_WORLD=false`. The demo venues and bookings stay as they are; nothing new is made.
+- Demo venues are left out of the admin totals.
+
 ## Nightly backups
 
 Every night at 3 am (Malaysia time) a copy of the live database is made, locked with a password, and restored into an empty database to prove it works ([ADR-029](adr/029-nightly-locked-backups-in-a-private-repo.md)). The script is `.github/scripts/backup.sh` in this repository. It runs from a separate **private** repository, `courtku-backups`, so the locked copies are visible only to you. They are kept for 30 days.
@@ -174,6 +183,8 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `QUEUE_CONNECTION` | `database` | Booking emails wait in the `jobs` table and the minute tick sends them ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)). `sync` sends them inside the request instead (slower booking, and lost if Brevo is down) |
 | `WEB_PROXY_SECRET` | a long random text, the **same** value as in Vercel, see *Web app secret* below | Only requests carrying it may say who the visitor is ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Empty = forwarded headers are believed from anyone |
 | `SENTRY_LARAVEL_DSN` | the `courtku-api` project's DSN, see *Error alerts (Sentry)* | Empty = no error alerts from the API |
+| `DEMO_WORLD` | `true` | The 20 demo venues and their bookings, kept fresh by the minute tick ([ADR-030](adr/030-a-rolling-demo-world.md)). `false` stops it; the demo data stays |
+| `DEMO_STRIPE_ACCOUNT_ID` | the Test Venue's Stripe account, `acct_...` (Stripe dashboard of that account → **Settings → Account details**, or `venue_payment_accounts.account_id`) | Lets one demo venue take the test card. Empty = demo venues are pay-at-venue only |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
 | `STRIPE_WEBHOOK_SECRET` | the Connect webhook's **Signing secret** (`whsec_...`), see *Payment webhook* below | Proves each payment message really comes from Stripe ([ADR-006](adr/006-hosted-payment-page-webhook.md)). Without it every webhook is refused with 401 |

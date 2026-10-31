@@ -3,6 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-11-05
 - **Builds on:** [ADR-009](009-venue-own-gateway-account.md) (each venue's own account) and [ADR-023](023-stripe-test-mode-instead-of-billplz.md) (Stripe test mode)
+- **Changed by:** [ADR-030](030-a-rolling-demo-world.md): the online demo venue shares the Test Venue's Stripe account, so an account may belong to more than one venue.
 
 ## Context
 
