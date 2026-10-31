@@ -32,6 +32,7 @@ Free plan limits to know:
 | --- | --- | --- |
 | UptimeRobot says down, `/api/health` shows `"database": false` | Aiven powered the database off | Aiven console → `courtku-db` → **Power on**. Wait for **Running**; the API reconnects by itself. If tables were never created, Render → **Manual Deploy → Restart service** runs the migrations again |
 | Emails stop arriving, Brevo logs are empty | Brevo SMTP key expired (1-year expiry, or 90 days without sending) | Brevo → **SMTP & API** → generate a new key → update `MAIL_PASSWORD` in Render |
+| Booking emails stop, but verify-email and password emails still arrive | The minute tick isn't running, so queued emails wait in `jobs` | cron-job.org → the CourtKu tick's history. Once it runs again, the waiting emails all go out. Emails that failed 3 times are listed by `php artisan queue:failed` (from the laptop, as in *Make an account the platform admin*); `php artisan queue:retry all` sends them again |
 | Every request times out, even `/up` | Render instance stuck or failed to deploy | Render → **Events** and **Logs**; **Manual Deploy → Restart service** |
 | The **After deploy** workflow fails with "still runs ... after 25 minutes" | The new code didn't deploy (build failed, or the deploy is still queued) | Render → **Events**, or Vercel → **Deployments**: read the failed build's log. Then re-run the workflow (Actions → After deploy → **Re-run jobs**) |
 | The **After deploy** workflow fails a check after the deploy | The new code broke something on the live site | Fix forward with a new PR, or go back: Render → **Events** → the previous deploy → **Rollback**; Vercel → **Deployments** → the previous production deployment → **Instant Rollback** |
@@ -102,7 +103,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `SESSION_DRIVER` | `database` | |
 | `SESSION_SECURE_COOKIE` | `true` | Cookie is only sent over HTTPS |
 | `CACHE_STORE` | `database` | |
-| `QUEUE_CONNECTION` | `sync` | No background worker yet |
+| `QUEUE_CONNECTION` | `database` | Booking emails wait in the `jobs` table and the minute tick sends them ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)). `sync` sends them inside the request instead (slower booking, and lost if Brevo is down) |
 | `WEB_PROXY_SECRET` | a long random text, the **same** value as in Vercel, see *Web app secret* below | Only requests carrying it may say who the visitor is ([ADR-025](adr/025-web-app-proves-itself-with-a-secret.md)). Empty = forwarded headers are believed from anyone |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
 | `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
@@ -137,15 +138,15 @@ On every start, the container runs the database migrations (`apps/api/docker/45-
 
 Unpaid holds expire and finished bookings complete through `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Render's free plan has no scheduler, so a free cron service calls it:
 
-1. Make a long random secret (e.g. 40 letters and digits from a password manager) and set it as `CRON_SECRET` in Render. Render redeploys.
+1. Make a long random secret (e.g. 40 letters and digits from a password manager) and set it as `CRON_SECRET` in Render. Render redeploys. The tick also sends the queued booking emails ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)).
 2. Sign up at [cron-job.org](https://cron-job.org) (free) and create a cron job:
    - **URL** `https://courtku-api.onrender.com/api/tick`
    - **Schedule** every 1 minute
    - **Advanced → Request method** `POST`
    - **Advanced → Headers** `X-Cron-Secret` = the same secret
-3. Save, then open the job's history: each run should answer **200** with `{"data":{"expired_holds":0,"completed_bookings":0}}`. A 403 means the header doesn't match `CRON_SECRET`; a 404 means `CRON_SECRET` isn't set in Render.
+3. Save, then open the job's history: each run should answer **200** with `{"data":{"expired_holds":0,"completed_bookings":0,...,"emails_sent":0}}`. A 403 means the header doesn't match `CRON_SECRET`; a 404 means `CRON_SECRET` isn't set in Render.
 
-Locally, run `php artisan schedule:work` in a terminal (or `php artisan courtku:tick` once). Players never wait on this job: whatever reads free times expires overdue holds first.
+Locally, run `php artisan schedule:work` in a terminal (or `php artisan courtku:tick` once). Players never wait on this job: whatever reads free times expires overdue holds first. Booking emails reach Mailpit only while it runs.
 
 ## Payment webhook (Stripe Connect)
 
@@ -182,5 +183,5 @@ Do Vercel before Render. While only Vercel has the secret, the API still believe
 
 ## Known gaps before real customers
 
-- No queue worker or backups yet. Timed jobs depend on cron-job.org calling `/api/tick`.
+- No queue worker or backups yet. Timed jobs and booking emails depend on cron-job.org calling `/api/tick` ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)).
 - No staging server ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)): each merge goes straight to the live site, checked afterwards by the After deploy workflow.

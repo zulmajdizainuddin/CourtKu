@@ -6,16 +6,25 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Support\MalaysiaTime;
 use App\Support\Money;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
  * Money came in online but couldn't simply confirm the booking (plan section 9: amount mismatch, late
  * payment, paid after a cancel, paid twice). The owner gets the details to sort it out, usually a refund
- * (FR-25); the player is told the venue will refund them.
+ * (FR-25); the player is told the venue will refund them. Queued like the booking emails (ADR-027).
  */
-class PaymentNeedsAttention extends Notification
+class PaymentNeedsAttention extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    public int $tries = 3;
+
+    /** @var list<int> */
+    public array $backoff = [60, 300];
+
     public function __construct(
         private readonly Payment $payment,
         private readonly Booking $booking,

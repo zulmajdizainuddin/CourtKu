@@ -39,6 +39,8 @@ class BookingService
     /** FR-16: a player can wait on at most this many unpaid bookings at once, so one person can't hold a whole evening. */
     public const MAX_HOLDS_PER_PLAYER = 2;
 
+    public function __construct(private readonly BookingEmails $emails = new BookingEmails) {}
+
     /**
      * Checks a booking (venue approved, court bookable, start on :00 or :30, allowed length, opening
      * hours, closures, window, notice, free) and works out its price. Throws a clear error when it
@@ -133,6 +135,11 @@ class BookingService
                     'total_sen' => $draft->totalSen,
                     'hold_expires_at' => $booking->hold_expires_at?->toIso8601String(),
                 ]));
+
+                // Paid at the venue: confirmed straight away (FR-26). A hold waits for its payment.
+                if ($booking->status === BookingStatus::Confirmed) {
+                    $this->emails->confirmed($booking);
+                }
 
                 return $booking;
             });

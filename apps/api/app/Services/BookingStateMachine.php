@@ -19,9 +19,12 @@ use Illuminate\Support\Facades\DB;
  * The booking is re-read with a row lock (lockForUpdate) inside a transaction first, so two
  * changes at the same moment (e.g. two staff tapping "cancel" and "check in") happen one after
  * the other, and the second sees the first's result. Every change is written to the audit log.
+ * Confirming and cancelling also email the player and the venue (BookingEmails, FR-26, FR-27).
  */
 class BookingStateMachine
 {
+    public function __construct(private readonly BookingEmails $emails = new BookingEmails) {}
+
     public function transition(Booking $booking, BookingStatus $to, ?User $by, ?string $reason = null): Booking
     {
         return DB::transaction(function () use ($booking, $to, $by, $reason) {
@@ -54,6 +57,12 @@ class BookingStateMachine
                 'reason' => $reason,
             ]));
 
+            match ($to) {
+                BookingStatus::Confirmed => $this->emails->confirmed($locked),
+                BookingStatus::Cancelled => $this->emails->cancelled($locked, $from, $by),
+                default => null,
+            };
+
             return $locked;
         });
     }
@@ -74,6 +83,7 @@ class BookingStateMachine
             $locked->status = BookingStatus::Confirmed;
             $locked->save();
             AuditLog::record($locked, 'booking.reclaimed', null, ['from' => 'expired', 'to' => 'confirmed', 'reason' => $reason]);
+            $this->emails->confirmed($locked);
 
             return $locked;
         });

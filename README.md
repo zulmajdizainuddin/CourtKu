@@ -78,7 +78,7 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 
 **Photo uploads** need a free Cloudinary account; see the `CLOUDINARY_*` lines in `apps/api/.env.example` ([ADR-018](docs/adr/018-photos-on-cloudinary.md)).
 
-**Online payments** need a free Stripe account in test mode with **Connect** turned on; put its secret key (`sk_test_...`) in `STRIPE_SECRET_KEY` ([ADR-023](docs/adr/023-stripe-test-mode-instead-of-billplz.md), [ADR-024](docs/adr/024-venues-connect-through-stripe-connect.md)). Stripe can't reach your laptop, so locally a payment is confirmed when the player comes back from Stripe's page. Run `php artisan schedule:work` for the every-minute jobs (hold expiry, payment checks). Everything else works without these.
+**Online payments** need a free Stripe account in test mode with **Connect** turned on; put its secret key (`sk_test_...`) in `STRIPE_SECRET_KEY` ([ADR-023](docs/adr/023-stripe-test-mode-instead-of-billplz.md), [ADR-024](docs/adr/024-venues-connect-through-stripe-connect.md)). Stripe can't reach your laptop, so locally a payment is confirmed when the player comes back from Stripe's page. Run `php artisan schedule:work` for the every-minute jobs (hold expiry, payment checks, and sending the queued booking emails to Mailpit, [ADR-027](docs/adr/027-emails-queued-and-sent-by-the-tick.md)). Everything else works without these.
 
 ## Tests and checks
 

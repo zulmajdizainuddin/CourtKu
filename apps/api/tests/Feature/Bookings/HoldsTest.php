@@ -183,11 +183,11 @@ it('ADR-022 the every-minute tick expires holds and completes finished bookings,
 
     // 10:10 am: the hold still has time and the game hasn't ended.
     $this->travel(10)->minutes();
-    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 0. Reconciled payments: 0.');
+    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 0. Reconciled payments: 0. Emails sent: 0.');
 
     $this->travelTo('2026-11-02 04:00:00'); // 12:00 pm: the hold ran out, the 11 am game is over
     $this->artisan('courtku:tick')
-        ->expectsOutput('Expired holds: 1. Completed bookings: 1. Retried webhooks: 0. Reconciled payments: 0.')
+        ->expectsOutput('Expired holds: 1. Completed bookings: 1. Retried webhooks: 0. Reconciled payments: 0. Emails sent: 0.')
         ->assertSuccessful();
 
     expect($late->fresh()->status)->toBe(BookingStatus::Expired)
@@ -196,7 +196,7 @@ it('ADR-022 the every-minute tick expires holds and completes finished bookings,
         ->and($notOver->fresh()->status)->toBe(BookingStatus::Confirmed);
 
     // Running it again changes nothing.
-    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 0. Reconciled payments: 0.');
+    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 0. Reconciled payments: 0. Emails sent: 0.');
 });
 
 it('ADR-022 runs the tick from a cron service only with the secret', function () {
@@ -214,7 +214,7 @@ it('ADR-022 runs the tick from a cron service only with the secret', function ()
 
     $this->postJson('/api/tick', [], ['X-Cron-Secret' => 'a-long-random-secret'])
         ->assertOk()
-        ->assertExactJson(['data' => ['expired_holds' => 1, 'completed_bookings' => 0, 'retried_webhooks' => 0, 'reconciled_payments' => 0]]);
+        ->assertExactJson(['data' => ['expired_holds' => 1, 'completed_bookings' => 0, 'retried_webhooks' => 0, 'reconciled_payments' => 0, 'emails_sent' => 0]]);
     expect($booking->fresh()->status)->toBe(BookingStatus::Expired);
 });
 

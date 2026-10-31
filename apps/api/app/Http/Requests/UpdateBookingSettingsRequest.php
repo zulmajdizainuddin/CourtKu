@@ -10,7 +10,7 @@ use Illuminate\Validation\Validator;
 /**
  * PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13).
  * { "slot_minutes": 60, "min_minutes": 60, "max_minutes": 180, "booking_window_days": 14, "min_notice_minutes": 0,
- *   "cancel_cutoff_hours": 24 }
+ *   "cancel_cutoff_hours": 24, "booking_emails": true }
  */
 class UpdateBookingSettingsRequest extends FormRequest
 {
@@ -30,6 +30,9 @@ class UpdateBookingSettingsRequest extends FormRequest
             'min_notice_minutes' => ['required', 'integer', 'in:0,30,60,120,1440'],
             // FR-24: players cancel online until 2, 6, 12, 24 or 48 hours before the start.
             'cancel_cutoff_hours' => ['required', 'integer', 'in:2,6,12,24,48'],
+            // FR-27: emails to the venue's owners and staff about player bookings and cancels.
+            // Optional, so a caller that doesn't know about it leaves it as it is.
+            'booking_emails' => ['sometimes', 'boolean'],
         ];
     }
 
