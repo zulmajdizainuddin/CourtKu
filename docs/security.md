@@ -51,6 +51,12 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 - [x] **No SQL built from user input.** All queries go through Eloquent or the query builder with bound values.
 - [x] **Photos are re-processed** by Cloudinary on upload, which also strips location data (EXIF). [ADR-018](adr/018-photos-on-cloudinary.md)
 
+## Knowing when something breaks
+
+- [x] **Uptime alerts:** UptimeRobot checks the API's `/api/health` and the web home page every 5 minutes and emails when either is down.
+- [x] **Error alerts:** Sentry emails about unexpected errors in the API and the web app (docs/deploy.md). It gets the error and the line of code only: no request bodies, IP addresses, cookies, headers, user details or code values (`config/sentry.php`, `apps/web/lib/sentry.ts`). Business rules saying no are never reported.
+- [x] **After every deploy** the live site is checked automatically ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)).
+
 ## Dependencies
 
 - [x] CI runs `composer audit` and `npm audit --audit-level=high` on every pull request, so a package with a known hole blocks the merge.
@@ -58,7 +64,6 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 ## Still open
 
 - [ ] **Scripts in the web CSP.** A full `script-src` needs a fresh nonce on every page, which turns off Next.js' static and cached pages. Revisit if we add anything that shows user-written HTML.
-- [ ] **Error alerts** (Sentry) and **uptime alerts**: M5 PR 8.
 - [ ] **Nightly backups with a tested restore**: M5 PR 9.
 - [ ] **A staging copy** to try changes before the live site. Not on free plans ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)); instead every deploy is checked automatically by the After deploy workflow.
 - [ ] **Own domain and email sender**, so emails stop landing in spam and DMARC passes.

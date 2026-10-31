@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ErrorAlertsCheck } from "@/components/admin/error-alerts-check";
 import { TwoFactorGate } from "@/components/auth/two-factor-gate";
 import { FormAlert } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export default function AdminPage() {
           <TwoFactorGate user={user}>
             <PlatformTotals />
             <AdminVenues />
+            <ErrorAlertsCheck />
           </TwoFactorGate>
         ) : (
           // The API refuses every admin request anyway; this only avoids showing an empty page.
