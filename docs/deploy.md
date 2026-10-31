@@ -30,7 +30,7 @@ Free plan limits to know:
 
 ## Demo world
 
-The live site runs on 20 made-up venues full of bookings ([ADR-030](adr/030-a-rolling-demo-world.md)). With `DEMO_WORLD=true` in Render, the minute tick spends up to 10 seconds a minute keeping them right: today and the next days first, then 30 days of history and 13 days ahead. After the first deploy it fills itself within a few hours; after that, each night a new day appears, ended games are finished, and between 3 and 4 am what visitors booked at demo venues is cleared.
+The live site runs on 20 made-up venues full of bookings ([ADR-030](adr/030-a-rolling-demo-world.md)). With `DEMO_WORLD=true` in Render, the minute tick spends about 8 seconds a minute keeping them right: today and the next days first, then 30 days of history and 13 days ahead. After the first deploy it fills itself within a few hours; after that, each night a new day appears, ended games are finished, and between 3 and 4 am what visitors booked at demo venues is cleared.
 
 - **Progress:** cron-job.org → the CourtKu tick → a run's response shows `"demo_bookings"`, the bookings made in that minute (0 once everything is filled).
 - **Nobody is emailed** about demo bookings, and on the live site nothing is ever sent to `example.com` addresses.

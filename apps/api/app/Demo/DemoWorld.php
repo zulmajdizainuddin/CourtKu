@@ -86,7 +86,7 @@ class DemoWorld
             $venues = $this->ensureVenues();
             $players = $this->ensurePlayers();
             $done['dropped'] = $this->dropOldDays($venues);
-            $done['finished'] = $this->finishEndedGames($venues);
+            $done['finished'] = $this->finishEndedGames($venues, $deadline);
             $done['cleared'] = $this->clearVisitorBookings($venues, $players);
             [$done['bookings'], $done['days_left']] = $this->fillDays($venues, $players, $deadline);
         } finally {
@@ -238,15 +238,18 @@ class DemoWorld
      *
      * @param  Collection<int, Venue>  $venues
      */
-    private function finishEndedGames(Collection $venues): int
+    private function finishEndedGames(Collection $venues, float $deadline): int
     {
         $ended = Booking::whereIn('venue_id', $venues->modelKeys())
             ->where('status', BookingStatus::Confirmed->value)
             ->where('ends_at', '<=', now())
-            ->limit(1000)
+            ->limit(300)
             ->get(['id', 'code', 'starts_at', 'ends_at', 'paid_at']);
 
         foreach ($ended as $booking) {
+            if (microtime(true) >= $deadline) {
+                break; // the rest next minute
+            }
             $roll = crc32($booking->code) % 100;
             if ($roll < 5) {
                 Booking::whereKey($booking->id)->update(['status' => BookingStatus::NoShow->value]);
@@ -311,47 +314,61 @@ class DemoWorld
         }
         usort($dates, fn (CarbonImmutable $a, CarbonImmutable $b) => abs($a->diffInDays($today)) <=> abs($b->diffInDays($today)));
 
-        $filled = DB::table('demo_days')->whereIn('venue_id', $venues->modelKeys())
-            ->get(['venue_id', 'business_date'])
-            ->map(fn ($row) => "{$row->venue_id}:".substr((string) $row->business_date, 0, 10))
-            ->flip();
+        // Days already finished, and how far unfinished ones got (courts done, in court order).
+        $progress = DB::table('demo_days')->whereIn('venue_id', $venues->modelKeys())
+            ->get(['venue_id', 'business_date', 'courts_done', 'finished_at'])
+            ->keyBy(fn ($row) => "{$row->venue_id}:".substr((string) $row->business_date, 0, 10));
 
         $todo = [];
         foreach ($dates as $date) {
             foreach ($venues as $venue) {
-                if (! isset($filled["{$venue->id}:{$date->toDateString()}"])) {
-                    $todo[] = [$venue, $date];
+                $row = $progress["{$venue->id}:{$date->toDateString()}"] ?? null;
+                if ($row === null || $row->finished_at === null) {
+                    $todo[] = [$venue, $date, (int) ($row->courts_done ?? 0)];
                 }
             }
         }
 
         $made = 0;
         $realNow = CarbonImmutable::now();
-        foreach ($todo as $i => [$venue, $date]) {
-            if (microtime(true) >= $deadline) {
+        foreach ($todo as $i => [$venue, $date, $courtsDone]) {
+            // At least one court each minute, even when the jobs before used the time, so it always moves on.
+            if ($i > 0 && microtime(true) >= $deadline) {
                 return [$made, count($todo) - $i];
             }
-            $made += $this->fillDay($venue, $date, $players, $realNow);
-            DB::table('demo_days')->insertOrIgnore(['venue_id' => $venue->id, 'business_date' => $date->toDateString(), 'created_at' => $realNow]);
+            [$count, $courtsDone, $finished] = $this->fillDay($venue, $date, $players, $realNow, $courtsDone, $deadline);
+            $made += $count;
+            DB::table('demo_days')->upsert(
+                [['venue_id' => $venue->id, 'business_date' => $date->toDateString(), 'courts_done' => $courtsDone, 'finished_at' => $finished ? $realNow : null, 'created_at' => $realNow]],
+                ['venue_id', 'business_date'],
+                ['courts_done', 'finished_at'],
+            );
+            if (! $finished) {
+                return [$made, count($todo) - $i]; // out of time half way through the day: next minute
+            }
         }
 
         return [$made, 0];
     }
 
     /**
-     * One venue's bookings for one day, made through the real booking engine. Returns how many.
+     * One venue's bookings for one day, made through the real booking engine, court by court from court
+     * number $from (in court order). Stops after a court once the deadline has passed, so a big day is
+     * spread over several minutes' ticks.
      *
      * @param  Collection<int, User>  $players
+     * @return array{0: int, 1: int, 2: bool} bookings made, courts done so far, and whether the day is finished
      */
-    private function fillDay(Venue $venue, CarbonImmutable $date, Collection $players, CarbonImmutable $realNow): int
+    private function fillDay(Venue $venue, CarbonImmutable $date, Collection $players, CarbonImmutable $realNow, int $from, float $deadline): array
     {
         $availability = new AvailabilityService($venue);
         $open = $availability->openMinutes($date);
         if ($open === [] || $players->isEmpty()) {
-            return 0;
+            return [0, 0, true];
         }
 
-        // The same day always gets the same bookings: the dice are seeded with the venue and the date.
+        // The same day always gets the same bookings, whether made in one go or over several ticks: the
+        // dice are seeded with the venue and the date (and each court below).
         $dice = new Randomizer(new Mt19937(crc32("{$venue->slug}:{$date->toDateString()}")));
         $busy = (float) collect(DemoVenues::all())->firstWhere('slug', $venue->slug)['busy'];
         $weekend = in_array($date->dayOfWeek, [0, 6], true) ? 1.25 : 1.0;
@@ -363,7 +380,15 @@ class DemoWorld
 
         $openSet = array_flip($open);
         $made = 0;
-        foreach ($venue->courts()->bookable()->with('sports')->get() as $court) {
+        $courts = $venue->courts()->bookable()->with('sports')->orderBy('sort_order')->orderBy('id')->get()->values();
+        foreach ($courts as $index => $court) {
+            if ($index < $from) {
+                continue; // made in an earlier tick
+            }
+            if ($index > $from && microtime(true) >= $deadline) {
+                return [$made, $index, false];
+            }
+            $dice = new Randomizer(new Mt19937(crc32("{$venue->slug}:{$date->toDateString()}:{$court->id}")));
             $minute = $open[0];
             $last = end($open);
             while ($minute <= $last) {
@@ -388,7 +413,7 @@ class DemoWorld
             }
         }
 
-        return $made;
+        return [$made, $courts->count(), true];
     }
 
     /**
