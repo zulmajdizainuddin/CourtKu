@@ -27,3 +27,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [020](020-price-rules-never-overlap.md) | Price rules never overlap; a court's own rule beats an all-courts rule | 2026-10-31 |
 | [021](021-holds-move-to-m4.md) | Checkout holds arrive with online payment (M4), not in M3 | 2026-11-01 |
 | [022](022-timed-jobs-without-a-scheduler.md) | Timed jobs run lazily and from a cron-called endpoint | 2026-11-04 |
+| [023](023-stripe-test-mode-instead-of-billplz.md) | Online payments use Stripe in test mode, not the Billplz Sandbox | 2026-11-05 |

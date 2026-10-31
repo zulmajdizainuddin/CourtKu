@@ -36,6 +36,12 @@ return [
         'folder' => env('CLOUDINARY_FOLDER', 'courtku'),
     ],
 
+    // Stripe test mode (ADR-023). Each venue connects its own Stripe account (ADR-009); this key is only
+    // for trying the gateway locally (php artisan courtku:stripe-try) and connecting the local demo venue.
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY'),
+    ],
+
     // The every-minute jobs (ADR-022): a cron service calls POST /api/tick with this secret.
     // Empty = the endpoint is off (404); the scheduler can still run `php artisan courtku:tick`.
     'cron' => [
