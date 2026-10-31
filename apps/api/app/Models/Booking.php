@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property int $total_sen
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $checked_in_at
+ * @property Carbon|null $reminder_sent_at when the "your game is tomorrow" email was queued (FR-26)
  * @property Carbon|null $paid_at paid at the counter (FR-28)
  * @property PaymentMethod|null $payment_method
  * @property int|null $paid_by
@@ -51,6 +52,7 @@ class Booking extends Model
             'total_sen' => 'integer',
             'cancelled_at' => 'datetime',
             'checked_in_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
             'paid_at' => 'datetime',
             'payment_method' => PaymentMethod::class,
         ];
