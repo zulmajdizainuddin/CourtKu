@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Database\Factories\PriceRuleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['court_id', 'name', 'weekdays', 'starts_at', 'ends_at', 'ends_next_day', 'price_sen'])]
 class PriceRule extends Model
 {
+    use ClearsAvailabilityCache;
+
     /** @use HasFactory<PriceRuleFactory> */
     use HasFactory;
 

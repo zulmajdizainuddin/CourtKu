@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BookingSource;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentMethod;
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,8 @@ use Illuminate\Support\Carbon;
 #[Fillable(['code', 'idempotency_key', 'venue_id', 'court_id', 'sport_id', 'user_id', 'customer_name', 'customer_phone', 'source', 'starts_at', 'ends_at', 'business_date', 'total_sen', 'created_by'])]
 class Booking extends Model
 {
+    use ClearsAvailabilityCache;
+
     protected function casts(): array
     {
         return [

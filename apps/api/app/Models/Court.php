@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsAvailabilityCache;
 use Database\Factories\CourtFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'is_indoor', 'base_price_sen', 'is_active', 'sort_order'])]
 class Court extends Model
 {
+    use ClearsAvailabilityCache;
+
     /** @use HasFactory<CourtFactory> */
     use HasFactory;
 

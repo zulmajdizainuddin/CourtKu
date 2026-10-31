@@ -73,7 +73,8 @@ it('FR-13 lets players book right up to the start time, or with the venue\'s not
     $response = $this->getJson('/api/v1/venues/arena-test/availability?date=2026-11-02&sport=badminton');
     expect(cellTimes($response)[0])->toBe('20:00'); // book at 7:50 pm for 8:00 pm
 
-    Venue::where('slug', 'arena-test')->update(['min_notice_minutes' => 60]);
+    // Saved like the Settings tab does, so the kept time grid is thrown away (ADR-028).
+    Venue::where('slug', 'arena-test')->firstOrFail()->update(['min_notice_minutes' => 60]);
     $response = $this->getJson('/api/v1/venues/arena-test/availability?date=2026-11-02&sport=badminton');
     expect(cellTimes($response)[0])->toBe('21:00'); // 8:00 pm and 8:30 pm are less than an hour away
 });

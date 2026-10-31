@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOpeningHoursRequest;
 use App\Http\Resources\OperatingHourResource;
 use App\Models\Venue;
+use App\Services\AvailabilityCache;
 use App\Services\BookingConflicts;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,8 @@ class OpeningHoursController extends Controller
         DB::transaction(function () use ($request, $venue) {
             $venue->operatingHours()->delete();
             $venue->operatingHours()->createMany($request->periods());
+            // The delete above is a plain query, and a week closed every day creates nothing (ADR-028).
+            AvailabilityCache::forget($venue->id);
         });
 
         return $this->index($venue);

@@ -32,3 +32,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [025](025-web-app-proves-itself-with-a-secret.md) | The web app proves itself to the API with a shared secret | 2026-11-06 |
 | [026](026-no-staging-server-check-after-deploy.md) | No staging server; every deploy is checked automatically instead | 2026-11-06 |
 | [027](027-emails-queued-and-sent-by-the-tick.md) | Booking emails wait in a database queue and the minute tick sends them | 2026-11-07 |
+| [028](028-availability-kept-30-seconds.md) | The public time grid is kept for 30 seconds and thrown away on every change | 2026-11-08 |
