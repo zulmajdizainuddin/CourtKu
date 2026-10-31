@@ -92,6 +92,7 @@ function VenueMenu({ venueId, isOwner }: { venueId: string; isOwner: boolean }) 
     ...(isOwner
       ? [
           { href: `${base}/payments`, label: "Payments" },
+          { href: `${base}/reports`, label: "Reports" },
           { href: `${base}/staff`, label: "Staff" },
         ]
       : []),
