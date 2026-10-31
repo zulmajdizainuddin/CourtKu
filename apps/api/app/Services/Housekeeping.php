@@ -11,7 +11,8 @@ use App\Models\WebhookEvent;
  * The jobs that run every minute (ADR-022):
  *   - expire unpaid holds whose time is up, freeing their half hours (FR-16);
  *   - mark checked-in bookings that have ended as completed;
- *   - finish payment webhooks that were saved but failed half way (PaymentProcessor).
+ *   - finish payment webhooks that were saved but failed half way (PaymentProcessor);
+ *   - look up payments still pending after 20 minutes with the gateway, each every 15 (reconciliation).
  *
  * Run by `php artisan courtku:tick` (the scheduler, on a server that has one) and by
  * POST /api/tick (a free cron service, on hosting without a scheduler, like Render's free plan).
@@ -26,17 +27,19 @@ class Housekeeping
     ) {}
 
     /**
-     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int}
+     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int, reconciled_payments: int}
      */
     public function run(): array
     {
         // Payments first: a hold paid just in time is confirmed before the expiry looks at it.
         $retried = $this->retryWebhooks();
+        $reconciled = app(Checkouts::class)->reconcile();
 
         return [
             'expired_holds' => $this->holds->releaseExpired(),
             'completed_bookings' => $this->completeFinished(),
             'retried_webhooks' => $retried,
+            'reconciled_payments' => $reconciled,
         ];
     }
 

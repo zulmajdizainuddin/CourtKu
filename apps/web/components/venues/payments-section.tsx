@@ -6,14 +6,17 @@ import { FormAlert, SelectField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import type { ManageVenue, PaymentMode } from "@/features/venues/hooks";
 import {
+  type AttentionPayment,
   type PaymentAccount,
   useDisconnectPaymentAccount,
   useGoToStripe,
   usePaymentAccount,
+  usePaymentsNeedingAttention,
   useUpdatePaymentSettings,
 } from "@/features/venues/payments";
 import { ApiError } from "@/lib/api";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatDayTime } from "@/lib/format";
+import { formatPhone } from "@/lib/phone";
 
 const NETWORK_ERROR = "Could not reach CourtKu. Check your connection and try again.";
 
@@ -222,5 +225,50 @@ export function PaymentSettingsForm({ venue }: { venue: ManageVenue }) {
         {save.isPending ? "Saving..." : "Save payment settings"}
       </Button>
     </form>
+  );
+}
+
+/**
+ * Online payments whose money came in but couldn't confirm the booking (plan section 9): a wrong amount,
+ * paid after the time ran out and was taken, paid after a cancel, or paid twice. The owner refunds them
+ * in their Stripe dashboard (FR-25).
+ */
+export function PaymentsNeedingAttention({ venueId }: { venueId: string }) {
+  const payments = usePaymentsNeedingAttention(venueId);
+
+  if (payments.isPending) return <p className="text-sm text-muted-foreground">Loading...</p>;
+  if (payments.isError) return <p className="text-sm text-destructive">Could not load the payments. Please refresh the page.</p>;
+  if (payments.data.length === 0) {
+    return <p className="text-sm text-muted-foreground">Nothing needs your attention. Every online payment confirmed its booking.</p>;
+  }
+
+  return (
+    <ul className="grid gap-3">
+      {payments.data.map((payment) => (
+        <AttentionItem key={payment.id} payment={payment} />
+      ))}
+    </ul>
+  );
+}
+
+function AttentionItem({ payment }: { payment: AttentionPayment }) {
+  const { booking } = payment;
+  const customer = booking.customer;
+  return (
+    <li className="grid gap-1 rounded-lg px-3 py-2 text-sm ring-1 ring-amber-500/40">
+      <p className="font-medium">
+        {payment.paid_amount ?? "Payment"} for {booking.code} · {booking.court}, {formatDayTime(booking.starts_at)}
+      </p>
+      <p>{payment.problem_text}</p>
+      <p className="text-muted-foreground">
+        {customer.name ?? "Player"}
+        {customer.email && ` · ${customer.email}`}
+        {customer.phone && ` · ${formatPhone(customer.phone)}`}
+        {payment.paid_at && ` · paid ${formatDayTime(payment.paid_at)}`}
+      </p>
+      <p className="text-muted-foreground">
+        Refund it in your Stripe dashboard (search for <span className="font-mono break-all">{payment.checkout_id}</span>).
+      </p>
+    </li>
   );
 }

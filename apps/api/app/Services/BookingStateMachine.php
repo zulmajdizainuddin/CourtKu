@@ -59,6 +59,27 @@ class BookingStateMachine
     }
 
     /**
+     * A payment that arrived after the hold ran out, while the time was still free (plan section 7, late
+     * payment): the booking is confirmed again. Only from expired, and only after its half hours were taken
+     * back (PaymentProcessor does both in one transaction). Never reachable as a plain status change.
+     */
+    public function reclaim(Booking $booking, string $reason): Booking
+    {
+        return DB::transaction(function () use ($booking, $reason) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== BookingStatus::Expired) {
+                throw new ApiException('INVALID_BOOKING_STATUS', "This booking is {$locked->status->label()}, so it can't be taken back.");
+            }
+
+            $locked->status = BookingStatus::Confirmed;
+            $locked->save();
+            AuditLog::record($locked, 'booking.reclaimed', null, ['from' => 'expired', 'to' => 'confirmed', 'reason' => $reason]);
+
+            return $locked;
+        });
+    }
+
+    /**
      * Payment taken at the counter (FR-28). Not a status change, but the same row lock, so two staff
      * tapping "Paid" at once can't record it twice. Written to the audit log.
      */

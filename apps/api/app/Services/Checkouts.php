@@ -31,6 +31,12 @@ class Checkouts
     /** Asking Stripe again when the player keeps refreshing: at most this often per payment. */
     private const CHECK_EVERY_SECONDS = 5;
 
+    /** Reconciliation: look up payments still pending this long after they started... */
+    private const RECONCILE_AFTER_MINUTES = 20;
+
+    /** ...and each one again at most this often. */
+    private const RECONCILE_EVERY_MINUTES = 15;
+
     public function __construct(
         private readonly PaymentGateways $gateways,
         private readonly PaymentProcessor $processor = new PaymentProcessor,
@@ -107,12 +113,56 @@ class Checkouts
             ->get();
 
         foreach ($pending as $payment) {
-            $payment->forceFill(['checked_at' => now()])->save();
+            $this->check($payment);
+        }
+    }
+
+    /**
+     * Reconciliation (plan section 9, "callback never arrives"): payments still pending 20 minutes after
+     * they started are looked up with the gateway, each at most every 15 minutes. Run by the every-minute
+     * tick; a batch at a time, well inside the gateway's limits. Returns how many it looked up.
+     */
+    public function reconcile(int $batch = 50): int
+    {
+        $due = Payment::where('status', PaymentStatus::Pending->value)
+            ->where('created_at', '<=', now()->subMinutes(self::RECONCILE_AFTER_MINUTES))
+            ->where(fn ($query) => $query->whereNull('checked_at')->orWhere('checked_at', '<=', now()->subMinutes(self::RECONCILE_EVERY_MINUTES)))
+            ->orderBy('id')
+            ->limit($batch)
+            ->get();
+
+        foreach ($due as $payment) {
+            $this->check($payment);
+        }
+
+        return $due->count();
+    }
+
+    /**
+     * Closes a booking's open payment pages at the gateway (plan section 9, "hold expiry deletes the Bill"),
+     * e.g. when its hold runs out or it is cancelled, so nobody can pay for time that isn't theirs. If the
+     * gateway says one was paid meanwhile, that payment counts: it confirms the booking while it still waits,
+     * and is flagged for a refund otherwise. Quiet when the gateway can't be reached: reconciliation settles it.
+     */
+    public function closeOpen(Booking $booking): void
+    {
+        foreach ($booking->payments()->where('status', PaymentStatus::Pending->value)->get() as $payment) {
             try {
-                $this->processor->applyCheckout($payment, $this->gateways->make()->findCheckout($payment->account_id, $payment->checkout_id));
+                $this->processor->applyCheckout($payment, $this->gateways->make()->expireCheckout($payment->account_id, $payment->checkout_id));
             } catch (PaymentGatewayException) {
-                // Try again on the next look.
+                // Reconciliation looks it up later.
             }
+        }
+    }
+
+    /** Asks the gateway how one payment stands and acts on the answer. */
+    private function check(Payment $payment): void
+    {
+        $payment->forceFill(['checked_at' => now()])->save();
+        try {
+            $this->processor->applyCheckout($payment, $this->gateways->make()->findCheckout($payment->account_id, $payment->checkout_id));
+        } catch (PaymentGatewayException) {
+            // Try again on the next look.
         }
     }
 

@@ -77,6 +77,7 @@ Route::prefix('v1')->group(function () {
                 ->can('update', 'venue');
             Route::delete('/venues/{venue}/payment-account', [PaymentAccountController::class, 'destroy'])->can('update', 'venue');
             Route::put('/venues/{venue}/payment-settings', [PaymentAccountController::class, 'updateSettings'])->can('update', 'venue');
+            Route::get('/venues/{venue}/payments/attention', [PaymentAccountController::class, 'needingAttention'])->can('update', 'venue');
 
             // The day schedule for the counter (FR-31): owners and staff.
             Route::get('/venues/{venue}/schedule', [ScheduleController::class, 'show'])->can('view', 'venue');

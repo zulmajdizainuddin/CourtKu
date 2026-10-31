@@ -230,13 +230,16 @@ it('plan section 9: a payment that came too late shows as needing a refund, neve
     $code = bookToPay($venue, $player)->json('data.code');
     payFor($player, $code)->assertOk();
     $this->travel(15)->minutes();
-    (new Holds)->releaseExpired(); // the time ran out and went back to other players
-    $this->gateway->pay('cs_fake_1'); // then the player paid anyway
+    $this->gateway->down = true; // Stripe can't be reached, so the payment page can't be closed...
+    (new Holds)->releaseExpired(); // ...but the time still goes back to other players
+    $this->gateway->down = false;
+    bookToPay($venue, User::factory()->create(), 'counter', 'someone-else')->assertCreated(); // and someone takes it
+    $this->gateway->pay('cs_fake_1'); // then the first player pays on the page that stayed open
 
     $this->actingAs($player)->getJson("/api/v1/bookings/{$code}")
         ->assertJsonPath('data.status', 'expired')
         ->assertJsonPath('data.payment.status', 'paid')
-        ->assertJsonPath('data.payment.problem', 'booking_expired'); // the venue refunds it (M4 PR 6 re-claims first)
+        ->assertJsonPath('data.payment.problem', 'booking_expired'); // the venue refunds it
 });
 
 it('confirms a payment that came in just after the hold time, when the player comes back before anyone took the time', function () {

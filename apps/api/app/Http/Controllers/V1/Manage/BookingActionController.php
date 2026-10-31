@@ -10,6 +10,7 @@ use App\Http\Resources\ManageBookingResource;
 use App\Models\Booking;
 use App\Models\Venue;
 use App\Services\BookingStateMachine;
+use App\Services\Checkouts;
 use App\Support\MalaysiaTime;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -62,14 +63,18 @@ class BookingActionController extends Controller
      * (unlike players, FR-24).
      * The time is free for others straight away.
      */
-    public function cancel(Request $request, Venue $venue, Booking $booking): ManageBookingResource
+    public function cancel(Request $request, Venue $venue, Booking $booking, Checkouts $checkouts): ManageBookingResource
     {
         $data = $request->validate(
             ['reason' => ['required', 'string', 'max:200']],
             ['reason.required' => 'Say why, e.g. rain or the player asked.'],
         );
 
-        return $this->respond($this->machine->transition($booking, BookingStatus::Cancelled, $request->user(), trim($data['reason'])));
+        $cancelled = $this->machine->transition($booking, BookingStatus::Cancelled, $request->user(), trim($data['reason']));
+        // A booking still waiting for payment: close its payment page too.
+        $checkouts->closeOpen($cancelled);
+
+        return $this->respond($cancelled);
     }
 
     private function respond(Booking $booking): ManageBookingResource
