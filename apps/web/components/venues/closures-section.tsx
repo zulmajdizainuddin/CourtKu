@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormAlert, FormField } from "@/components/forms/form-field";
+import { BookingConflictList } from "@/components/venues/booking-conflict-list";
 import { Button } from "@/components/ui/button";
 import { type Closure, useAddClosure, useClosures, useRemoveClosure } from "@/features/venues/hours";
 import { ApiError } from "@/lib/api";
@@ -112,6 +113,7 @@ function AddClosureForm({ venueId }: { venueId: string }) {
         {...form.register("reason")}
       />
       <FormAlert message={formError} />
+      <BookingConflictList error={add.error} venueId={venueId} />
       {added && <FormAlert tone="success" message="Closed dates added." />}
       <Button type="submit" variant="outline" className="h-11 justify-self-start px-6" disabled={isSubmitting}>
         {isSubmitting ? "Adding..." : "Add closed dates"}

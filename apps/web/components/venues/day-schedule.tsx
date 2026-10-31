@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FormField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,10 @@ export function DaySchedule({
   rules: { slot_minutes: number; min_minutes: number; max_minutes: number };
 }) {
   const today = todayInMalaysia();
-  const [date, setDate] = useState(today);
+  // ?date=2026-11-06 opens that day, e.g. from the list of bookings a settings change would strand.
+  // Read here, inside VenuePage's <Suspense>, as Next.js requires for the address's ?query.
+  const linked = useSearchParams().get("date");
+  const [date, setDate] = useState(linked && /^\d{4}-\d{2}-\d{2}$/.test(linked) ? linked : today);
   // A booking code, or "block-12" for a block.
   const [selected, setSelected] = useState<string>();
   const [adding, setAdding] = useState<"booking" | "block">();

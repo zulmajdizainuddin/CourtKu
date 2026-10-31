@@ -19,6 +19,8 @@ export class ApiError extends Error {
     message: string,
     /** Field-level validation messages, e.g. { email: ["The email has already been taken."] } */
     public fields: Record<string, string[]> = {},
+    /** Everything else the API sent in error.details, e.g. the bookings in the way (BOOKINGS_CONFLICT). */
+    public details: Record<string, unknown> = {},
   ) {
     super(message);
     this.name = "ApiError";
@@ -29,7 +31,7 @@ export class ApiError extends Error {
 export function toApiError(status: number, body: unknown): ApiError {
   const err = (body as Partial<ApiErrorBody> | null)?.error;
   if (err && typeof err.code === "string") {
-    return new ApiError(status, err.code, err.message, err.details?.fields ?? {});
+    return new ApiError(status, err.code, err.message, err.details?.fields ?? {}, err.details ?? {});
   }
   return new ApiError(status, `HTTP_${status}`, "Something went wrong. Please try again.");
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\CourtRequest;
 use App\Http\Resources\CourtResource;
 use App\Models\Court;
 use App\Models\Venue;
+use App\Services\BookingConflicts;
 use App\Support\SortOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,9 +55,20 @@ class CourtController extends Controller
     }
 
     /** PUT /api/v1/manage/venues/{venue}/courts/{court}: name, indoor, active and sports. */
-    public function update(CourtRequest $request, Venue $venue, Court $court): CourtResource
+    public function update(CourtRequest $request, Venue $venue, Court $court, BookingConflicts $conflicts): CourtResource
     {
-        // TODO(M3, FR-38): refuse deactivating while the court has future bookings.
+        // FR-38: switching a court off (or removing its price, which hides it too) would leave its
+        // upcoming bookings on a court players can't see; the owner cancels them first.
+        $data = $request->courtData();
+        $switchedOff = ($data['is_active'] ?? true) === false
+            || (array_key_exists('base_price_sen', $data) && $data['base_price_sen'] === null);
+        if ($switchedOff) {
+            $stranded = $conflicts->onCourt($court);
+            if ($stranded->isNotEmpty()) {
+                throw BookingConflicts::refuse($stranded, "{is} on {$court->name}", 'switch it off again');
+            }
+        }
+
         DB::transaction(function () use ($request, $court) {
             $court->update($request->courtData());
             $court->sports()->sync($request->sportIds());
