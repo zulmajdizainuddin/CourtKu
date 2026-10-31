@@ -136,7 +136,7 @@ On every start, the container runs the database migrations (`apps/api/docker/45-
 
 ## Timed jobs (every minute)
 
-Unpaid holds expire and finished bookings complete through `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Render's free plan has no scheduler, so a free cron service calls it:
+Unpaid holds expire, finished bookings complete, "your game is tomorrow" reminders go out a day before each game, and queued emails are sent through `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md), [ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)). Render's free plan has no scheduler, so a free cron service calls it:
 
 1. Make a long random secret (e.g. 40 letters and digits from a password manager) and set it as `CRON_SECRET` in Render. Render redeploys. The tick also sends the queued booking emails ([ADR-027](adr/027-emails-queued-and-sent-by-the-tick.md)).
 2. Sign up at [cron-job.org](https://cron-job.org) (free) and create a cron job:

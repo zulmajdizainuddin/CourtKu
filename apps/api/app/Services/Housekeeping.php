@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Queue;
  *   - mark checked-in bookings that have ended as completed;
  *   - finish payment webhooks that were saved but failed half way (PaymentProcessor);
  *   - look up payments still pending after 20 minutes with the gateway, each every 15 (reconciliation);
+ *   - queue the "your game is tomorrow" reminders that are due (FR-26, Reminders);
  *   - send the emails waiting in the queue (ADR-027).
  *
  * Run by `php artisan courtku:tick` (the scheduler, on a server that has one) and by
@@ -27,10 +28,11 @@ class Housekeeping
         private readonly Holds $holds = new Holds,
         private readonly BookingStateMachine $machine = new BookingStateMachine,
         private readonly PaymentProcessor $payments = new PaymentProcessor,
+        private readonly Reminders $reminders = new Reminders,
     ) {}
 
     /**
-     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int, reconciled_payments: int, emails_sent: int}
+     * @return array{expired_holds: int, completed_bookings: int, retried_webhooks: int, reconciled_payments: int, reminders: int, emails_sent: int}
      */
     public function run(): array
     {
@@ -39,12 +41,14 @@ class Housekeeping
         $reconciled = app(Checkouts::class)->reconcile();
         $expired = $this->holds->releaseExpired();
         $completed = $this->completeFinished();
+        $reminders = $this->reminders->queueDue();
 
         return [
             'expired_holds' => $expired,
             'completed_bookings' => $completed,
             'retried_webhooks' => $retried,
             'reconciled_payments' => $reconciled,
+            'reminders' => $reminders,
             // Last, so emails queued by the jobs above go out in this same tick.
             'emails_sent' => $this->sendQueuedEmails(),
         ];
