@@ -24,6 +24,7 @@ dataset('manage endpoints', [
     'connect payment account' => ['POST', '/api/v1/manage/venues/{venue}/payment-account/onboarding'],
     'disconnect payment account' => ['DELETE', '/api/v1/manage/venues/{venue}/payment-account'],
     'update payment settings' => ['PUT', '/api/v1/manage/venues/{venue}/payment-settings'],
+    'payments needing attention' => ['GET', '/api/v1/manage/venues/{venue}/payments/attention'],
     'view schedule' => ['GET', '/api/v1/manage/venues/{venue}/schedule'],
     'add walk-in booking' => ['POST', '/api/v1/manage/venues/{venue}/bookings'],
     'add block' => ['POST', '/api/v1/manage/venues/{venue}/blocks'],

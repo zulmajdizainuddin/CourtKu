@@ -7,8 +7,10 @@ use App\Enums\PaymentMode;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdatePaymentSettingsRequest;
+use App\Http\Resources\ManagePaymentResource;
 use App\Http\Resources\ManageVenueResource;
 use App\Http\Resources\PaymentAccountResource;
+use App\Models\Payment;
 use App\Models\Venue;
 use App\Models\VenuePaymentAccount;
 use App\Payments\PaymentGatewayException;
@@ -16,6 +18,7 @@ use App\Payments\PaymentGateways;
 use App\Services\Holds;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * The owner's Payments tab (FR-17, FR-39, ADR-009, ADR-024): connect the venue's own Stripe account
@@ -105,6 +108,24 @@ class PaymentAccountController extends Controller
         $venue->forceFill(['payment_mode' => PaymentMode::Counter])->save();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * GET /api/v1/manage/venues/{venue}/payments/attention: online payments whose money came in but couldn't
+     * simply confirm the booking (wrong amount, too late, after a cancel, paid twice), newest first. The owner
+     * refunds them in Stripe (FR-25).
+     */
+    public function needingAttention(Venue $venue): AnonymousResourceCollection
+    {
+        return ManagePaymentResource::collection(
+            Payment::where('venue_id', $venue->id)
+                ->whereNotNull('problem')
+                ->with(['booking.court', 'booking.user'])
+                ->latest('paid_at')
+                ->latest('id')
+                ->limit(50)
+                ->get(),
+        );
     }
 
     /** PUT /api/v1/manage/venues/{venue}/payment-settings  { "payment_mode": "both", "hold_minutes": 15 } */

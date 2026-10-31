@@ -21,7 +21,7 @@ class Tick extends Command
     public function handle(Housekeeping $housekeeping): int
     {
         $done = $housekeeping->run();
-        $this->info("Expired holds: {$done['expired_holds']}. Completed bookings: {$done['completed_bookings']}. Retried webhooks: {$done['retried_webhooks']}.");
+        $this->info("Expired holds: {$done['expired_holds']}. Completed bookings: {$done['completed_bookings']}. Retried webhooks: {$done['retried_webhooks']}. Reconciled payments: {$done['reconciled_payments']}.");
 
         return self::SUCCESS;
     }

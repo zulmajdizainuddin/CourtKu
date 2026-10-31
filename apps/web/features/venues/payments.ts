@@ -106,3 +106,33 @@ export function useUpdatePaymentSettings(venueId: string) {
     },
   });
 }
+
+/** An online payment that needs the owner (the API's ManagePaymentResource), e.g. a refund (FR-25). */
+export type AttentionPayment = {
+  id: number;
+  status: "pending" | "paid" | "failed" | "expired";
+  problem: "amount_mismatch" | "booking_expired" | "booking_cancelled" | "already_paid";
+  problem_text: string;
+  amount_sen: number;
+  paid_amount_sen: number | null;
+  paid_amount: string | null;
+  paid_at: string | null;
+  /** Search for it in your Stripe dashboard. */
+  checkout_id: string;
+  booking: {
+    code: string;
+    status: string;
+    court: string;
+    starts_at: string;
+    customer: { name: string | null; email: string | null; phone: string | null };
+  };
+};
+
+/** Money that came in online but couldn't confirm its booking (wrong amount, too late, cancelled, paid twice). */
+export function usePaymentsNeedingAttention(venueId: string) {
+  return useQuery({
+    queryKey: ["manage", "venues", venueId, "payments", "attention"],
+    queryFn: async () =>
+      (await api<{ data: AttentionPayment[] }>(`/api/v1/manage/venues/${venueId}/payments/attention`)).data,
+  });
+}

@@ -124,7 +124,7 @@ class BookingController extends Controller
      * POST /api/v1/bookings/{code}/cancel: the player cancels their own booking (FR-24), until the
      * venue's cutoff (e.g. 24 hours before). The half hours are free for others straight away.
      */
-    public function cancel(Request $request, string $code, BookingStateMachine $machine): PlayerBookingResource
+    public function cancel(Request $request, string $code, BookingStateMachine $machine, Checkouts $checkouts): PlayerBookingResource
     {
         $booking = $this->ownBooking($request, $code);
 
@@ -138,6 +138,8 @@ class BookingController extends Controller
         }
         // Any other status (already cancelled, checked in...) is refused by the state machine.
         $machine->transition($booking, BookingStatus::Cancelled, $request->user(), 'Cancelled by the player');
+        // Close its payment page, so it can't be paid any more (a payment that landed meanwhile is flagged for a refund).
+        $checkouts->closeOpen($booking);
 
         return new PlayerBookingResource($booking->fresh(['venue', 'court', 'sport']));
     }

@@ -166,14 +166,15 @@ it('plan section 9: confirms only when the amount paid equals what the booking c
         ->and(AuditLog::where('action', 'payment.problem')->firstOrFail()->changes)->toMatchArray(['problem' => 'amount_mismatch', 'paid_sen' => 1000, 'expected_sen' => 2000]);
 });
 
-it('flags a payment for a booking whose hold already ran out, for the owner to refund', function () {
-    [$booking, $payment] = heldAndPaying(webhookVenue());
+it('flags a late payment for a refund when someone else has booked the time meanwhile', function () {
+    $venue = webhookVenue();
+    [$booking, $payment] = heldAndPaying($venue);
     $this->travel(15)->minutes();
-    (new Holds)->releaseExpired(); // the time went back to other players
+    (new Holds)->releaseExpired(); // the time went back to other players...
+    heldAndPaying($venue); // ...and another player took it
 
-    payAndNotify($payment)->assertOk();
+    payAndNotify($payment)->assertOk(); // the first player's payment arrives anyway
 
-    // M4 PR 6 tries to take the time back first; until then the owner refunds it.
     expect($booking->fresh()->status)->toBe(BookingStatus::Expired)
         ->and($payment->fresh()->problem)->toBe(PaymentProblem::BookingExpired);
 });
@@ -262,7 +263,7 @@ it('ADR-022 finishes a webhook that was saved but not acted on, at the next tick
     app(PaymentProcessor::class)->save('stripe', $event);
 
     $this->travel(2)->minutes();
-    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 1.');
+    $this->artisan('courtku:tick')->expectsOutput('Expired holds: 0. Completed bookings: 0. Retried webhooks: 1. Reconciled payments: 0.');
 
     expect($booking->fresh()->status)->toBe(BookingStatus::Confirmed)
         ->and(WebhookEvent::firstOrFail()->processed_at)->not->toBeNull();

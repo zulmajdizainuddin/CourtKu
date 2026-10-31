@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
 use App\Exceptions\ApiException;
 use App\Models\Booking;
 use App\Models\User;
@@ -15,6 +16,9 @@ use App\Models\Venue;
  *   - every read or booking that needs to know which half hours are free ("lazy" release),
  *     so a player never sees a hold whose time is up, even when no timer has run yet;
  *   - the every-minute tick (courtku:tick), which tidies up the rest.
+ *
+ * A hold with an open payment page has that page closed at the gateway first, so nobody pays for time
+ * that went back to other players; a payment that arrived just in time confirms the booking instead.
  *
  * Each hold goes through BookingStateMachine, which locks the booking first. So when a payment
  * confirms a hold at the same moment, only one of the two wins: the other sees the new status
@@ -38,6 +42,11 @@ class Holds
 
         $expired = 0;
         foreach ($holds as $hold) {
+            // Close its payment page first (plan section 9). If the player paid just in time, that payment
+            // confirms the booking now, and the expiry below finds it confirmed and leaves it alone.
+            if ($hold->payments()->where('status', PaymentStatus::Pending->value)->exists()) {
+                app(Checkouts::class)->closeOpen($hold);
+            }
             try {
                 $this->machine->transition($hold, BookingStatus::Expired, null, 'Not paid in time');
                 $expired++;

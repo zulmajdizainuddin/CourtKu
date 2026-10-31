@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaymentSettingsForm, StripeAccountSection } from "@/components/venues/payments-section";
+import { PaymentSettingsForm, PaymentsNeedingAttention, StripeAccountSection } from "@/components/venues/payments-section";
 import { VenuePage } from "@/components/venues/venue-page";
 
 /**
@@ -33,6 +33,17 @@ export default function VenuePaymentsPage() {
               <CardContent>
                 {/* key: connecting or disconnecting changes the choices, so the form starts again from the saved values. */}
                 <PaymentSettingsForm key={String(venue.payment_connected)} venue={venue} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Payments needing your attention</CardTitle>
+                <CardDescription>
+                  Money that came in online but couldn&apos;t confirm its booking. CourtKu also emails you about each one.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PaymentsNeedingAttention venueId={String(venue.id)} />
               </CardContent>
             </Card>
           </>
