@@ -44,6 +44,11 @@ class ManageVenueResource extends JsonResource
             'booking_window_days' => $this->booking_window_days,
             'min_notice_minutes' => $this->min_notice_minutes,
             'cancel_cutoff_hours' => $this->cancel_cutoff_hours,
+            // Payments (FR-16, FR-17): how players pay, how long they have to pay online, and
+            // whether the venue's own Stripe account is connected and can take payments.
+            'payment_mode' => $this->payment_mode,
+            'hold_minutes' => $this->hold_minutes,
+            'payment_connected' => $this->paymentAccount?->isReady() ?? false,
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

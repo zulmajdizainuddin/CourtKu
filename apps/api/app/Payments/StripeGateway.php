@@ -10,8 +10,8 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Stripe Checkout, in test mode for the demo (ADR-023). Plain HTTPS calls to Stripe's API, so
- * every request is visible here and easy to fake in tests.
+ * Stripe Checkout with Stripe Connect, in test mode for the demo (ADR-023, ADR-024). Plain HTTPS
+ * calls to Stripe's API, so every request is visible here and easy to fake in tests.
  *
  * Stripe's page shows whatever payment methods the venue's Stripe account allows (cards today,
  * FPX once the account is activated), so CourtKu never lists methods itself.
@@ -22,19 +22,94 @@ class StripeGateway implements PaymentGateway
 {
     private const API = 'https://api.stripe.com/v1';
 
+    /** Stripe's Accounts v2 (connected accounts) needs a pinned API version; v1 calls use the account's default. */
+    private const V2_API = 'https://api.stripe.com';
+
+    private const V2_VERSION = '2026-10-28.endive';
+
     /** Stripe refuses webhooks older than this; so do we, so an old captured webhook can't be replayed. */
     public const SIGNATURE_TOLERANCE_SECONDS = 300;
 
     /** Stripe keeps a payment page open for at least 30 minutes; CourtKu closes it itself when the hold runs out. */
     private const MIN_PAGE_MINUTES = 31;
 
+    /** The Checkout events CourtKu acts on (see parseWebhook). The Connect webhook in Stripe sends these. */
+    public const WEBHOOK_EVENTS = [
+        'checkout.session.completed',
+        'checkout.session.async_payment_succeeded',
+        'checkout.session.async_payment_failed',
+        'checkout.session.expired',
+    ];
+
+    /** $secretKey is CourtKu's own platform key (STRIPE_SECRET_KEY), never a venue's. */
     public function __construct(private readonly string $secretKey) {}
 
-    public function createCheckout(CheckoutRequest $request): Checkout
+    /**
+     * A Stripe account for a venue, made by CourtKu through Stripe Connect (ADR-024), with Stripe's
+     * Accounts v2 API (Stripe no longer takes v1 for new Connect platforms). Its settings make it the
+     * venue's own account in every way that matters:
+     *   - dashboard full: the owner logs in to Stripe and runs it (payouts, refunds) themselves;
+     *   - fees_collector stripe: Stripe takes its fees from the venue, as if the venue used Stripe directly;
+     *   - losses_collector stripe: CourtKu doesn't carry the venue's refunds or disputes;
+     *   - merchant configuration: the account takes card payments (its own Checkout pages).
+     * The same Idempotency-Key twice gives the same account, so a double tap never makes two.
+     */
+    public function createAccount(string $email, string $businessName, string $idempotencyKey): string
+    {
+        $account = $this->send(fn () => $this->httpV2()
+            ->withHeaders(['Idempotency-Key' => $idempotencyKey])
+            ->post('/v2/core/accounts', [
+                'display_name' => $businessName,
+                'contact_email' => $email,
+                'identity' => ['country' => 'MY'],
+                'dashboard' => 'full',
+                'defaults' => ['responsibilities' => ['fees_collector' => 'stripe', 'losses_collector' => 'stripe']],
+                'configuration' => ['merchant' => ['capabilities' => ['card_payments' => ['requested' => true]]]],
+            ]))->json();
+
+        return is_string($account['id'] ?? null) ? $account['id'] : throw new PaymentGatewayException;
+    }
+
+    public function onboardingUrl(string $accountId, string $returnUrl, string $refreshUrl): string
+    {
+        $link = $this->send(fn () => $this->httpV2()->post('/v2/core/account_links', [
+            'account' => $accountId,
+            'use_case' => [
+                'type' => 'account_onboarding',
+                'account_onboarding' => ['return_url' => $returnUrl, 'refresh_url' => $refreshUrl],
+            ],
+        ]))->json();
+
+        return is_string($link['url'] ?? null) ? $link['url'] : throw new PaymentGatewayException;
+    }
+
+    /** Ready = Stripe has switched on card payments for the account (it says "active"). */
+    public function account(string $accountId): GatewayAccount
+    {
+        $account = $this->send(fn () => $this->httpV2()->get('/v2/core/accounts/'.rawurlencode($accountId), [
+            'include' => ['configuration.merchant', 'identity'],
+        ]))->json();
+        if (! is_string($account['id'] ?? null)) {
+            throw new PaymentGatewayException;
+        }
+
+        return new GatewayAccount(
+            id: $account['id'],
+            name: is_string($account['display_name'] ?? null) ? $account['display_name'] : null,
+            country: is_string($account['identity']['country'] ?? null) ? $account['identity']['country'] : null,
+            chargesEnabled: ($account['configuration']['merchant']['capabilities']['card_payments']['status'] ?? null) === 'active',
+        );
+    }
+
+    /**
+     * A "direct charge": the payment page belongs to the venue's own account (the Stripe-Account header),
+     * so the money lands there, not with CourtKu (ADR-009).
+     */
+    public function createCheckout(?string $accountId, CheckoutRequest $request): Checkout
     {
         $expiresAt = max($request->expiresAt, CarbonImmutable::now()->addMinutes(self::MIN_PAGE_MINUTES));
 
-        $response = $this->send(fn () => $this->http()
+        $response = $this->send(fn () => $this->http($accountId)
             ->withHeaders(['Idempotency-Key' => $request->idempotencyKey])
             ->post('/checkout/sessions', [
                 'mode' => 'payment',
@@ -59,20 +134,20 @@ class StripeGateway implements PaymentGateway
         return $this->checkout($response->json());
     }
 
-    public function findCheckout(string $id): Checkout
+    public function findCheckout(?string $accountId, string $id): Checkout
     {
-        return $this->checkout($this->send(fn () => $this->http()->get('/checkout/sessions/'.rawurlencode($id)))->json());
+        return $this->checkout($this->send(fn () => $this->http($accountId)->get('/checkout/sessions/'.rawurlencode($id)))->json());
     }
 
-    public function expireCheckout(string $id): Checkout
+    public function expireCheckout(?string $accountId, string $id): Checkout
     {
         $response = $this->send(
-            fn () => $this->http()->post('/checkout/sessions/'.rawurlencode($id).'/expire'),
+            fn () => $this->http($accountId)->post('/checkout/sessions/'.rawurlencode($id).'/expire'),
             // Stripe answers 400 when the page is no longer open (paid or already expired): then say how it stands.
             allowBadRequest: true,
         );
 
-        return $response->status() === 400 ? $this->findCheckout($id) : $this->checkout($response->json());
+        return $response->status() === 400 ? $this->findCheckout($accountId, $id) : $this->checkout($response->json());
     }
 
     public function signatureHeader(): string
@@ -127,14 +202,31 @@ class StripeGateway implements PaymentGateway
             default => null,
         };
 
-        return $type === null ? null : new PaymentEvent($event['id'], $type, $this->checkout($session));
+        // A Connect webhook says which venue's account the event happened on.
+        $accountId = is_string($event['account'] ?? null) ? $event['account'] : null;
+
+        return $type === null ? null : new PaymentEvent($event['id'], $type, $this->checkout($session), $accountId);
     }
 
-    private function http(): PendingRequest
+    /** With an account id, the request acts on that venue's account (Stripe Connect's Stripe-Account header). */
+    private function http(?string $accountId = null): PendingRequest
     {
         return Http::baseUrl(self::API)
             ->withToken($this->secretKey)
+            ->when($accountId !== null, fn (PendingRequest $request) => $request->withHeaders(['Stripe-Account' => (string) $accountId]))
             ->asForm()
+            ->acceptJson()
+            ->connectTimeout(5)
+            ->timeout(15);
+    }
+
+    /** Stripe's v2 API: JSON in and out, with a pinned version. */
+    private function httpV2(): PendingRequest
+    {
+        return Http::baseUrl(self::V2_API)
+            ->withToken($this->secretKey)
+            ->withHeaders(['Stripe-Version' => self::V2_VERSION])
+            ->asJson()
             ->acceptJson()
             ->connectTimeout(5)
             ->timeout(15);
@@ -157,11 +249,12 @@ class StripeGateway implements PaymentGateway
             return $response;
         }
 
-        throw new PaymentGatewayException(match ($response->status()) {
-            401 => 'The venue\'s Stripe secret key was refused. The owner should check it under Payments.',
-            404 => 'The payment service doesn\'t know this payment.',
-            default => 'The payment service didn\'t answer. Please try again in a minute.',
-        });
+        throw match ($response->status()) {
+            // CourtKu's own key: something for whoever runs CourtKu to fix, not the owner or the player.
+            401 => new PaymentGatewayException('Online payments are not set up correctly on CourtKu. Please try again later.'),
+            404 => new PaymentGatewayException('The payment service doesn\'t know this payment.'),
+            default => new PaymentGatewayException,
+        };
     }
 
     /**

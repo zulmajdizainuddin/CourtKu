@@ -9,6 +9,9 @@ export type VenueStatus = "pending" | "active" | "suspended";
 export type VenueRole = "owner" | "staff";
 
 /** A venue as its owner or staff see it in the dashboard (ManageVenueResource in the API). */
+/** counter = pay at the venue; online = pay online while the time is held; both = the player chooses. */
+export type PaymentMode = "counter" | "online" | "both";
+
 export type ManageVenue = {
   id: number;
   name: string;
@@ -32,6 +35,12 @@ export type ManageVenue = {
   min_notice_minutes: number;
   /** Players cancel online until this many hours before the start (FR-24). */
   cancel_cutoff_hours: number;
+  /** How players pay (FR-17); online needs the venue's own Stripe account. */
+  payment_mode: PaymentMode;
+  /** How long a player has to pay online before the time is freed (FR-16). */
+  hold_minutes: number;
+  /** Whether the venue's own Stripe account is connected (never its keys, FR-39). */
+  payment_connected: boolean;
   approved_at: string | null;
   created_at: string;
 };

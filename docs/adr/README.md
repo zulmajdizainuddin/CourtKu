@@ -28,3 +28,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [021](021-holds-move-to-m4.md) | Checkout holds arrive with online payment (M4), not in M3 | 2026-11-01 |
 | [022](022-timed-jobs-without-a-scheduler.md) | Timed jobs run lazily and from a cron-called endpoint | 2026-11-04 |
 | [023](023-stripe-test-mode-instead-of-billplz.md) | Online payments use Stripe in test mode, not the Billplz Sandbox | 2026-11-05 |
+| [024](024-venues-connect-through-stripe-connect.md) | Venues connect their Stripe accounts through Stripe Connect; CourtKu never holds their keys | 2026-11-05 |

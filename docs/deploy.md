@@ -90,6 +90,7 @@ Never commit real values. `APP_KEY` and passwords live only in Render.
 | `CACHE_STORE` | `database` | |
 | `QUEUE_CONNECTION` | `sync` | No background worker yet |
 | `CRON_SECRET` | a long random text, e.g. from a password manager's generator | The cron service sends it to `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)). Empty = the endpoint is off |
+| `STRIPE_SECRET_KEY` | Stripe (Sandbox) → **Developers → API keys → Secret key** (`sk_test_...`) | CourtKu's own platform key, with **Connect** turned on. Venues connect their own Stripe accounts through Stripe Connect and never give CourtKu a key ([ADR-024](adr/024-venues-connect-through-stripe-connect.md)). Test keys only |
 | `DB_CONNECTION` | `mysql` | |
 | `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` | from the Aiven service's connection information | |
 | `DB_DATABASE` | `courtku` | Created in Aiven under Databases |

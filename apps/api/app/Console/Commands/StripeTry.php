@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
  */
 class StripeTry extends Command
 {
-    protected $signature = 'courtku:stripe-try {--show= : A payment page id to look up} {--expire= : A payment page id to close}';
+    protected $signature = 'courtku:stripe-try {--account= : A connected venue account (acct_...); none = CourtKu\'s own} {--show= : A payment page id to look up} {--expire= : A payment page id to close}';
 
     protected $description = 'Try the Stripe gateway in test mode: open, look up or close a payment page';
 
@@ -33,11 +33,12 @@ class StripeTry extends Command
             return self::FAILURE;
         }
         $stripe = new StripeGateway($key);
+        $account = is_string($this->option('account')) ? $this->option('account') : null;
 
         $checkout = match (true) {
-            is_string($this->option('show')) => $stripe->findCheckout($this->option('show')),
-            is_string($this->option('expire')) => $stripe->expireCheckout($this->option('expire')),
-            default => $stripe->createCheckout(new CheckoutRequest(
+            is_string($this->option('show')) => $stripe->findCheckout($account, $this->option('show')),
+            is_string($this->option('expire')) => $stripe->expireCheckout($account, $this->option('expire')),
+            default => $stripe->createCheckout($account, new CheckoutRequest(
                 bookingCode: 'CK-TEST1',
                 amountSen: 1000,
                 description: 'CourtKu test payment (no real money)',

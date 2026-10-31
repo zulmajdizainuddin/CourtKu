@@ -36,8 +36,8 @@ return [
         'folder' => env('CLOUDINARY_FOLDER', 'courtku'),
     ],
 
-    // Stripe test mode (ADR-023). Each venue connects its own Stripe account (ADR-009); this key is only
-    // for trying the gateway locally (php artisan courtku:stripe-try) and connecting the local demo venue.
+    // Stripe test mode (ADR-023). CourtKu's own platform key: venues connect their accounts through
+    // Stripe Connect and never give CourtKu a key (ADR-024). Test keys (sk_test_) only.
     'stripe' => [
         'secret' => env('STRIPE_SECRET_KEY'),
     ],
