@@ -33,9 +33,9 @@ Route::prefix('v1')->group(function () {
     // Stripe tells CourtKu about payments (ADR-006, ADR-024). No login: the signature proves it is Stripe.
     Route::post('/webhooks/payments/stripe', [PaymentWebhookController::class, 'stripe'])->middleware('throttle:120,1');
 
-    // Public: anyone can read an approved venue's page (plan: public reads 60 a minute).
-    // TODO(M5): a key of its own for the web app's server, which fetches from one IP for everyone.
-    Route::middleware('throttle:60,1')->group(function () {
+    // Public: anyone can read an approved venue's page (plan: public reads 60 a minute each;
+    // the web app's own server has a bucket of its own, see AppServiceProvider).
+    Route::middleware('throttle:public-reads')->group(function () {
         Route::get('/venues/{venue:slug}', [PublicVenueController::class, 'show']);
         Route::get('/venues/{venue:slug}/courts', [PublicVenueController::class, 'courts']);
         Route::get('/venues/{venue:slug}/availability', [AvailabilityController::class, 'show']);

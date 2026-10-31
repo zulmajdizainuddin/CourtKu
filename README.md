@@ -98,4 +98,4 @@ How the live demo is hosted and every production setting: [docs/deploy.md](docs/
 
 ## Decisions
 
-Every important design decision has a short write-up in [docs/adr](docs/adr/README.md).
+Every important design decision has a short write-up in [docs/adr](docs/adr/README.md). The security checklist is in [docs/security.md](docs/security.md).

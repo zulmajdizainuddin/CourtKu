@@ -16,6 +16,32 @@ const nextConfig: NextConfig = {
     },
   },
 
+  // Safety headers on every page (docs/security.md). The forwarded API paths are left out:
+  // Laravel adds its own there, and two copies of a header can cancel each other out.
+  async headers() {
+    return [
+      {
+        source: "/((?!api/|auth/|sanctum/).*)",
+        headers: [
+          // Browsers must not guess that a file is a different type than we say.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Other sites may not show CourtKu inside a frame (stops "clickjacking").
+          { key: "X-Frame-Options", value: "DENY" },
+          // Other sites we link to only learn "courtku.vercel.app", never the full page address.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // CourtKu never needs the camera, microphone or location.
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // No framing, no plugins, and forms and <base> links stay on CourtKu. Scripts aren't
+          // limited yet: Next.js needs per-request nonces for that (see docs/security.md).
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+          },
+        ],
+      },
+    ];
+  },
+
   // The browser calls these paths on the web app itself, and Next.js forwards them
   // to Laravel. Because the browser only ever talks to one site, Laravel's login
   // cookie is a normal first-party cookie and no CORS setup is needed.

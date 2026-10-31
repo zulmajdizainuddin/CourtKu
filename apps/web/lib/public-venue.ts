@@ -2,6 +2,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import type { OpeningPeriod } from "@/lib/opening-hours";
 import { SLUG_PATTERN } from "@/lib/slug";
 import { stateLabel } from "@/lib/states";
+import { serverRequestHeaders } from "@/lib/web-proxy";
 
 // A venue's public page /v/[slug] (FR-06): what guests see without logging in.
 
@@ -58,7 +59,10 @@ export async function getPublicVenue(slug: string): Promise<PublicVenue | null> 
   // Not a possible web address: don't even ask the API.
   if (!SLUG_PATTERN.test(slug)) return null;
 
-  const response = await fetch(`${apiUrl}/api/v1/venues/${slug}`, { headers: { Accept: "application/json" } });
+  // The secret tells the API this is the web app's server (its own rate-limit bucket, ADR-025).
+  const response = await fetch(`${apiUrl}/api/v1/venues/${slug}`, {
+    headers: { Accept: "application/json", ...serverRequestHeaders(process.env.WEB_PROXY_SECRET) },
+  });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`The venue page could not be loaded (API answered ${response.status}).`);
 

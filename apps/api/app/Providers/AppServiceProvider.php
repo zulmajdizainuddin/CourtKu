@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\TrustWebProxy;
 use App\Models\User;
 use App\Services\Cloudinary;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -43,5 +47,12 @@ class AppServiceProvider extends ServiceProvider
 
         // The platform admin approves and suspends venues (routes/api.php, "can:admin").
         Gate::define('admin', fn (User $user) => $user->is_platform_admin);
+
+        // Public venue pages and times (plan: 60 a minute each). The web app's own server builds the
+        // public pages for everyone from one address, so it gets a bucket of its own instead of
+        // sharing a visitor's 60 (ADR-025). Pages are cached for a minute, so 600 is plenty.
+        RateLimiter::for('public-reads', fn (Request $request) => $request->attributes->get('via') === TrustWebProxy::VIA_WEB_SERVER
+            ? Limit::perMinute(600)->by('web-server')
+            : Limit::perMinute(60)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
     }
 }

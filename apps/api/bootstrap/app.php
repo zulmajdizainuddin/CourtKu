@@ -3,11 +3,14 @@
 use App\Exceptions\ApiException;
 use App\Http\Middleware\RequirePassword;
 use App\Http\Middleware\RequireTwoFactor;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TrustWebProxy;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -28,11 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
 
         // Every browser request reaches us through the Next.js proxy (Vercel in production).
-        // Trusting it means request()->ip() and generated links use the visitor's real
-        // IP and the web app's host, not the proxy's. See ADR-004.
-        // TODO(M5): before going live, only accept requests that come from the proxy,
-        // otherwise someone calling the API directly could fake their IP.
-        $middleware->trustProxies(at: '*');
+        // Only requests carrying the web app's secret may say who the visitor is and which
+        // host they used; anyone calling the API directly can't fake their IP. ADR-004, ADR-025.
+        $middleware->replace(TrustProxies::class, TrustWebProxy::class);
+
+        // Safety headers on every answer (docs/security.md).
+        $middleware->append(SecurityHeaders::class);
 
         // Logged-out visitors are sent to the web app's login page.
         $middleware->redirectGuestsTo('/login');
