@@ -28,6 +28,10 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    // Which commit is running: Render sets RENDER_GIT_COMMIT on every deploy. Shown by /api/health,
+    // so the after-deploy check knows when the new code is live (ADR-026).
+    'version' => env('RENDER_GIT_COMMIT', 'local'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

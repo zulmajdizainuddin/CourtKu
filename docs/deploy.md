@@ -9,13 +9,14 @@ Browser ──► courtku.vercel.app (Vercel, Singapore) ──► courtku-api.o
 
 | Part | Where | Deploys when |
 | --- | --- | --- |
-| Web app (`apps/web`) | Vercel Hobby, region `sin1` | Every push to `main` (pull requests get preview URLs) |
+| Web app (`apps/web`) | Vercel Hobby, region `sin1` | Every push to `main` (pull requests get preview URLs, which use the **live** API, see below) |
 | API (`apps/api`) | Render free web service, region Singapore, built from `apps/api/Dockerfile` | Every push to `main` |
 | MySQL 8 | Aiven free plan | Always on, except when Aiven powers it off (see below) |
 | Email | Brevo free plan (300 emails/day), SMTP on port 2525 | n/a |
 | Venue photos | Cloudinary free plan (25 credits/month), [ADR-018](adr/018-photos-on-cloudinary.md) | n/a |
 | Uptime | UptimeRobot, every 5 minutes on `/api/health` and the web home page | n/a |
 | Timed jobs | cron-job.org, every minute on `POST /api/tick` ([ADR-022](adr/022-timed-jobs-without-a-scheduler.md)) | n/a |
+| After-deploy check | GitHub Actions, after every merge to `main` ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)) | n/a |
 
 Free plan limits to know:
 
@@ -32,6 +33,19 @@ Free plan limits to know:
 | UptimeRobot says down, `/api/health` shows `"database": false` | Aiven powered the database off | Aiven console → `courtku-db` → **Power on**. Wait for **Running**; the API reconnects by itself. If tables were never created, Render → **Manual Deploy → Restart service** runs the migrations again |
 | Emails stop arriving, Brevo logs are empty | Brevo SMTP key expired (1-year expiry, or 90 days without sending) | Brevo → **SMTP & API** → generate a new key → update `MAIL_PASSWORD` in Render |
 | Every request times out, even `/up` | Render instance stuck or failed to deploy | Render → **Events** and **Logs**; **Manual Deploy → Restart service** |
+| The **After deploy** workflow fails with "still runs ... after 25 minutes" | The new code didn't deploy (build failed, or the deploy is still queued) | Render → **Events**, or Vercel → **Deployments**: read the failed build's log. Then re-run the workflow (Actions → After deploy → **Re-run jobs**) |
+| The **After deploy** workflow fails a check after the deploy | The new code broke something on the live site | Fix forward with a new PR, or go back: Render → **Events** → the previous deploy → **Rollback**; Vercel → **Deployments** → the previous production deployment → **Instant Rollback** |
+
+## After every deploy
+
+There is no staging server ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)): Render's free hours don't stretch to a second API, so every merge to `main` goes straight to the live site. To catch a bad deploy quickly, the **After deploy** workflow (`.github/workflows/after-deploy.yml`) runs after every merge:
+
+1. It looks at which folders changed. For `apps/api` it waits until `https://courtku-api.onrender.com/api/health` reports the merged commit as `version`; for `apps/web`, until `https://courtku.vercel.app/version` does. Up to 25 minutes each.
+2. Then it checks the live site: API and database healthy, the web app's secret accepted (`via` = `browser`), home and login pages, the login cookie, the not-found page and the safety headers.
+
+GitHub emails whoever merged if it fails; see *When something is down* above. Run the same checks by hand from the repo root with `node .github/scripts/after-deploy-check.mjs`.
+
+**Pull request previews** use the live API and the live database. They are only for looking at screens: never book, pay or change settings in a preview.
 
 ## Make an account the platform admin
 
@@ -168,4 +182,5 @@ Do Vercel before Render. While only Vercel has the secret, the API still believe
 
 ## Known gaps before real customers
 
-- No queue worker, backups or staging environment yet. Timed jobs depend on cron-job.org calling `/api/tick`.
+- No queue worker or backups yet. Timed jobs depend on cron-job.org calling `/api/tick`.
+- No staging server ([ADR-026](adr/026-no-staging-server-check-after-deploy.md)): each merge goes straight to the live site, checked afterwards by the After deploy workflow.

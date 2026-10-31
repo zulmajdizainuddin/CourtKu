@@ -1,0 +1,51 @@
+# After every merge to main: waits until Render and Vercel run the new code, then checks
+# the live site (ADR-026). There is no staging server, so this is the first look at a deploy.
+# When it fails, GitHub emails whoever merged. It can also be started by hand:
+# Actions -> After deploy -> Run workflow (it then checks without waiting).
+name: After deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer merge replaces the older, still-waiting run (that one would never see its commit).
+concurrency:
+  group: after-deploy
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Live site
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Render and Vercel only rebuild a part when its folder changed, so only wait for those.
+      - name: What changed
+        id: changed
+        run: |
+          before="${{ github.event.before }}"
+          if [ "${{ github.event_name }}" != "push" ] || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+            echo "api=no" >> "$GITHUB_OUTPUT"
+            echo "web=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only "$before" "${{ github.sha }}")
+          echo "$changed"
+          echo "api=$(grep -q '^apps/api/' <<< "$changed" && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+          echo "web=$(grep -q '^apps/web/' <<< "$changed" && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Wait for the deploy, then check the live site
+        run: node .github/scripts/after-deploy-check.mjs
+        env:
+          COMMIT: ${{ github.sha }}
+          WAIT_API: ${{ steps.changed.outputs.api }}
+          WAIT_WEB: ${{ steps.changed.outputs.web }}
