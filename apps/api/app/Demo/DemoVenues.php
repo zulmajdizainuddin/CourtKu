@@ -4,8 +4,8 @@ namespace App\Demo;
 
 /**
  * The demo world's cast (ADR-030): 20 fictional venues across Malaysia, the fictional players who book
- * them, and names for walk-ins. Every venue name ends in "(Demo)" and every page about it says it is
- * made up. Players use @demo.example.com addresses, which can never receive email.
+ * them, and names for walk-ins. Each venue's own page says it is made up (venues.is_demo); the names
+ * themselves read like real venues, so the home page list looks natural. Players use @demo.example.com addresses, which can never receive email.
  */
 final class DemoVenues
 {
@@ -92,7 +92,7 @@ final class DemoVenues
 
         return [
             'slug' => $slug,
-            'name' => "{$name} (Demo)",
+            'name' => $name,
             'state' => $state,
             'city' => $city,
             'postcode' => $postcode,

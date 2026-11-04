@@ -37,6 +37,16 @@ function demoVenues()
     return Venue::where('is_demo', true)->orderBy('id')->get();
 }
 
+it('follows the list when a demo venue\'s name changes, e.g. "(Demo)" dropped', function () {
+    (new DemoWorld)->step();
+    $venue = demoVenues()->first();
+    $venue->update(['name' => "{$venue->name} (Demo)"]);
+
+    (new DemoWorld)->step();
+
+    expect($venue->fresh()->name)->toBe(DemoVenues::all()[0]['name']);
+});
+
 it('does nothing while switched off', function () {
     config(['demo.enabled' => false]);
 
@@ -51,7 +61,8 @@ it('ADR-030 builds labelled venues and fills every day of the window through the
 
     $venues = demoVenues();
     expect($venues)->toHaveCount(2)
-        ->and($venues->pluck('name')->all())->each->toEndWith('(Demo)')
+        ->and($venues->pluck('name')->all())->each->not->toContain('Demo') // labelled on their own pages instead
+        ->and($venues->every(fn (Venue $v) => $v->is_demo))->toBeTrue()
         ->and($venues->every(fn (Venue $v) => $v->status->value === 'active' && $v->courts()->count() > 0 && $v->operatingHours()->count() > 0))->toBeTrue()
         ->and(User::where('email', 'like', '%@'.DemoVenues::PLAYER_DOMAIN)->count())->toBe(40)
         ->and(DB::table('demo_days')->count())->toBe(10) // 2 venues x 5 days
