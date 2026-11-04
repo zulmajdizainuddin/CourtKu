@@ -35,3 +35,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [028](028-availability-kept-30-seconds.md) | The public time grid is kept for 30 seconds and thrown away on every change | 2026-11-08 |
 | [029](029-nightly-locked-backups-in-a-private-repo.md) | Nightly locked backups, kept in a private repository, restored every night | 2026-11-09 |
 | [030](030-a-rolling-demo-world.md) | The live demo runs on a rolling demo world, kept fresh by the minute tick | 2026-11-10 |
+| [031](031-guest-venue-list-on-the-home-page.md) | Guests can browse the bookable venues on the home page | 2026-11-11 |

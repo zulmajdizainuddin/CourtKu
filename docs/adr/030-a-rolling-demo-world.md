@@ -14,7 +14,7 @@ The live site runs on free plans: Render's small shared CPU and an Aiven databas
 
 ## Decision
 
-- **20 fictional venues** across Malaysia (`App\Demo\DemoVenues`): every name ends in "(Demo)", `venues.is_demo` is set, and each venue page says it is made up and that what visitors book there is cleared overnight. **40 fictional players** use `@demo.example.com` addresses.
+- **20 fictional venues** across Malaysia (`App\Demo\DemoVenues`): `venues.is_demo` is set, and each venue's own page says it is made up and that what visitors book there is cleared overnight. Their names read like real venues (an earlier "(Demo)" at the end was dropped so the home page list looks natural; the demo world renames existing venues to follow the list). **40 fictional players** use `@demo.example.com` addresses.
 - **A rolling window instead of a nightly wipe** (`App\Demo\DemoWorld`): the minute tick spends about 8 seconds keeping the demo world right, nearest days first. A day is filled court by court and can be spread over several ticks (`demo_days.courts_done`): on the live site one big day takes longer than a whole tick, and cron-job.org gives up on a call after 30 seconds:
   1. the venues and players exist;
   2. days older than 30 days are removed;

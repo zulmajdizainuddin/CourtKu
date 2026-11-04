@@ -39,6 +39,8 @@ Route::prefix('v1')->group(function () {
     // Public: anyone can read an approved venue's page (plan: public reads 60 a minute each;
     // the web app's own server has a bucket of its own, see AppServiceProvider).
     Route::middleware('throttle:public-reads')->group(function () {
+        // The venues guests can book, for the home page (ADR-031).
+        Route::get('/venues', [PublicVenueController::class, 'index']);
         Route::get('/venues/{venue:slug}', [PublicVenueController::class, 'show']);
         Route::get('/venues/{venue:slug}/courts', [PublicVenueController::class, 'courts']);
         Route::get('/venues/{venue:slug}/availability', [AvailabilityController::class, 'show']);

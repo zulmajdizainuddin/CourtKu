@@ -105,6 +105,10 @@ class DemoWorld
 
         foreach ($definitions as $definition) {
             $venue = $existing[$definition['slug']] ?? $this->createVenue($definition);
+            // Names changed since a venue was made (e.g. "(Demo)" dropped): follow the list.
+            if ($venue->name !== $definition['name']) {
+                $venue->update(['name' => $definition['name']]);
+            }
             $existing[$definition['slug']] = $venue;
             if ($definition['online']) {
                 $this->connectStripe($venue);

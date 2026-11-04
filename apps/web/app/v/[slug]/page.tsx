@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -8,7 +9,9 @@ import { facilityLabel } from "@/lib/facilities";
 import { formatDay } from "@/lib/format";
 import { DAY_NAMES, formatPeriod, WEEK_ORDER, weekFromPeriods } from "@/lib/opening-hours";
 import { formatPhone } from "@/lib/phone";
+import { StockPhoto } from "@/components/venues/stock-photo";
 import { DemoVenueNotice } from "@/components/venues/demo-venue-notice";
+import { mainSport } from "@/lib/stock-photo";
 import { directionsUrl, fullAddress, getPublicVenue, type PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
 import { stateLabel } from "@/lib/states";
@@ -45,7 +48,10 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
 
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-6 px-4 py-8">
-      {cover && (
+      <Link href="/" className="text-sm text-muted-foreground hover:underline">
+        ← All venues
+      </Link>
+      {cover ? (
         <Image
           src={cover.url}
           alt={`${venue.name}, cover photo`}
@@ -54,6 +60,16 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
           unoptimized // Cloudinary already sends the right size and format.
           priority
           className="aspect-video w-full rounded-xl object-cover"
+        />
+      ) : (
+        // No photos yet: a sample photo of its main sport instead of an empty space.
+        <StockPhoto
+          sport={mainSport(venue.courts)}
+          seed={venue.slug}
+          width={1280}
+          height={720}
+          priority
+          className="aspect-video w-full rounded-xl"
         />
       )}
 

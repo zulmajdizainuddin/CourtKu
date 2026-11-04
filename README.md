@@ -10,7 +10,7 @@ Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a 
 
 Log in with the demo account `player@example.com` / `CourtKu-Demo-2026`, or register your own.
 
-The live site runs on **20 made-up demo venues** across Malaysia with about 10,000 bookings made through the real booking engine, kept fresh every night ([ADR-030](docs/adr/030-a-rolling-demo-world.md)). Try one, e.g. https://courtku.vercel.app/v/demo-shuttle-house-cheras (it also takes the test card below). What you book at a demo venue is cleared overnight.
+The live site runs on **20 made-up demo venues** across Malaysia with about 10,000 bookings made through the real booking engine, kept fresh every night ([ADR-030](docs/adr/030-a-rolling-demo-world.md)). The home page lists every venue you can book, with filters for sport and state; a venue without its own photos shows a free sample photo from [Unsplash](https://unsplash.com/license) ([ADR-031](docs/adr/031-guest-venue-list-on-the-home-page.md)); Shuttle House Cheras also takes the test card below. What you book at a demo venue is cleared overnight.
 
 Online payments run in **Stripe test mode: no real money is charged.** Pay with the test card `4242 4242 4242 4242`, any future expiry date and any CVC (`4000 0000 0000 0002` is always declined).
 
