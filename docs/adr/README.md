@@ -36,3 +36,5 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [029](029-nightly-locked-backups-in-a-private-repo.md) | Nightly locked backups, kept in a private repository, restored every night | 2026-11-09 |
 | [030](030-a-rolling-demo-world.md) | The live demo runs on a rolling demo world, kept fresh by the minute tick | 2026-11-10 |
 | [031](031-guest-venue-list-on-the-home-page.md) | Guests can browse the bookable venues on the home page | 2026-11-11 |
+| [032](032-legal-pages-and-refund-policy-before-payment.md) | Terms, Privacy Notice and a refund policy built from the cancel setting | 2026-11-12 |
+| [033](033-deleting-an-account-anonymises-it.md) | Deleting an account anonymises it; past bookings stay with the venue | 2026-11-12 |

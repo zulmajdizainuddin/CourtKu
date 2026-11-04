@@ -35,6 +35,8 @@ export type ManageVenue = {
   min_notice_minutes: number;
   /** Players cancel online until this many hours before the start (FR-24). */
   cancel_cutoff_hours: number;
+  /** The owner's own note added to the refund policy players see before paying (FR-40). */
+  refund_note: string | null;
   /** Owners and staff get an email for each player booking and player cancel (FR-27). */
   booking_emails: boolean;
   /** How players pay (FR-17); online needs the venue's own Stripe account. */
@@ -91,6 +93,7 @@ export type BookingSettings = Pick<
   | "booking_window_days"
   | "min_notice_minutes"
   | "cancel_cutoff_hours"
+  | "refund_note"
   | "booking_emails"
 >;
 

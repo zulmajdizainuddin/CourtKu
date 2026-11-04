@@ -11,6 +11,7 @@ import { DAY_NAMES, formatPeriod, WEEK_ORDER, weekFromPeriods } from "@/lib/open
 import { formatPhone } from "@/lib/phone";
 import { StockPhoto } from "@/components/venues/stock-photo";
 import { DemoVenueNotice } from "@/components/venues/demo-venue-notice";
+import { RefundPolicy } from "@/components/venues/refund-policy";
 import { mainSport } from "@/lib/stock-photo";
 import { directionsUrl, fullAddress, getPublicVenue, type PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
@@ -128,6 +129,16 @@ async function VenueContent({ params }: { params: PageProps<"/v/[slug]">["params
         <aside className="grid content-start gap-4">
           <VisitCard venue={venue} />
           <HoursCard venue={venue} />
+          {venue.courts.length > 0 && (
+            <Card size="sm">
+              <CardHeader>
+                <CardTitle>Cancellation and refunds</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm">
+                <RefundPolicy rules={venue.booking} />
+              </CardContent>
+            </Card>
+          )}
         </aside>
       </div>
     </div>

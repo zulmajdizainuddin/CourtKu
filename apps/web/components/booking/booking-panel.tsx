@@ -13,6 +13,7 @@ import { formatDay, hourInMalaysia, todayInMalaysia } from "@/lib/format";
 import { formatRinggit } from "@/lib/money";
 import { formatPhone } from "@/lib/phone";
 import { DemoNotice } from "@/components/booking/demo-notice";
+import { RefundPolicy } from "@/components/venues/refund-policy";
 import type { PublicVenue } from "@/lib/public-venue";
 import { sportLabel } from "@/lib/sports";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -254,6 +255,12 @@ function BookAction({
   const busy = book.isPending || pay.isPending || pay.isSuccess;
   return (
     <div className="grid gap-3">
+      <section aria-labelledby="refund-policy-heading" className="grid gap-1 rounded-lg border px-4 py-3 text-sm">
+        <h3 id="refund-policy-heading" className="font-medium">
+          Cancellation and refunds
+        </h3>
+        <RefundPolicy rules={rules} />
+      </section>
       <div className="flex flex-wrap gap-2">
         {rules.pay_online && (
           <Button className="h-11 px-6" disabled={!booking || busy} onClick={() => onBook("online")}>
@@ -282,10 +289,12 @@ function BookAction({
           page. <DemoNotice />
         </p>
       )}
-      <p className="text-sm text-muted-foreground">
-        {rules.pay_at_counter && "Paying at the venue: you pay at the counter when you arrive. "}
-        Free cancellation online until {rules.cancel_cutoff_hours} hours before the start. {help}
-      </p>
+      {(rules.pay_at_counter || help) && (
+        <p className="text-sm text-muted-foreground">
+          {rules.pay_at_counter && "Paying at the venue: you pay at the counter when you arrive. "}
+          {help}
+        </p>
+      )}
     </div>
   );
 }
@@ -315,7 +324,7 @@ function Choices({
         {options.map((option) => (
           <label
             key={option.value}
-            className="flex min-h-11 shrink-0 cursor-pointer flex-col justify-center rounded-lg px-3 py-1.5 text-sm ring-1 ring-foreground/10 has-checked:bg-foreground has-checked:text-background has-focus-visible:ring-2 has-focus-visible:ring-ring"
+            className="relative flex min-h-11 shrink-0 cursor-pointer flex-col justify-center rounded-lg px-3 py-1.5 text-sm ring-1 ring-foreground/10 has-checked:bg-foreground has-checked:text-background has-focus-visible:ring-2 has-focus-visible:ring-ring"
           >
             <input
               type="radio"

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { DeleteAccount } from "@/components/auth/delete-account";
 import { TwoFactorSettings } from "@/components/auth/two-factor-settings";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequireUser } from "@/features/auth/require-user";
 import { safeNextPath } from "@/lib/safe-next-path";
 
-/** Account security: two-factor login. Owners and the admin are sent here until it's on. */
+/** Account security: two-factor login, and deleting the account. Owners and the admin are sent here until two-factor is on. */
 export default function SecurityPage() {
   return (
     <Suspense>
@@ -48,6 +49,15 @@ function SecurityContent() {
             </CardHeader>
             <CardContent>
               <TwoFactorSettings user={user} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Delete account</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DeleteAccount />
             </CardContent>
           </Card>
         </div>

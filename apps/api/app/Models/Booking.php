@@ -92,7 +92,8 @@ class Booking extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        // withTrashed: a deleted account still shows, as "Deleted user" (ADR-033).
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     /** FR-24: the last moment the player may cancel online, e.g. 24 hours before the start. */
@@ -121,7 +122,7 @@ class Booking extends Model
      */
     public function paidBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'paid_by');
+        return $this->belongsTo(User::class, 'paid_by')->withTrashed();
     }
 
     /** FR-28: from an hour before the start until it ends, so tomorrow's booking can't be checked in by mistake. */

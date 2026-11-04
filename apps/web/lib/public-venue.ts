@@ -31,6 +31,8 @@ export type PublicVenue = {
     booking_window_days: number;
     /** Players cancel online until this many hours before the start (FR-24). */
     cancel_cutoff_hours: number;
+    /** The owner's own note added to the refund policy (FR-40), or null. */
+    refund_note: string | null;
     /** How players can pay (FR-17): online on Stripe's page, at the counter, or either. */
     pay_online: boolean;
     pay_at_counter: boolean;

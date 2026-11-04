@@ -64,6 +64,17 @@ export default function RegisterPage() {
         <Button type="submit" size="lg" className="h-11" disabled={isSubmitting}>
           {isSubmitting ? "Creating account..." : "Create account"}
         </Button>
+        <p className="text-xs text-muted-foreground">
+          By creating an account you agree to the{" "}
+          <Link href="/terms" className="text-foreground underline">
+            Terms of Use
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="text-foreground underline">
+            Privacy Notice
+          </Link>
+          .
+        </p>
       </form>
     </AuthCard>
   );
