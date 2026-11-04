@@ -14,10 +14,18 @@ use Illuminate\Support\Facades\DB;
 /**
  * The invited person's side (FR-05): see the invite, then accept it.
  * The link only works for the invited email, so a forwarded link is useless to anyone else.
+ *
+ * @group Staff invites
+ *
+ * @authenticated
  */
 class InviteController extends Controller
 {
-    /** GET /api/v1/invites/{token}: what the invite is, before accepting. */
+    /**
+     * GET /api/v1/invites/{token}: what the invite is, before accepting.
+     *
+     * @urlParam token string required The code from the invite email. Example: 5f2b8c1e9a7d4f6b
+     */
     public function show(Request $request, string $token): JsonResponse
     {
         $invite = $this->findOrFail($token);
@@ -33,7 +41,11 @@ class InviteController extends Controller
         ]]);
     }
 
-    /** POST /api/v1/invites/{token}/accept: the logged-in, verified user joins the venue. */
+    /**
+     * POST /api/v1/invites/{token}/accept: the logged-in, verified user joins the venue.
+     *
+     * @urlParam token string required The code from the invite email. Example: 5f2b8c1e9a7d4f6b
+     */
     public function accept(Request $request, string $token): ManageVenueResource
     {
         $user = $request->user();

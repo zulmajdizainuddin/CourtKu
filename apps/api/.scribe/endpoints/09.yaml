@@ -1,0 +1,182 @@
+name: Admin
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/admin/venues
+    metadata:
+      custom: []
+      groupName: Admin
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/admin/venues?status=pending: newest first, 25 per page.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: suspended
+        type: string
+        enumValues:
+          - pending
+          - active
+          - suspended
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      status: suspended
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/admin/venues/{venue_id}/approve'
+    metadata:
+      custom: []
+      groupName: Admin
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/admin/venues/{venue}/approve'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/admin/venues/{venue_id}/suspend'
+    metadata:
+      custom: []
+      groupName: Admin
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/admin/venues/{venue}/suspend'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/admin/stats
+    metadata:
+      custom: []
+      groupName: Admin
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null

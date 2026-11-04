@@ -55,6 +55,7 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 
 - [x] **API** (`App\Http\Middleware\SecurityHeaders`): `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` (no framing), `Referrer-Policy: no-referrer`, and `Strict-Transport-Security` over HTTPS. `X-Frame-Options` comes from the Docker image's nginx, so Laravel doesn't send a second, different one.
 - [x] **Web pages** (`apps/web/next.config.ts`): `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (no camera, microphone or location), and a CSP that blocks framing, plugins, outside `<base>` links and outside form targets. Vercel adds `Strict-Transport-Security`.
+- [x] **The API docs page** (`/docs`) is the only API answer with a looser content rule: its own and a few CDN scripts and styles, still no framing, forms or plugins ([ADR-035](adr/035-api-docs-served-at-docs.md)).
 - [x] **No raw HTML from users.** React escapes everything it shows, and the web app has no `dangerouslySetInnerHTML`.
 - [x] **No SQL built from user input.** All queries go through Eloquent or the query builder with bound values.
 - [x] **Photos are re-processed** by Cloudinary on upload, which also strips location data (EXIF). [ADR-018](adr/018-photos-on-cloudinary.md)

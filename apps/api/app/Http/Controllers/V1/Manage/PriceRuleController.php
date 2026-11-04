@@ -15,6 +15,10 @@ use Illuminate\Http\Response;
 /**
  * A venue's peak and off-peak prices (FR-10). Owners add, change and remove them; staff can read them.
  * Routes with {priceRule} only find rules of this {venue} (scopeBindings).
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class PriceRuleController extends Controller
 {

@@ -1,0 +1,2038 @@
+name: 'Venue setup (owners)'
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/manage/venues
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/manage/venues: the venue picker. Only venues this user belongs to.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/manage/venues
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/manage/venues: list a new venue (FR-04).'
+      description: 'It starts as pending and stays hidden until an admin approves it.'
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must be at least 3 characters. Must not be greater than 100 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      slug:
+        custom: []
+        name: slug
+        description: 'Must match the regex /^[a-z0-9]+(?:-[a-z0-9]+)*$/. Must be at least 3 characters. Must not be greater than 60 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      state:
+        custom: []
+        name: state
+        description: ''
+        required: true
+        example: putrajaya
+        type: string
+        enumValues:
+          - johor
+          - kedah
+          - kelantan
+          - melaka
+          - negeri-sembilan
+          - pahang
+          - perak
+          - perlis
+          - pulau-pinang
+          - sabah
+          - sarawak
+          - selangor
+          - terengganu
+          - kuala-lumpur
+          - labuan
+          - putrajaya
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      slug: 'n'
+      state: putrajaya
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/manage/venues/{venue}. The route checks VenuePolicy::view first.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}: save the profile (FR-06). Owners only (VenuePolicy::update).'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must be at least 3 characters. Must not be greater than 100 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      slug:
+        custom: []
+        name: slug
+        description: 'Must match the regex /^[a-z0-9]+(?:-[a-z0-9]+)*$/. Must be at least 3 characters. Must not be greater than 60 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      state:
+        custom: []
+        name: state
+        description: ''
+        required: true
+        example: terengganu
+        type: string
+        enumValues:
+          - johor
+          - kedah
+          - kelantan
+          - melaka
+          - negeri-sembilan
+          - pahang
+          - perak
+          - perlis
+          - pulau-pinang
+          - sabah
+          - sarawak
+          - selangor
+          - terengganu
+          - kuala-lumpur
+          - labuan
+          - putrajaya
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Must not be greater than 2000 characters.'
+        required: false
+        example: 'Animi quos velit et fugiat.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      address_line:
+        custom: []
+        name: address_line
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: d
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: l
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      postcode:
+        custom: []
+        name: postcode
+        description: 'Must match the regex /^\d{5}$/.'
+        required: false
+        example: '56425'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must not be greater than 20 characters.'
+        required: false
+        example: dljnikhwaykcmyuw
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      facilities:
+        custom: []
+        name: facilities
+        description: ''
+        required: false
+        example:
+          - changing_rooms
+        type: 'string[]'
+        enumValues:
+          - parking
+          - surau
+          - toilets
+          - showers
+          - changing_rooms
+          - lockers
+          - canteen
+          - wifi
+          - air_conditioning
+          - equipment_rental
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      slug: 'n'
+      state: terengganu
+      description: 'Animi quos velit et fugiat.'
+      address_line: d
+      city: l
+      postcode: '56425'
+      phone: dljnikhwaykcmyuw
+      facilities:
+        - changing_rooms
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/settings'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13). Owners only.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      slot_minutes:
+        custom: []
+        name: slot_minutes
+        description: ''
+        required: true
+        example: 60
+        type: integer
+        enumValues:
+          - 30
+          - 60
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      min_minutes:
+        custom: []
+        name: min_minutes
+        description: 'Must be at least 30. Must not be greater than 720.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      max_minutes:
+        custom: []
+        name: max_minutes
+        description: 'Must be at least 30. Must not be greater than 720.'
+        required: true
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      booking_window_days:
+        custom: []
+        name: booking_window_days
+        description: 'Must be at least 1. Must not be greater than 90.'
+        required: true
+        example: 7
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      min_notice_minutes:
+        custom: []
+        name: min_notice_minutes
+        description: ''
+        required: true
+        example: 30
+        type: integer
+        enumValues:
+          - 0
+          - 30
+          - 60
+          - 120
+          - 1440
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cancel_cutoff_hours:
+        custom: []
+        name: cancel_cutoff_hours
+        description: ''
+        required: true
+        example: 24
+        type: integer
+        enumValues:
+          - 2
+          - 6
+          - 12
+          - 24
+          - 48
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      refund_note:
+        custom: []
+        name: refund_note
+        description: 'Must not be greater than 300 characters.'
+        required: false
+        example: z
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      booking_emails:
+        custom: []
+        name: booking_emails
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      slot_minutes: 60
+      min_minutes: 1
+      max_minutes: 22
+      booking_window_days: 7
+      min_notice_minutes: 30
+      cancel_cutoff_hours: 24
+      refund_note: z
+      booking_emails: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/hours'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/manage/venues/{venue}/hours'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/hours'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}/hours: replaces the whole week.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      periods:
+        custom: []
+        name: periods
+        description: ''
+        required: false
+        example: null
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'periods[].weekday':
+        custom: []
+        name: 'periods[].weekday'
+        description: 'Must be between 0 and 6.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'periods[].opens_at':
+        custom: []
+        name: 'periods[].opens_at'
+        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'periods[].closes_at':
+        custom: []
+        name: 'periods[].closes_at'
+        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      periods:
+        -
+          weekday: 1
+          opens_at: '04:30'
+          closes_at: '04:30'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/closures'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "GET /api/v1/manage/venues/{venue}/closures: today's and future closures, soonest first."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/manage/venues/{venue_id}/closures'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/manage/venues/{venue}/closures'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      starts_on:
+        custom: []
+        name: starts_on
+        description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>2026-11-04</code>.'
+        required: true
+        example: '2052-11-27'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ends_on:
+        custom: []
+        name: ends_on
+        description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>starts_on</code>.'
+        required: true
+        example: '2052-11-27'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      reason:
+        custom: []
+        name: reason
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      starts_on: '2052-11-27'
+      ends_on: '2052-11-27'
+      reason: 'n'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/closures/{closure_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        DELETE /api/v1/manage/venues/{venue}/closures/{closure}
+        The route only finds closures of this venue (scopeBindings), so venue A's URL
+        can never remove venue B's closure.
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      closure_id:
+        custom: []
+        name: closure_id
+        description: 'The ID of the closure.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      closure_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/courts'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "GET /api/v1/manage/venues/{venue}/courts: in the owner's chosen order."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/manage/venues/{venue_id}/courts'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/manage/venues/{venue}/courts: the new court goes at the end of the list.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 50 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      is_indoor:
+        custom: []
+        name: is_indoor
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      base_price_sen:
+        custom: []
+        name: base_price_sen
+        description: 'Must be at least 0. Must not be greater than 100000.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      is_active:
+        custom: []
+        name: is_active
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sports:
+        custom: []
+        name: sports
+        description: 'Must match an existing stored value.'
+        required: false
+        example: null
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      is_indoor: true
+      base_price_sen: 22
+      is_active: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/courts/order'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        PUT /api/v1/manage/venues/{venue}/courts/order  { "court_ids": [7, 4, 5] }
+        Every court of the venue, each exactly once, in the new order.
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      court_ids:
+        custom: []
+        name: court_ids
+        description: ''
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      court_ids:
+        - 16
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/courts/{court_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}/courts/{court}: name, indoor, active and sports.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      court_id:
+        custom: []
+        name: court_id
+        description: 'The ID of the court.'
+        required: true
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      court_id: 5
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 50 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      is_indoor:
+        custom: []
+        name: is_indoor
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      base_price_sen:
+        custom: []
+        name: base_price_sen
+        description: 'Must be at least 0. Must not be greater than 100000.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      is_active:
+        custom: []
+        name: is_active
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sports:
+        custom: []
+        name: sports
+        description: 'Must match an existing stored value.'
+        required: false
+        example: null
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      is_indoor: true
+      base_price_sen: 22
+      is_active: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/courts/{court_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/v1/manage/venues/{venue}/courts/{court}'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      court_id:
+        custom: []
+        name: court_id
+        description: 'The ID of the court.'
+        required: true
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      court_id: 5
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/price-rules'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/manage/venues/{venue}/price-rules: all-courts rules first, then by start time.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/manage/venues/{venue_id}/price-rules'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/manage/venues/{venue}/price-rules'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 50 characters.'
+        required: false
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      court_id:
+        custom: []
+        name: court_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      weekdays:
+        custom: []
+        name: weekdays
+        description: 'Must be between 0 and 6.'
+        required: false
+        example:
+          - 1
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      starts_at:
+        custom: []
+        name: starts_at
+        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ends_at:
+        custom: []
+        name: ends_at
+        description: 'The value and <code>starts_at</code> must be different. Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_sen:
+        custom: []
+        name: price_sen
+        description: 'Must be at least 0. Must not be greater than 100000.'
+        required: true
+        example: 8
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      court_id: 16
+      weekdays:
+        - 1
+      starts_at: '04:30'
+      ends_at: '04:30'
+      price_sen: 8
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/price-rules/{priceRule_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}/price-rules/{priceRule}'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      priceRule_id:
+        custom: []
+        name: priceRule_id
+        description: 'The ID of the priceRule.'
+        required: true
+        example: 3
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      priceRule_id: 3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 50 characters.'
+        required: false
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      court_id:
+        custom: []
+        name: court_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      weekdays:
+        custom: []
+        name: weekdays
+        description: 'Must be between 0 and 6.'
+        required: false
+        example:
+          - 1
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      starts_at:
+        custom: []
+        name: starts_at
+        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ends_at:
+        custom: []
+        name: ends_at
+        description: 'The value and <code>starts_at</code> must be different. Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+        required: true
+        example: '04:30'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_sen:
+        custom: []
+        name: price_sen
+        description: 'Must be at least 0. Must not be greater than 100000.'
+        required: true
+        example: 8
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: b
+      court_id: 16
+      weekdays:
+        - 1
+      starts_at: '04:30'
+      ends_at: '04:30'
+      price_sen: 8
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/price-rules/{priceRule_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/v1/manage/venues/{venue}/price-rules/{priceRule}: those hours go back to the normal price.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      priceRule_id:
+        custom: []
+        name: priceRule_id
+        description: 'The ID of the priceRule.'
+        required: true
+        example: 3
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      priceRule_id: 3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/staff'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/manage/venues/{venue}/staff'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/manage/venues/{venue_id}/staff-invites'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        POST /api/v1/manage/venues/{venue}/staff-invites  { "email": "aina@example.com" }
+        Inviting the same email again sends a fresh link; the old one stops working.
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/staff-invites/{invite_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/v1/manage/venues/{venue}/staff-invites/{invite}: the link stops working.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      invite_id:
+        custom: []
+        name: invite_id
+        description: 'The ID of the invite.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      invite_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/staff/{user}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/v1/manage/venues/{venue}/staff/{user}: they lose access straight away.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      user:
+        custom: []
+        name: user
+        description: ''
+        required: true
+        example: '564'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      user: '564'
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/manage/venues/{venue_id}/photos'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "GET /api/v1/manage/venues/{venue}/photos: in the owner's chosen order."
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/manage/venues/{venue_id}/photos'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/manage/venues/{venue}/photos: the new photo goes at the end.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      photo:
+        custom: []
+        name: photo
+        description: 'Must be a file. Must be an image. Must not be greater than 4096 kilobytes.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      photo: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/manage/venues/{venue_id}/photos/order'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'PUT /api/v1/manage/venues/{venue}/photos/order  { "photo_ids": [5, 2, 3] }'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      photo_ids:
+        custom: []
+        name: photo_ids
+        description: ''
+        required: false
+        example:
+          - 16
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      photo_ids:
+        - 16
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/manage/venues/{venue_id}/photos/{photo_id}'
+    metadata:
+      custom: []
+      groupName: 'Venue setup (owners)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE /api/v1/manage/venues/{venue}/photos/{photo}'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      X-XSRF-TOKEN: '{XSRF-TOKEN cookie value}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_id:
+        custom: []
+        name: venue_id
+        description: 'The ID of the venue.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      photo_id:
+        custom: []
+        name: photo_id
+        description: 'The ID of the photo.'
+        required: true
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_id: 1
+      photo_id: 2
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - X-XSRF-TOKEN
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null

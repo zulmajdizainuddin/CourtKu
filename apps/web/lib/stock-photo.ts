@@ -10,7 +10,7 @@ const PHOTOS: Record<StockSport, string[]> = {
     "photo-1775993167284-8e6a6e56ab69", // unsplash.com/photos/R3S6YdeHA6A
     "photo-1775993167393-f2add1f8eec2", // unsplash.com/photos/AILEpOyczIk
     "photo-1564769353575-73f33a36d84f", // unsplash.com/photos/Bt-oCv_YI3E
-    "photo-1787705190608-352c19d2ba26", // unsplash.com/photos/6qTZBVH2h4Y
+    "photo-1771909716747-346cb2b09329", // unsplash.com/photos/_XlTp6nHbm0
     "photo-1771909720886-a90afd1b37f5", // unsplash.com/photos/okCrVJ6hI7o
     "photo-1771909715670-083a55b7f354", // unsplash.com/photos/Mll0kFmv8y4
   ],

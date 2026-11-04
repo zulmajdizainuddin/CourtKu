@@ -19,6 +19,10 @@ use Illuminate\Validation\ValidationException;
  * FR-25: refunds are recorded manually by the owner in the MVP. The owner refunds the player in their own
  * Stripe dashboard (the money is theirs, ADR-009), then records it here, so CourtKu's records match.
  * Owners only (VenuePolicy::update).
+ *
+ * @group Payments
+ *
+ * @authenticated
  */
 class RefundController extends Controller
 {

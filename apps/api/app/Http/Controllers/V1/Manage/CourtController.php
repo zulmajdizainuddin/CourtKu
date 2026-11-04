@@ -21,6 +21,10 @@ use Illuminate\Support\Facades\DB;
  * A venue's courts (FR-08). Owners add, change, reorder and remove them; staff can read them.
  * Routes with {court} only find courts of this {venue} (scopeBindings), so venue A's
  * address can never reach venue B's court.
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class CourtController extends Controller
 {

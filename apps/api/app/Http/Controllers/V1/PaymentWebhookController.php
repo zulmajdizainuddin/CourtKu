@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Log;
  *   otherwise -> saved, acted on, 200.
  *
  * Stripe retries a webhook that doesn't get a 2xx, so a valid one is always answered quickly with 200.
+ *
+ * @group Payments
  */
 class PaymentWebhookController extends Controller
 {

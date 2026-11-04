@@ -19,6 +19,10 @@ use Illuminate\Http\UploadedFile;
 /**
  * A venue's photos (FR-06), stored on Cloudinary (ADR-018). Owners add, reorder and
  * remove them; staff can see them. The first photo is the venue's cover photo.
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class VenuePhotoController extends Controller
 {

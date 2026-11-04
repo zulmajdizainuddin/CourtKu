@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * The venues a user works at, for the dashboard (owners and staff).
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class VenueController extends Controller
 {

@@ -16,6 +16,10 @@ use Illuminate\Validation\ValidationException;
 /**
  * Closing courts for repairs or a private event (FR-21). Owners and staff.
  * Routes with {slotBlock} only find blocks of this {venue} (scopeBindings).
+ *
+ * @group Day schedule (staff)
+ *
+ * @authenticated
  */
 class SlotBlockController extends Controller
 {

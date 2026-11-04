@@ -17,6 +17,10 @@ use Illuminate\Validation\ValidationException;
  * Walk-in and phone bookings (FR-20): owners and staff book for a customer who has no account.
  * The same booking engine as online bookings, so they can never clash with them either.
  * Paid at the counter, confirmed straight away (ADR-021).
+ *
+ * @group Day schedule (staff)
+ *
+ * @authenticated
  */
 class CounterBookingController extends Controller
 {

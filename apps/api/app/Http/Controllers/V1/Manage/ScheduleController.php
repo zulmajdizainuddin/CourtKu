@@ -18,6 +18,10 @@ use Illuminate\Http\Request;
 /**
  * The day schedule for the counter (FR-31): every court and every booking of one business day.
  * Owners and staff can see it.
+ *
+ * @group Day schedule (staff)
+ *
+ * @authenticated
  */
 class ScheduleController extends Controller
 {

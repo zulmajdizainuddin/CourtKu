@@ -69,7 +69,10 @@ class AvailabilityRequest extends FormRequest
 
     private function venue(): Venue
     {
-        /** @var Venue */
-        return $this->route('venue');
+        /** @var Venue|null $venue */
+        $venue = $this->route('venue');
+
+        // A real request always has its venue. Only the API docs (Scribe) read these rules without one.
+        return $venue ?? new Venue;
     }
 }

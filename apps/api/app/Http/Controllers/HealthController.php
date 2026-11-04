@@ -15,6 +15,8 @@ use Throwable;
  * "via" says whether the API recognised the web app (ADR-025): through courtku.vercel.app it
  * should say "browser", called directly "direct". A quick check after changing WEB_PROXY_SECRET.
  * "version" is the commit that is running, for the after-deploy check (ADR-026).
+ *
+ * @group Health
  */
 class HealthController extends Controller
 {

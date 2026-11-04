@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @group Account and login
+ *
+ * @authenticated
+ */
 class AccountController extends Controller
 {
     /**

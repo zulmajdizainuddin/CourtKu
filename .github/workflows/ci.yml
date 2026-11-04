@@ -89,7 +89,7 @@ jobs:
 
       # 10.255.255.1 never answers, like a database that has been powered off.
       # The API must still start, answer /up, and report the database as down.
-      - name: API starts even when the database is down
+      - name: API starts even when the database is down, docs included
         run: |
           docker run -d --name api -p 8080:8080 \
             -e APP_KEY=base64:$(openssl rand -base64 32) \
@@ -104,6 +104,10 @@ jobs:
           status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/health)
           echo "/api/health returned $status"
           test "$status" = "503"
+          # The API docs (ADR-035) open without Scribe installed and without the database.
+          docs=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/docs)
+          echo "/docs returned $docs"
+          test "$docs" = "200"
 
       - name: Container logs
         if: always()

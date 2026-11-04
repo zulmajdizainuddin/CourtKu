@@ -2,7 +2,7 @@
 
 Book a badminton, futsal or pickleball court in under two minutes. CourtKu is a multi-tenant SaaS: each venue gets its own booking page, players see live availability and pay online, and owners run their day from a dashboard.
 
-> **Status:** M4 Payments is live. Venue owners sign up (with two-factor login), wait for approval, set up their venue, prices and booking rules, and connect their own Stripe account (Stripe Connect). Players book at `/v/<venue>/book` and pay online on Stripe's page while the court is held for them, or pay at the counter. Staff run the day from a schedule (walk-ins, blocks, check-in, paid at the counter), and owners record refunds. Notifications, reports and production hardening come next (M5).
+> **Status:** M5 is complete. Venue owners sign up (with two-factor login), wait for approval, set up their venue, prices and booking rules, and connect their own Stripe account (Stripe Connect). Players find a venue on the home page, book, and pay online while the court is held for them, or pay at the counter; they get emails for each booking, a reminder before the game, and can cancel or delete their account. Staff run the day from a live schedule (walk-ins, blocks, check-in, paid at the counter); owners see reports with a CSV export and record refunds. The live site runs on a rolling demo world, with error and uptime alerts and nightly locked backups that are restored every night to prove they work. Next: M6, a real venue.
 
 ## Live demo
 
@@ -16,6 +16,24 @@ Online payments run in **Stripe test mode: no real money is charged.** Pay with 
 
 The API runs on a free plan that sleeps when nobody uses it, so the first request after a quiet period can take up to a minute.
 
+**API documentation:** https://courtku-api.onrender.com/docs, every endpoint with its fields and examples, plus a [Postman collection](https://courtku-api.onrender.com/docs.postman) and an [OpenAPI file](https://courtku-api.onrender.com/docs.openapi) ([ADR-035](docs/adr/035-api-docs-served-at-docs.md)).
+
+## Screenshots
+
+Taken on a local copy with the demo data. The owner and staff side needs an owner account with two-factor login, so it isn't open on the live demo.
+
+| Find a court (home page) | A venue's page |
+| --- | --- |
+| ![Home page: Find a court, filtered to Pulau Pinang](docs/screenshots/home-find-a-court.png) | ![A demo venue's public page](docs/screenshots/venue-page.png) |
+
+| Booking on a phone | Staff: the day schedule |
+| --- | --- |
+| <img src="docs/screenshots/booking-phone.png" alt="Booking page on a phone: date, length, start time, free courts and the total" width="300"> | ![Staff day schedule: courts across, half hours down, bookings as blocks](docs/screenshots/staff-day-schedule.png) |
+
+| Owner: reports | Owner: booking settings |
+| --- | --- |
+| ![Owner reports: totals, bookings per day and how full each court was](docs/screenshots/owner-reports.png) | ![Owner booking settings, including the cancel cutoff and refund note](docs/screenshots/owner-settings.png) |
+
 ## Tech stack
 
 | Part | Technology |
@@ -23,8 +41,9 @@ The API runs on a free plan that sleeps when nobody uses it, so the first reques
 | API | Laravel 13 (PHP 8.4), Sanctum + Fortify for auth, Pest for tests, Larastan + Pint for code quality |
 | Web | Next.js 16 (TypeScript, App Router), Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form + Zod, Vitest |
 | Data | MySQL 8.4, Valkey (Redis-compatible) for cache and queues |
-| CI | GitHub Actions: lint, static analysis, tests, build and the production Docker image on every pull request |
-| Hosting | Vercel (web), Render (API, Docker), Aiven (MySQL), Brevo (email), UptimeRobot (monitoring) |
+| CI | GitHub Actions on every pull request: lint, static analysis, tests, build, the production Docker image, and Playwright browser tests of the 4 key flows |
+| Hosting | Vercel (web), Render (API, Docker), Aiven (MySQL), Brevo (email), Stripe test mode (payments), Cloudinary (photos) |
+| Watching | Sentry (error alerts), UptimeRobot (uptime), nightly locked backups in a private repository, restored every night |
 
 ## How it fits together
 
@@ -40,8 +59,9 @@ The browser only ever talks to the web app. The web app forwards API calls to La
 
 ```
 apps/api/     Laravel API
-apps/web/     Next.js web app
+apps/web/     Next.js web app (browser tests in apps/web/e2e)
 docs/adr/     Architecture decision records: why things are built this way
+docs/         Deployment, security checklist, backups, README screenshots
 docker/       Config for the local Docker services
 docker-compose.yml   MySQL, Redis and Mailpit for local development
 .github/workflows/   CI
@@ -92,6 +112,7 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 | Web tests | `npm test` | `apps/web` |
 | Web lint and types | `npm run lint` and `npm run typecheck` | `apps/web` |
 | Browser tests (4 key flows, laptop and phone size) | `npm run e2e` | `apps/web` |
+| API docs (write them again after changing an endpoint) | `composer docs` | `apps/api` |
 
 The same checks run in GitHub Actions on every pull request.
 

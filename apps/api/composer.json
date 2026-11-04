@@ -15,6 +15,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "knuckleswtf/scribe": "^5.11",
         "larastan/larastan": "^3.13",
         "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",
@@ -69,6 +70,10 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "docs": [
+            "@php artisan scribe:generate --no-interaction",
+            "@php -r \"@mkdir('resources/docs'); copy('storage/app/private/scribe/collection.json', 'resources/docs/collection.json'); copy('storage/app/private/scribe/openapi.yaml', 'resources/docs/openapi.yaml');\""
         ]
     },
     "extra": {
@@ -86,5 +91,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts-descriptions": {
+        "docs": "Writes the API docs served at /docs (ADR-035)."
+    }
 }

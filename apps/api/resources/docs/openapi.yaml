@@ -1,0 +1,2523 @@
+openapi: 3.0.3
+info:
+  title: 'CourtKu API'
+  description: 'The API behind CourtKu: venues, courts, prices, live availability, bookings and online payments for badminton, futsal and pickleball courts in Malaysia.'
+  version: 1.0.0
+servers:
+  -
+    url: 'https://courtku.vercel.app'
+tags:
+  -
+    name: 'Account and login'
+    description: ''
+  -
+    name: 'Venues (public)'
+    description: ''
+  -
+    name: 'Bookings (players)'
+    description: ''
+  -
+    name: Payments
+    description: ''
+  -
+    name: 'Venue setup (owners)'
+    description: ''
+  -
+    name: 'Day schedule (staff)'
+    description: ''
+  -
+    name: 'Staff invites'
+    description: ''
+  -
+    name: 'Reports (owners)'
+    description: ''
+  -
+    name: Admin
+    description: ''
+  -
+    name: Health
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: apiKey
+      name: X-XSRF-TOKEN
+      in: header
+      description: 'CourtKu uses a login session cookie, not API tokens (ADR-004). Call <code>GET /sanctum/csrf-cookie</code>, then <code>POST /auth/login</code>; the browser keeps the session cookie, and every request that changes something sends the <code>XSRF-TOKEN</code> cookie back in the <code>X-XSRF-TOKEN</code> header. Owners and the admin also need two-factor login.'
+security:
+  -
+    default: []
+paths:
+  /auth/login:
+    post:
+      summary: 'Attempt to authenticate a new session.'
+      operationId: attemptToAuthenticateANewSession
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: ''
+                  example: gbailey@example.net
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+                remember:
+                  type: string
+                  description: ''
+                  example: null
+              required:
+                - email
+                - password
+      security: []
+  /auth/logout:
+    post:
+      summary: 'Destroy an authenticated session.'
+      operationId: destroyAnAuthenticatedSession
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/forgot-password:
+    post:
+      summary: 'Send a reset link to the given user.'
+      operationId: sendAResetLinkToTheGivenUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+              required:
+                - email
+      security: []
+  /auth/reset-password:
+    post:
+      summary: "Reset the user's password."
+      operationId: resetTheUsersPassword
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: ''
+                  example: architecto
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - token
+                - password
+      security: []
+  /auth/register:
+    post:
+      summary: 'Create a new registered user.'
+      operationId: createANewRegisteredUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  '/auth/email/verify/{id}/{hash}':
+    get:
+      summary: "Mark the authenticated user's email address as verified."
+      operationId: markTheAuthenticatedUsersEmailAddressAsVerified
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the verify.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: hash
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /auth/email/verification-notification:
+    post:
+      summary: 'Send a new email verification notification.'
+      operationId: sendANewEmailVerificationNotification
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/profile-information:
+    put:
+      summary: "Update the user's profile information."
+      operationId: updateTheUsersProfileInformation
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/password:
+    put:
+      summary: "Update the user's password."
+      operationId: updateTheUsersPassword
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/confirmed-password-status:
+    get:
+      summary: 'Get the password confirmation status.'
+      operationId: getThePasswordConfirmationStatus
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/confirm-password:
+    post:
+      summary: "Confirm the user's password."
+      operationId: confirmTheUsersPassword
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/two-factor-challenge:
+    post:
+      summary: 'Attempt to authenticate a new session using the two factor authentication code.'
+      operationId: attemptToAuthenticateANewSessionUsingTheTwoFactorAuthenticationCode
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                recovery_code:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+      security: []
+  /auth/user/two-factor-authentication:
+    post:
+      summary: 'Enable two factor authentication for the user.'
+      operationId: enableTwoFactorAuthenticationForTheUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+    delete:
+      summary: 'Disable two factor authentication for the user.'
+      operationId: disableTwoFactorAuthenticationForTheUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/confirmed-two-factor-authentication:
+    post:
+      summary: 'Enable two factor authentication for the user.'
+      operationId: enableTwoFactorAuthenticationForTheUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/two-factor-qr-code:
+    get:
+      summary: "Get the SVG element for the user's two factor authentication QR code."
+      operationId: getTheSVGElementForTheUsersTwoFactorAuthenticationQRCode
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/two-factor-secret-key:
+    get:
+      summary: "Get the current user's two factor authentication setup / secret key."
+      operationId: getTheCurrentUsersTwoFactorAuthenticationSetupSecretKey
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /auth/user/two-factor-recovery-codes:
+    get:
+      summary: 'Get the two factor authentication recovery codes for authenticated user.'
+      operationId: getTheTwoFactorAuthenticationRecoveryCodesForAuthenticatedUser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+    post:
+      summary: 'Generate a fresh set of two factor authentication recovery codes.'
+      operationId: generateAFreshSetOfTwoFactorAuthenticationRecoveryCodes
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /sanctum/csrf-cookie:
+    get:
+      summary: 'Return an empty response simply to trigger the storage of the CSRF cookie in the browser.'
+      operationId: returnAnEmptyResponseSimplyToTriggerTheStorageOfTheCSRFCookieInTheBrowser
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Account and login'
+      security: []
+  /api/v1/me:
+    get:
+      summary: ''
+      operationId: getApiV1Me
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Account and login'
+    delete:
+      summary: 'DELETE /api/v1/me  { "password": ".'
+      operationId: dELETEapiv1mepassword
+      description: "..\" }: delete my own account (NFR-07, ADR-033).\nThe password is asked again, so someone at an unlocked laptop can't do it in one click."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Account and login'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+              required:
+                - password
+  /api/v1/venues:
+    get:
+      summary: "GET /api/v1/venues?sport=badminton&state=selangor&q=cheras&page=2: the venues guests can book,\nfor the list on the home page (ADR-031). Only approved venues with at least one bookable court."
+      operationId: gETapiv1venuessportbadmintonstateselangorqcheraspage2TheVenuesGuestsCanBookForTheListOnTheHomePageADR031OnlyApprovedVenuesWithAtLeastOneBookableCourt
+      description: 'Real venues come first, then the demo venues (ADR-030); 24 per page.'
+      parameters: []
+      responses: {}
+      tags:
+        - 'Venues (public)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sport:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                state:
+                  type: string
+                  description: ''
+                  example: melaka
+                  enum:
+                    - johor
+                    - kedah
+                    - kelantan
+                    - melaka
+                    - negeri-sembilan
+                    - pahang
+                    - perak
+                    - perlis
+                    - pulau-pinang
+                    - sabah
+                    - sarawak
+                    - selangor
+                    - terengganu
+                    - kuala-lumpur
+                    - labuan
+                    - putrajaya
+                  nullable: true
+                q:
+                  type: string
+                  description: 'Must not be greater than 60 characters.'
+                  example: 'n'
+                  nullable: true
+      security: []
+  '/api/v1/venues/{venue_slug}':
+    get:
+      summary: "GET /api/v1/venues/{slug}: everything the venue's public page shows."
+      operationId: gETapiv1venuesslugEverythingTheVenuesPublicPageShows
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Venues (public)'
+      security: []
+    parameters:
+      -
+        in: path
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        example: arena-demo
+        required: true
+        schema:
+          type: string
+  '/api/v1/venues/{venue_slug}/courts':
+    get:
+      summary: 'GET /api/v1/venues/{slug}/courts: the courts players can book.'
+      operationId: gETapiv1venuesslugcourtsTheCourtsPlayersCanBook
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Venues (public)'
+      security: []
+    parameters:
+      -
+        in: path
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        example: arena-demo
+        required: true
+        schema:
+          type: string
+  '/api/v1/venues/{venue_slug}/availability':
+    get:
+      summary: "GET /api/v1/venues/{slug}/availability?date=2026-11-06&sport=badminton\nEvery bookable court offering the sport, with each half hour players can still book\nand its price. Half hours that have started, or are inside the venue's notice, are left out."
+      operationId: gETapiv1venuesslugavailabilitydate20261106sportbadmintonEveryBookableCourtOfferingTheSportWithEachHalfHourPlayersCanStillBookAndItsPriceHalfHoursThatHaveStartedOrAreInsideTheVenuesNoticeAreLeftOut
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - 'Venues (public)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+                  example: '2026-11-04'
+                sport:
+                  type: string
+                  description: 'Must match an existing stored value.'
+                  example: architecto
+                  nullable: true
+              required:
+                - date
+      security: []
+    parameters:
+      -
+        in: path
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        example: arena-demo
+        required: true
+        schema:
+          type: string
+  '/api/v1/venues/{venue_slug}/quote':
+    post:
+      summary: 'POST /api/v1/venues/{slug}/quote: the total for one booking, adding up each half hour.'
+      operationId: pOSTapiv1venuesslugquoteTheTotalForOneBookingAddingUpEachHalfHour
+      description: 'The booking page shows this before the player books; M3 uses the same check to book.'
+      parameters: []
+      responses: {}
+      tags:
+        - 'Venues (public)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                court_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                starts_at:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-11-04T15:46:09'
+                minutes:
+                  type: integer
+                  description: 'Must be between 60 and 180.'
+                  example: 61
+              required:
+                - court_id
+                - starts_at
+                - minutes
+      security: []
+    parameters:
+      -
+        in: path
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        example: arena-demo
+        required: true
+        schema:
+          type: string
+  '/api/v1/venues/{venue_slug}/bookings':
+    post:
+      summary: "POST /api/v1/venues/{slug}/bookings  (header Idempotency-Key: <a random id per Book press>)\n201 with the new booking; 200 with the same booking when the same key comes again\n(a double tap or a network retry); 409 SLOT_TAKEN when someone was faster."
+      operationId: pOSTapiv1venuesslugbookingsheaderIdempotencyKeyaRandomIdPerBookPress201WithTheNewBooking200WithTheSameBookingWhenTheSameKeyComesAgainaDoubleTapOrANetworkRetry409SLOTTAKENWhenSomeoneWasFaster
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Bookings (players)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                court_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                sport:
+                  type: string
+                  description: 'Must match an existing stored value.'
+                  example: architecto
+                starts_at:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-11-04T15:46:09'
+                minutes:
+                  type: integer
+                  description: 'Must be at least 30. Must not be greater than 720.'
+                  example: 22
+                pay:
+                  type: string
+                  description: ''
+                  example: online
+                  enum:
+                    - online
+                    - counter
+              required:
+                - court_id
+                - sport
+                - starts_at
+                - minutes
+    parameters:
+      -
+        in: path
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        example: arena-demo
+        required: true
+        schema:
+          type: string
+  '/api/v1/bookings/{code}':
+    get:
+      summary: "GET /api/v1/bookings/{code}: the player's own booking, e.g. for the confirmation page."
+      operationId: gETapiv1bookingscodeThePlayersOwnBookingEgForTheConfirmationPage
+      description: "While it waits for payment, CourtKu asks Stripe how the payment stands first (at most every few\nseconds), so the status page shows \"paid\" as soon as Stripe knows, webhook or not."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Bookings (players)'
+    parameters:
+      -
+        in: path
+        name: code
+        description: 'The booking code.'
+        example: CK-7F3K2
+        required: true
+        schema:
+          type: string
+  /api/v1/me/bookings:
+    get:
+      summary: "GET /api/v1/me/bookings?when=upcoming (soonest first) or ?when=past (latest first, with\ncancelled ones), 20 at a time. The next page is ?cursor=<meta.next_cursor> (plan section 8)."
+      operationId: gETapiv1mebookingswhenupcomingsoonestFirstOrwhenpastlatestFirstWithCancelledOnes20AtATimeTheNextPageIscursormetanextCursorplanSection8
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Bookings (players)'
+  '/api/v1/bookings/{code}/cancel':
+    post:
+      summary: "POST /api/v1/bookings/{code}/cancel: the player cancels their own booking (FR-24), until the\nvenue's cutoff (e.g. 24 hours before). The half hours are free for others straight away."
+      operationId: pOSTapiv1bookingscodecancelThePlayerCancelsTheirOwnBookingFR24UntilTheVenuesCutoffeg24HoursBeforeTheHalfHoursAreFreeForOthersStraightAway
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Bookings (players)'
+    parameters:
+      -
+        in: path
+        name: code
+        description: 'The booking code.'
+        example: CK-7F3K2
+        required: true
+        schema:
+          type: string
+  '/api/v1/bookings/{code}/pay':
+    post:
+      summary: 'POST /api/v1/bookings/{code}/pay: { "data": { "url": "https://checkout.stripe.com/.'
+      operationId: pOSTapiv1bookingscodepaydataurlhttpscheckoutstripecom
+      description: "..\" } }\nWhere the player pays for a booking that is waiting for payment: the page already open, or a new\none after a declined card. 409 NOT_AWAITING_PAYMENT once it is paid, cancelled or expired."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Bookings (players)'
+    parameters:
+      -
+        in: path
+        name: code
+        description: 'The booking code.'
+        example: CK-7F3K2
+        required: true
+        schema:
+          type: string
+  /api/v1/webhooks/payments/stripe:
+    post:
+      summary: ''
+      operationId: postApiV1WebhooksPaymentsStripe
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - Payments
+      security: []
+  '/api/v1/manage/venues/{venue_id}/payment-account':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/payment-account: the connected account, or null.'
+      operationId: gETapiv1managevenuesvenuepaymentAccountTheConnectedAccountOrNull
+      description: 'Until it can take payments, CourtKu asks Stripe again each time, e.g. when the owner comes back from Stripe.'
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+    delete:
+      summary: "DELETE /api/v1/manage/venues/{venue}/payment-account: CourtKu stops using the account, and players\ngo back to paying at the counter. The Stripe account itself stays the venue's. Refused while a\nplayer is paying, so their payment can still be confirmed."
+      operationId: dELETEapiv1managevenuesvenuepaymentAccountCourtKuStopsUsingTheAccountAndPlayersGoBackToPayingAtTheCounterTheStripeAccountItselfStaysTheVenuesRefusedWhileAPlayerIsPayingSoTheirPaymentCanStillBeConfirmed
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/payment-account/onboarding':
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/payment-account/onboarding: { "data": { "url": "https://connect.stripe.com/.'
+      operationId: pOSTapiv1managevenuesvenuepaymentAccountonboardingdataurlhttpsconnectstripecom
+      description: "..\" } }\nWhere the owner goes next: Stripe's own sign-up pages for the venue's account. The first time,\nthe account is made first. Each link works once and for a few minutes, so a new one is made each time."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/payment-settings':
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/payment-settings  { "payment_mode": "both", "hold_minutes": 15 }'
+      operationId: pUTapiv1managevenuesvenuepaymentSettingspaymentModebothholdMinutes15
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_mode:
+                  type: string
+                  description: ''
+                  example: counter
+                  enum:
+                    - counter
+                    - online
+                    - both
+                hold_minutes:
+                  type: integer
+                  description: ''
+                  example: 15
+                  enum:
+                    - 10
+                    - 15
+                    - 20
+                    - 30
+              required:
+                - payment_mode
+                - hold_minutes
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/payments/attention':
+    get:
+      summary: "GET /api/v1/manage/venues/{venue}/payments/attention: online payments the owner should refund (FR-25),\nnewest first, until they are fully refunded:\n  - money that came in but couldn't confirm the booking (wrong amount, too late, after a cancel, paid twice);\n  - bookings paid online and cancelled afterwards (by the player before the cutoff, or by staff)."
+      operationId: gETapiv1managevenuesvenuepaymentsattentionOnlinePaymentsTheOwnerShouldRefundFR25NewestFirstUntilTheyAreFullyRefundedMoneyThatCameInButCouldntConfirmTheBookingwrongAmountTooLateAfterACancelPaidTwiceBookingsPaidOnlineAndCancelledAfterwardsbyThePlayerBeforeTheCutoffOrByStaff
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/payments/{payment_id}/refunds':
+    post:
+      summary: "POST /api/v1/manage/venues/{venue}/payments/{payment}/refunds  { \"amount_sen\": 2000, \"reason\": \"Paid after the time ran out\" }\nPart refunds are fine; the total can never be more than was paid. Fully refunded = status refunded."
+      operationId: pOSTapiv1managevenuesvenuepaymentspaymentrefundsamountSen2000reasonPaidAfterTheTimeRanOutPartRefundsAreFineTheTotalCanNeverBeMoreThanWasPaidFullyRefundedStatusRefunded
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount_sen:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 16
+                reason:
+                  type: string
+                  description: 'Must not be greater than 200 characters.'
+                  example: 'n'
+              required:
+                - amount_sen
+                - reason
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: payment_id
+        description: 'The ID of the payment.'
+        example: 2
+        required: true
+        schema:
+          type: integer
+  /api/v1/manage/venues:
+    get:
+      summary: 'GET /api/v1/manage/venues: the venue picker. Only venues this user belongs to.'
+      operationId: gETapiv1managevenuesTheVenuePickerOnlyVenuesThisUserBelongsTo
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    post:
+      summary: 'POST /api/v1/manage/venues: list a new venue (FR-04).'
+      operationId: pOSTapiv1managevenuesListANewVenueFR04
+      description: 'It starts as pending and stays hidden until an admin approves it.'
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must be at least 3 characters. Must not be greater than 100 characters.'
+                  example: b
+                slug:
+                  type: string
+                  description: 'Must match the regex /^[a-z0-9]+(?:-[a-z0-9]+)*$/. Must be at least 3 characters. Must not be greater than 60 characters.'
+                  example: 'n'
+                state:
+                  type: string
+                  description: ''
+                  example: putrajaya
+                  enum:
+                    - johor
+                    - kedah
+                    - kelantan
+                    - melaka
+                    - negeri-sembilan
+                    - pahang
+                    - perak
+                    - perlis
+                    - pulau-pinang
+                    - sabah
+                    - sarawak
+                    - selangor
+                    - terengganu
+                    - kuala-lumpur
+                    - labuan
+                    - putrajaya
+              required:
+                - name
+                - slug
+                - state
+  '/api/v1/manage/venues/{venue_id}':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}. The route checks VenuePolicy::view first.'
+      operationId: gETapiv1managevenuesvenueTheRouteChecksVenuePolicyviewFirst
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}: save the profile (FR-06). Owners only (VenuePolicy::update).'
+      operationId: pUTapiv1managevenuesvenueSaveTheProfileFR06OwnersOnlyVenuePolicyupdate
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must be at least 3 characters. Must not be greater than 100 characters.'
+                  example: b
+                slug:
+                  type: string
+                  description: 'Must match the regex /^[a-z0-9]+(?:-[a-z0-9]+)*$/. Must be at least 3 characters. Must not be greater than 60 characters.'
+                  example: 'n'
+                state:
+                  type: string
+                  description: ''
+                  example: terengganu
+                  enum:
+                    - johor
+                    - kedah
+                    - kelantan
+                    - melaka
+                    - negeri-sembilan
+                    - pahang
+                    - perak
+                    - perlis
+                    - pulau-pinang
+                    - sabah
+                    - sarawak
+                    - selangor
+                    - terengganu
+                    - kuala-lumpur
+                    - labuan
+                    - putrajaya
+                description:
+                  type: string
+                  description: 'Must not be greater than 2000 characters.'
+                  example: 'Animi quos velit et fugiat.'
+                  nullable: true
+                address_line:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: d
+                  nullable: true
+                city:
+                  type: string
+                  description: 'Must not be greater than 100 characters.'
+                  example: l
+                  nullable: true
+                postcode:
+                  type: string
+                  description: 'Must match the regex /^\d{5}$/.'
+                  example: '56425'
+                  nullable: true
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: dljnikhwaykcmyuw
+                  nullable: true
+                facilities:
+                  type: array
+                  description: ''
+                  example:
+                    - changing_rooms
+                  items:
+                    type: string
+                    enum:
+                      - parking
+                      - surau
+                      - toilets
+                      - showers
+                      - changing_rooms
+                      - lockers
+                      - canteen
+                      - wifi
+                      - air_conditioning
+                      - equipment_rental
+              required:
+                - name
+                - slug
+                - state
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/settings':
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/settings: how players may book (FR-13). Owners only.'
+      operationId: pUTapiv1managevenuesvenuesettingsHowPlayersMayBookFR13OwnersOnly
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slot_minutes:
+                  type: integer
+                  description: ''
+                  example: 60
+                  enum:
+                    - 30
+                    - 60
+                min_minutes:
+                  type: integer
+                  description: 'Must be at least 30. Must not be greater than 720.'
+                  example: 1
+                max_minutes:
+                  type: integer
+                  description: 'Must be at least 30. Must not be greater than 720.'
+                  example: 22
+                booking_window_days:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 90.'
+                  example: 7
+                min_notice_minutes:
+                  type: integer
+                  description: ''
+                  example: 30
+                  enum:
+                    - 0
+                    - 30
+                    - 60
+                    - 120
+                    - 1440
+                cancel_cutoff_hours:
+                  type: integer
+                  description: ''
+                  example: 24
+                  enum:
+                    - 2
+                    - 6
+                    - 12
+                    - 24
+                    - 48
+                refund_note:
+                  type: string
+                  description: 'Must not be greater than 300 characters.'
+                  example: z
+                  nullable: true
+                booking_emails:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - slot_minutes
+                - min_minutes
+                - max_minutes
+                - booking_window_days
+                - min_notice_minutes
+                - cancel_cutoff_hours
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/hours':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/hours'
+      operationId: gETapiv1managevenuesvenuehours
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/hours: replaces the whole week.'
+      operationId: pUTapiv1managevenuesvenuehoursReplacesTheWholeWeek
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                periods:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: object
+                    properties:
+                      weekday:
+                        type: integer
+                        description: 'Must be between 0 and 6.'
+                        example: 1
+                      opens_at:
+                        type: string
+                        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                        example: '04:30'
+                      closes_at:
+                        type: string
+                        description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                        example: '04:30'
+                    required:
+                      - weekday
+                      - opens_at
+                      - closes_at
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/closures':
+    get:
+      summary: "GET /api/v1/manage/venues/{venue}/closures: today's and future closures, soonest first."
+      operationId: gETapiv1managevenuesvenueclosuresTodaysAndFutureClosuresSoonestFirst
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/closures'
+      operationId: pOSTapiv1managevenuesvenueclosures
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                starts_on:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>2026-11-04</code>.'
+                  example: '2052-11-27'
+                ends_on:
+                  type: string
+                  description: 'Must be a valid date in the format <code>Y-m-d</code>. Must be a date after or equal to <code>starts_on</code>.'
+                  example: '2052-11-27'
+                reason:
+                  type: string
+                  description: 'Must not be greater than 100 characters.'
+                  example: 'n'
+              required:
+                - starts_on
+                - ends_on
+                - reason
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/closures/{closure_id}':
+    delete:
+      summary: "DELETE /api/v1/manage/venues/{venue}/closures/{closure}\nThe route only finds closures of this venue (scopeBindings), so venue A's URL\ncan never remove venue B's closure."
+      operationId: dELETEapiv1managevenuesvenueclosuresclosureTheRouteOnlyFindsClosuresOfThisVenuescopeBindingsSoVenueAsURLCanNeverRemoveVenueBsClosure
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: closure_id
+        description: 'The ID of the closure.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/courts':
+    get:
+      summary: "GET /api/v1/manage/venues/{venue}/courts: in the owner's chosen order."
+      operationId: gETapiv1managevenuesvenuecourtsInTheOwnersChosenOrder
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/courts: the new court goes at the end of the list.'
+      operationId: pOSTapiv1managevenuesvenuecourtsTheNewCourtGoesAtTheEndOfTheList
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                is_indoor:
+                  type: boolean
+                  description: ''
+                  example: true
+                base_price_sen:
+                  type: integer
+                  description: 'Must be at least 0. Must not be greater than 100000.'
+                  example: 22
+                  nullable: true
+                is_active:
+                  type: boolean
+                  description: ''
+                  example: false
+                sports:
+                  type: array
+                  description: 'Must match an existing stored value.'
+                  example: null
+                  items:
+                    type: string
+              required:
+                - name
+                - is_indoor
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/courts/order':
+    put:
+      summary: "PUT /api/v1/manage/venues/{venue}/courts/order  { \"court_ids\": [7, 4, 5] }\nEvery court of the venue, each exactly once, in the new order."
+      operationId: pUTapiv1managevenuesvenuecourtsordercourtIds745EveryCourtOfTheVenueEachExactlyOnceInTheNewOrder
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                court_ids:
+                  type: array
+                  description: ''
+                  example:
+                    - 16
+                  items:
+                    type: integer
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/courts/{court_id}':
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/courts/{court}: name, indoor, active and sports.'
+      operationId: pUTapiv1managevenuesvenuecourtscourtNameIndoorActiveAndSports
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                is_indoor:
+                  type: boolean
+                  description: ''
+                  example: true
+                base_price_sen:
+                  type: integer
+                  description: 'Must be at least 0. Must not be greater than 100000.'
+                  example: 22
+                  nullable: true
+                is_active:
+                  type: boolean
+                  description: ''
+                  example: false
+                sports:
+                  type: array
+                  description: 'Must match an existing stored value.'
+                  example: null
+                  items:
+                    type: string
+              required:
+                - name
+                - is_indoor
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/courts/{court}'
+      operationId: dELETEapiv1managevenuesvenuecourtscourt
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: court_id
+        description: 'The ID of the court.'
+        example: 5
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/price-rules':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/price-rules: all-courts rules first, then by start time.'
+      operationId: gETapiv1managevenuesvenuepriceRulesAllCourtsRulesFirstThenByStartTime
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/price-rules'
+      operationId: pOSTapiv1managevenuesvenuepriceRules
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                  nullable: true
+                court_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+                weekdays:
+                  type: array
+                  description: 'Must be between 0 and 6.'
+                  example:
+                    - 1
+                  items:
+                    type: integer
+                starts_at:
+                  type: string
+                  description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                  example: '04:30'
+                ends_at:
+                  type: string
+                  description: 'The value and <code>starts_at</code> must be different. Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                  example: '04:30'
+                price_sen:
+                  type: integer
+                  description: 'Must be at least 0. Must not be greater than 100000.'
+                  example: 8
+              required:
+                - starts_at
+                - ends_at
+                - price_sen
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/price-rules/{priceRule_id}':
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/price-rules/{priceRule}'
+      operationId: pUTapiv1managevenuesvenuepriceRulespriceRule
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 50 characters.'
+                  example: b
+                  nullable: true
+                court_id:
+                  type: integer
+                  description: 'Must match an existing stored value.'
+                  example: 16
+                  nullable: true
+                weekdays:
+                  type: array
+                  description: 'Must be between 0 and 6.'
+                  example:
+                    - 1
+                  items:
+                    type: integer
+                starts_at:
+                  type: string
+                  description: 'Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                  example: '04:30'
+                ends_at:
+                  type: string
+                  description: 'The value and <code>starts_at</code> must be different. Must match the regex /^([01]\d|2[0-3]):(00|30)$/.'
+                  example: '04:30'
+                price_sen:
+                  type: integer
+                  description: 'Must be at least 0. Must not be greater than 100000.'
+                  example: 8
+              required:
+                - starts_at
+                - ends_at
+                - price_sen
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/price-rules/{priceRule}: those hours go back to the normal price.'
+      operationId: dELETEapiv1managevenuesvenuepriceRulespriceRuleThoseHoursGoBackToTheNormalPrice
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: priceRule_id
+        description: 'The ID of the priceRule.'
+        example: 3
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/staff':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/staff'
+      operationId: gETapiv1managevenuesvenuestaff
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/staff-invites':
+    post:
+      summary: "POST /api/v1/manage/venues/{venue}/staff-invites  { \"email\": \"aina@example.com\" }\nInviting the same email again sends a fresh link; the old one stops working."
+      operationId: pOSTapiv1managevenuesvenuestaffInvitesemailainaexamplecomInvitingTheSameEmailAgainSendsAFreshLinkTheOldOneStopsWorking
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/staff-invites/{invite_id}':
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/staff-invites/{invite}: the link stops working.'
+      operationId: dELETEapiv1managevenuesvenuestaffInvitesinviteTheLinkStopsWorking
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: invite_id
+        description: 'The ID of the invite.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/staff/{user}':
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/staff/{user}: they lose access straight away.'
+      operationId: dELETEapiv1managevenuesvenuestaffuserTheyLoseAccessStraightAway
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: user
+        description: ''
+        example: '564'
+        required: true
+        schema:
+          type: string
+  '/api/v1/manage/venues/{venue_id}/photos':
+    get:
+      summary: "GET /api/v1/manage/venues/{venue}/photos: in the owner's chosen order."
+      operationId: gETapiv1managevenuesvenuephotosInTheOwnersChosenOrder
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/photos: the new photo goes at the end.'
+      operationId: pOSTapiv1managevenuesvenuephotosTheNewPhotoGoesAtTheEnd
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. Must be an image. Must not be greater than 4096 kilobytes.'
+              required:
+                - photo
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/photos/order':
+    put:
+      summary: 'PUT /api/v1/manage/venues/{venue}/photos/order  { "photo_ids": [5, 2, 3] }'
+      operationId: pUTapiv1managevenuesvenuephotosorderphotoIds523
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo_ids:
+                  type: array
+                  description: ''
+                  example:
+                    - 16
+                  items:
+                    type: integer
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/photos/{photo_id}':
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/photos/{photo}'
+      operationId: dELETEapiv1managevenuesvenuephotosphoto
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Venue setup (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: photo_id
+        description: 'The ID of the photo.'
+        example: 2
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/schedule':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/schedule?date=2026-11-06 (today in Malaysia when left out)'
+      operationId: gETapiv1managevenuesvenuescheduledate20261106todayInMalaysiaWhenLeftOut
+      description: "times: the day's half hours, from opening to closing, after midnight too (ADR-015), plus any\nhalf hour a booking or block holds outside today's hours. courts: the active courts, and any\nother court with a booking or block that day. bookings: everything except cancelled and expired\nones (holds still waiting for payment included).\nblocks: times closed for repairs or a private event (FR-21)."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/schedule/version':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/schedule/version (FR-14)'
+      operationId: gETapiv1managevenuesvenuescheduleversionFR14
+      description: "A tiny answer the Schedule tab asks for every 10 seconds: a word that changes whenever a booking,\ncancel, block or setting at this venue is saved (AvailabilityCache, ADR-028). The page reloads the\nwhole schedule only when it changes, so the counter sees new online bookings within seconds."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/bookings':
+    post:
+      summary: 'POST /api/v1/manage/venues/{venue}/bookings'
+      operationId: pOSTapiv1managevenuesvenuebookings
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                court_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                sport:
+                  type: string
+                  description: 'Must match an existing stored value.'
+                  example: architecto
+                starts_at:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-11-04T15:46:09'
+                minutes:
+                  type: integer
+                  description: 'Must be at least 30. Must not be greater than 720.'
+                  example: 22
+                source:
+                  type: string
+                  description: ''
+                  example: walk_in
+                  enum:
+                    - walk_in
+                    - phone
+                customer_name:
+                  type: string
+                  description: 'Must not be greater than 100 characters.'
+                  example: g
+                customer_phone:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - court_id
+                - sport
+                - starts_at
+                - minutes
+                - source
+                - customer_name
+                - customer_phone
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/blocks':
+    post:
+      summary: "POST /api/v1/manage/venues/{venue}/blocks\n{ \"court_ids\": [6, 7], \"starts_at\": \"2026-11-06T18:00:00+08:00\", \"minutes\": 120, \"reason\": \"Floor repair\" }\nOne block per court, all or nothing: 409 SLOT_TAKEN (with the bookings in the way) when any\nof these half hours is already booked or blocked."
+      operationId: pOSTapiv1managevenuesvenueblockscourtIds67startsAt20261106T180000+0800minutes120reasonFloorRepairOneBlockPerCourtAllOrNothing409SLOTTAKENwithTheBookingsInTheWayWhenAnyOfTheseHalfHoursIsAlreadyBookedOrBlocked
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                court_ids:
+                  type: array
+                  description: ''
+                  example:
+                    - 16
+                  items:
+                    type: integer
+                starts_at:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-11-04T15:46:09'
+                minutes:
+                  type: integer
+                  description: 'Half-hour steps, at most a whole day; longer closures are closure days (FR-07). Must be at least 30. Must not be greater than 1440.'
+                  example: 22
+                reason:
+                  type: string
+                  description: 'Must not be greater than 100 characters.'
+                  example: g
+              required:
+                - starts_at
+                - minutes
+                - reason
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/bookings/{booking_code}/check-in':
+    post:
+      summary: 'POST .'
+      operationId: pOST
+      description: '../bookings/{code}/check-in: the player arrived. From an hour before the start until it ends.'
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: booking_code
+        description: ''
+        example: 31
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/bookings/{booking_code}/no-show':
+    post:
+      summary: 'POST .'
+      operationId: pOST
+      description: "../bookings/{code}/no-show: the player didn't come. The time stays taken, as history."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: booking_code
+        description: ''
+        example: 31
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/bookings/{booking_code}/paid':
+    post:
+      summary: 'POST .'
+      operationId: pOST
+      description: '../bookings/{code}/paid  { "method": "cash" | "qr" | "card" }'
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - method
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: booking_code
+        description: ''
+        example: 31
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/bookings/{booking_code}/cancel':
+    post:
+      summary: 'POST .'
+      operationId: pOST
+      description: "../bookings/{code}/cancel  { \"reason\": \"Rain\" }\nStaff and owners can cancel any confirmed booking, or one waiting for payment, with no cutoff\n(unlike players, FR-24).\nThe time is free for others straight away."
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 'Must not be greater than 200 characters.'
+                  example: b
+              required:
+                - reason
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: booking_code
+        description: ''
+        example: 31
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/blocks/{slotBlock_id}':
+    delete:
+      summary: 'DELETE /api/v1/manage/venues/{venue}/blocks/{slotBlock}: the time can be booked again.'
+      operationId: dELETEapiv1managevenuesvenueblocksslotBlockTheTimeCanBeBookedAgain
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Day schedule (staff)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: slotBlock_id
+        description: 'The ID of the slotBlock.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/v1/invites/{token}':
+    get:
+      summary: 'GET /api/v1/invites/{token}: what the invite is, before accepting.'
+      operationId: gETapiv1invitestokenWhatTheInviteIsBeforeAccepting
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Staff invites'
+    parameters:
+      -
+        in: path
+        name: token
+        description: 'The code from the invite email.'
+        example: 5f2b8c1e9a7d4f6b
+        required: true
+        schema:
+          type: string
+  '/api/v1/invites/{token}/accept':
+    post:
+      summary: 'POST /api/v1/invites/{token}/accept: the logged-in, verified user joins the venue.'
+      operationId: pOSTapiv1invitestokenacceptTheLoggedInVerifiedUserJoinsTheVenue
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Staff invites'
+    parameters:
+      -
+        in: path
+        name: token
+        description: 'The code from the invite email.'
+        example: 5f2b8c1e9a7d4f6b
+        required: true
+        schema:
+          type: string
+  '/api/v1/manage/venues/{venue_id}/reports':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/reports?from=2026-11-01&to=2026-11-30'
+      operationId: gETapiv1managevenuesvenuereportsfrom20261101to20261130
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Reports (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/manage/venues/{venue_id}/reports/bookings.csv':
+    get:
+      summary: 'GET /api/v1/manage/venues/{venue}/reports/bookings.csv?from=2026-11-01&to=2026-11-30'
+      operationId: gETapiv1managevenuesvenuereportsbookingscsvfrom20261101to20261130
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - 'Reports (owners)'
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/admin/venues:
+    get:
+      summary: 'GET /api/v1/admin/venues?status=pending: newest first, 25 per page.'
+      operationId: gETapiv1adminvenuesstatuspendingNewestFirst25PerPage
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Admin
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: suspended
+                  enum:
+                    - pending
+                    - active
+                    - suspended
+                  nullable: true
+  '/api/v1/admin/venues/{venue_id}/approve':
+    post:
+      summary: 'POST /api/v1/admin/venues/{venue}/approve'
+      operationId: pOSTapiv1adminvenuesvenueapprove
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Admin
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/admin/venues/{venue_id}/suspend':
+    post:
+      summary: 'POST /api/v1/admin/venues/{venue}/suspend'
+      operationId: pOSTapiv1adminvenuesvenuesuspend
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Admin
+    parameters:
+      -
+        in: path
+        name: venue_id
+        description: 'The ID of the venue.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/admin/stats:
+    get:
+      summary: ''
+      operationId: getApiV1AdminStats
+      description: ''
+      parameters:
+        -
+          in: header
+          name: X-XSRF-TOKEN
+          description: ''
+          example: '{XSRF-TOKEN cookie value}'
+          schema:
+            type: string
+      responses: {}
+      tags:
+        - Admin
+  /api/health:
+    get:
+      summary: ''
+      operationId: getApiHealth
+      description: ''
+      parameters: []
+      responses: {}
+      tags:
+        - Health
+      security: []

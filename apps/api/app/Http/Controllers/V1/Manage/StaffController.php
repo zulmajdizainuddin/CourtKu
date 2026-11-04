@@ -18,6 +18,10 @@ use Illuminate\Validation\ValidationException;
 /**
  * The owner's staff page (FR-05): who works here, pending invites, inviting and removing.
  * Owners only; every route checks VenuePolicy::update.
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class StaffController extends Controller
 {
