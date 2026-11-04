@@ -91,8 +91,11 @@ You need: **PHP 8.4** (Laravel Herd), **Composer**, **Node.js 24**, **Git** and 
 | API code style (fix) | `vendor/bin/pint` | `apps/api` |
 | Web tests | `npm test` | `apps/web` |
 | Web lint and types | `npm run lint` and `npm run typecheck` | `apps/web` |
+| Browser tests (4 key flows, laptop and phone size) | `npm run e2e` | `apps/web` |
 
 The same checks run in GitHub Actions on every pull request.
+
+The browser tests ([ADR-034](docs/adr/034-browser-tests-on-every-pull-request.md)) start their own API on port 8100, with its own `courtku_e2e` database and a pretend Stripe, and a production build of the web app on port 3100, so your local data is never touched. They need Docker's MySQL and Mailpit running (`docker compose up -d`) and Playwright's Chromium once (`npx playwright install chromium`). On Windows, point them at Herd's PHP first: `$env:E2E_PHP = "C:\Users\<you>\.config\herd\bin\php84\php.exe"`. An older Docker volume needs the `courtku_e2e` database added once (see `docker/mysql/init.sql`).
 
 ## Deployment
 

@@ -38,6 +38,12 @@ return [
 
     // Stripe test mode (ADR-023). CourtKu's own platform key: venues connect their accounts through
     // Stripe Connect and never give CourtKu a key (ADR-024). Test keys (sk_test_) only.
+    // Which payment gateway takes online payments: 'stripe', or 'pretend' for the browser tests
+    // (ADR-034). 'pretend' is refused on the live site (PretendGateway::enabled()).
+    'payments' => [
+        'gateway' => env('PAYMENT_GATEWAY', 'stripe'),
+    ],
+
     'stripe' => [
         'secret' => env('STRIPE_SECRET_KEY'),
         // The signing secret (whsec_...) of CourtKu's one Connect webhook: Stripe signs every payment event with it.

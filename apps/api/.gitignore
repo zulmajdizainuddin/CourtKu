@@ -3,6 +3,8 @@
 .env
 .env.backup
 .env.production
+# Made by apps/web/e2e/start-api.mjs from .env.e2e.example; holds a generated key.
+.env.e2e
 .phpactor.json
 .phpunit.result.cache
 /.idea

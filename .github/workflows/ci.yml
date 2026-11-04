@@ -1,6 +1,6 @@
 # Runs on every pull request and every push to main.
-# Both jobs must pass before a pull request can be merged (set this in GitHub:
-# Settings -> Branches -> branch protection for main -> require "API" and "Web").
+# Every job must pass before a pull request can be merged (GitHub ruleset "Protect main" requires
+# "API", "Web", "API Docker image" and "End-to-end").
 name: CI
 
 on:
@@ -141,3 +141,84 @@ jobs:
 
       - name: Known vulnerabilities in packages
         run: npm audit --audit-level=high --omit=dev
+
+  # The 4 key flows in a real browser, on a laptop screen and a 360 px phone (ADR-034): the real API
+  # (pretend Stripe, its own database) and a production build of the web app. See apps/web/e2e.
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: courtku_e2e
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      # Catches the emails, so the sign-up test can open the verification link.
+      mailpit:
+        image: axllent/mailpit:v1.31.6
+        ports: ["1025:1025", "8025:8025"]
+
+    env:
+      E2E_DB_DATABASE: courtku_e2e
+      E2E_DB_USERNAME: root
+      E2E_DB_PASSWORD: root
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_mysql, mbstring, intl
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ hashFiles('apps/api/composer.lock') }}
+
+      - name: Install API packages
+        working-directory: apps/api
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web packages
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Cache Playwright's browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('apps/web/package-lock.json') }}
+
+      - name: Install Chromium
+        working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests (Playwright)
+        working-directory: apps/web
+        run: npx playwright test
+
+      # What each failing step looked like (screenshots, a trace to replay): Actions -> this run -> Artifacts.
+      - name: Keep the report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

@@ -24,6 +24,10 @@ class PaymentGateways
         if ($this->fake !== null) {
             return $this->fake;
         }
+        // The browser tests' stand-in for Stripe (ADR-034); never on the live site.
+        if (PretendGateway::enabled()) {
+            return app(PretendGateway::class);
+        }
 
         $key = (string) config('services.stripe.secret');
         if (! str_starts_with($key, 'sk_test_')) {

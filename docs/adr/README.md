@@ -38,3 +38,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [031](031-guest-venue-list-on-the-home-page.md) | Guests can browse the bookable venues on the home page | 2026-11-11 |
 | [032](032-legal-pages-and-refund-policy-before-payment.md) | Terms, Privacy Notice and a refund policy built from the cancel setting | 2026-11-12 |
 | [033](033-deleting-an-account-anonymises-it.md) | Deleting an account anonymises it; past bookings stay with the venue | 2026-11-12 |
+| [034](034-browser-tests-on-every-pull-request.md) | Browser tests on every pull request, with a pretend Stripe | 2026-11-13 |

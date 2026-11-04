@@ -202,6 +202,8 @@ it('never lets a broken demo step stop the real every-minute jobs', function () 
 });
 
 it('takes no online payments when no Stripe account is configured', function () {
+    // Set here, so a DEMO_STRIPE_ACCOUNT_ID in a laptop's .env can't change the result.
+    config(['demo.stripe_account' => null]);
     (new DemoWorld)->step();
 
     expect(demoVenues()->contains(fn (Venue $v) => $v->acceptsOnlinePayment()))->toBeFalse()
