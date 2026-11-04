@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Safety headers on every API answer (docs/security.md). The API only sends JSON and a few
  * redirects, so it can be strict: no framing, no guessing file types, no scripts or styles.
+ * Only the API docs page at /docs loosens the content rule for itself (DocsController).
  */
 class SecurityHeaders
 {
@@ -22,7 +23,10 @@ class SecurityHeaders
         // and no other site may show an API answer inside a frame (frame-ancestors). No
         // X-Frame-Options here: the Docker image's nginx already sends one, and two different
         // values would confuse browsers. frame-ancestors wins over it in every current browser.
-        $response->headers->set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+        // The one exception is the API docs page (DocsController), which sets its own, looser rule.
+        if (! $response->headers->has('Content-Security-Policy')) {
+            $response->headers->set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+        }
         // Links followed from an API answer don't tell the next site the full address.
         $response->headers->set('Referrer-Policy', 'no-referrer');
 

@@ -26,6 +26,10 @@ use Illuminate\Validation\ValidationException;
  * Players booking courts online (FR-15, FR-35, FR-36): logged in, with a verified email.
  * Paid at the venue: confirmed straight away (ADR-021). Paid online: held while the player pays on
  * Stripe's page, and confirmed when Stripe says it was paid (FR-16, FR-22).
+ *
+ * @group Bookings (players)
+ *
+ * @authenticated
  */
 class BookingController extends Controller
 {
@@ -33,6 +37,8 @@ class BookingController extends Controller
      * POST /api/v1/venues/{slug}/bookings  (header Idempotency-Key: <a random id per Book press>)
      * 201 with the new booking; 200 with the same booking when the same key comes again
      * (a double tap or a network retry); 409 SLOT_TAKEN when someone was faster.
+     *
+     * @urlParam venue_slug string required The venue's web address name (slug). Example: arena-demo
      */
     public function store(StoreBookingRequest $request, Venue $venue, BookingService $bookings): JsonResponse
     {
@@ -96,6 +102,8 @@ class BookingController extends Controller
      * GET /api/v1/bookings/{code}: the player's own booking, e.g. for the confirmation page.
      * While it waits for payment, CourtKu asks Stripe how the payment stands first (at most every few
      * seconds), so the status page shows "paid" as soon as Stripe knows, webhook or not.
+     *
+     * @urlParam code string required The booking code. Example: CK-7F3K2
      */
     public function show(Request $request, string $code, Checkouts $checkouts): PlayerBookingResource
     {
@@ -112,6 +120,8 @@ class BookingController extends Controller
      * POST /api/v1/bookings/{code}/pay: { "data": { "url": "https://checkout.stripe.com/..." } }
      * Where the player pays for a booking that is waiting for payment: the page already open, or a new
      * one after a declined card. 409 NOT_AWAITING_PAYMENT once it is paid, cancelled or expired.
+     *
+     * @urlParam code string required The booking code. Example: CK-7F3K2
      */
     public function pay(Request $request, string $code, Checkouts $checkouts): JsonResponse
     {
@@ -123,6 +133,8 @@ class BookingController extends Controller
     /**
      * POST /api/v1/bookings/{code}/cancel: the player cancels their own booking (FR-24), until the
      * venue's cutoff (e.g. 24 hours before). The half hours are free for others straight away.
+     *
+     * @urlParam code string required The booking code. Example: CK-7F3K2
      */
     public function cancel(Request $request, string $code, BookingStateMachine $machine, Checkouts $checkouts): PlayerBookingResource
     {

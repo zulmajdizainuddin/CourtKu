@@ -39,3 +39,4 @@ To change a decision, add a new ADR that replaces the old one; don't edit histor
 | [032](032-legal-pages-and-refund-policy-before-payment.md) | Terms, Privacy Notice and a refund policy built from the cancel setting | 2026-11-12 |
 | [033](033-deleting-an-account-anonymises-it.md) | Deleting an account anonymises it; past bookings stay with the venue | 2026-11-12 |
 | [034](034-browser-tests-on-every-pull-request.md) | Browser tests on every pull request, with a pretend Stripe | 2026-11-13 |
+| [035](035-api-docs-served-at-docs.md) | API docs written by Scribe, served by CourtKu at /docs | 2026-11-14 |

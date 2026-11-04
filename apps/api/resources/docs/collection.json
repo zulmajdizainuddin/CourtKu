@@ -1,0 +1,2895 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "https:\/\/courtku.vercel.app"
+        }
+    ],
+    "info": {
+        "name": "CourtKu API",
+        "_postman_id": "6e159116-3492-4eef-b479-f127f016503c",
+        "description": "The API behind CourtKu: venues, courts, prices, live availability, bookings and online payments for badminton, futsal and pickleball courts in Malaysia.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Account and login",
+            "description": "",
+            "item": [
+                {
+                    "name": "Attempt to authenticate a new session.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"gbailey@example.net\",\"password\":\"|]|{+-\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Destroy an authenticated session.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send a reset link to the given user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/forgot-password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/forgot-password"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"gbailey@example.net\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset the user's password.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/reset-password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/reset-password"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"token\":\"architecto\",\"password\":\"architecto\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create a new registered user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/register",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/register"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Mark the authenticated user's email address as verified.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/email\/verify\/:id\/:hash",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/email\/verify\/:id\/:hash",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "architecto",
+                                    "description": "The ID of the verify."
+                                },
+                                {
+                                    "id": "hash",
+                                    "key": "hash",
+                                    "value": "architecto",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send a new email verification notification.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/email\/verification-notification",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/email\/verification-notification"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update the user's profile information.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/profile-information",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/profile-information"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update the user's password.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/password"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get the password confirmation status.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/confirmed-password-status",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/confirmed-password-status"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Confirm the user's password.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/confirm-password",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/confirm-password"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Attempt to authenticate a new session using the two factor authentication code.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/two-factor-challenge",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/two-factor-challenge"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"code\":\"architecto\",\"recovery_code\":\"architecto\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Enable two factor authentication for the user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-authentication",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-authentication"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Enable two factor authentication for the user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/confirmed-two-factor-authentication",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/confirmed-two-factor-authentication"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Disable two factor authentication for the user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-authentication",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-authentication"
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get the SVG element for the user's two factor authentication QR code.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-qr-code",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-qr-code"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get the current user's two factor authentication setup \/ secret key.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-secret-key",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-secret-key"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get the two factor authentication recovery codes for authenticated user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-recovery-codes",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-recovery-codes"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Generate a fresh set of two factor authentication recovery codes.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "auth\/user\/two-factor-recovery-codes",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/auth\/user\/two-factor-recovery-codes"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Return an empty response simply to trigger the storage of the CSRF cookie in the browser.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "sanctum\/csrf-cookie",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/sanctum\/csrf-cookie"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/me",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/me  { \"password\": \".",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me"
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"password\":\"|]|{+-\"}"
+                        },
+                        "description": "..\" }: delete my own account (NFR-07, ADR-033).\nThe password is asked again, so someone at an unlocked laptop can't do it in one click."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Venues (public)",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/venues?sport=badminton&state=selangor&q=cheras&page=2: the venues guests can book,\nfor the list on the home page (ADR-031). Only approved venues with at least one bookable court.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"sport\":\"architecto\",\"state\":\"melaka\",\"q\":\"n\"}"
+                        },
+                        "description": "Real venues come first, then the demo venues (ADR-030); 24 per page.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/venues\/{slug}: everything the venue's public page shows.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues\/:venue_slug",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues\/:venue_slug",
+                            "variable": [
+                                {
+                                    "id": "venue_slug",
+                                    "key": "venue_slug",
+                                    "value": "arena-demo",
+                                    "description": "The venue's web address name (slug)."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/venues\/{slug}\/courts: the courts players can book.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues\/:venue_slug\/courts",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues\/:venue_slug\/courts",
+                            "variable": [
+                                {
+                                    "id": "venue_slug",
+                                    "key": "venue_slug",
+                                    "value": "arena-demo",
+                                    "description": "The venue's web address name (slug)."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/venues\/{slug}\/availability?date=2026-11-06&sport=badminton\nEvery bookable court offering the sport, with each half hour players can still book\nand its price. Half hours that have started, or are inside the venue's notice, are left out.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues\/:venue_slug\/availability",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues\/:venue_slug\/availability",
+                            "variable": [
+                                {
+                                    "id": "venue_slug",
+                                    "key": "venue_slug",
+                                    "value": "arena-demo",
+                                    "description": "The venue's web address name (slug)."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"date\":\"2026-11-04\",\"sport\":\"architecto\"}"
+                        },
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/venues\/{slug}\/quote: the total for one booking, adding up each half hour.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues\/:venue_slug\/quote",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues\/:venue_slug\/quote",
+                            "variable": [
+                                {
+                                    "id": "venue_slug",
+                                    "key": "venue_slug",
+                                    "value": "arena-demo",
+                                    "description": "The venue's web address name (slug)."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"court_id\":16,\"starts_at\":\"2026-11-04T15:46:09\",\"minutes\":61}"
+                        },
+                        "description": "The booking page shows this before the player books; M3 uses the same check to book.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Bookings (players)",
+            "description": "",
+            "item": [
+                {
+                    "name": "POST \/api\/v1\/venues\/{slug}\/bookings  (header Idempotency-Key: <a random id per Book press>)\n201 with the new booking; 200 with the same booking when the same key comes again\n(a double tap or a network retry); 409 SLOT_TAKEN when someone was faster.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/venues\/:venue_slug\/bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/venues\/:venue_slug\/bookings",
+                            "variable": [
+                                {
+                                    "id": "venue_slug",
+                                    "key": "venue_slug",
+                                    "value": "arena-demo",
+                                    "description": "The venue's web address name (slug)."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"court_id\":16,\"sport\":\"architecto\",\"starts_at\":\"2026-11-04T15:46:09\",\"minutes\":22,\"pay\":\"online\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/bookings\/{code}: the player's own booking, e.g. for the confirmation page.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings\/:code",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings\/:code",
+                            "variable": [
+                                {
+                                    "id": "code",
+                                    "key": "code",
+                                    "value": "CK-7F3K2",
+                                    "description": "The booking code."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "While it waits for payment, CourtKu asks Stripe how the payment stands first (at most every few\nseconds), so the status page shows \"paid\" as soon as Stripe knows, webhook or not."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/me\/bookings?when=upcoming (soonest first) or ?when=past (latest first, with\ncancelled ones), 20 at a time. The next page is ?cursor=<meta.next_cursor> (plan section 8).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/me\/bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/me\/bookings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/bookings\/{code}\/cancel: the player cancels their own booking (FR-24), until the\nvenue's cutoff (e.g. 24 hours before). The half hours are free for others straight away.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings\/:code\/cancel",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings\/:code\/cancel",
+                            "variable": [
+                                {
+                                    "id": "code",
+                                    "key": "code",
+                                    "value": "CK-7F3K2",
+                                    "description": "The booking code."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/bookings\/{code}\/pay: { \"data\": { \"url\": \"https:\/\/checkout.stripe.com\/.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/bookings\/:code\/pay",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/bookings\/:code\/pay",
+                            "variable": [
+                                {
+                                    "id": "code",
+                                    "key": "code",
+                                    "value": "CK-7F3K2",
+                                    "description": "The booking code."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "..\" } }\nWhere the player pays for a booking that is waiting for payment: the page already open, or a new\none after a declined card. 409 NOT_AWAITING_PAYMENT once it is paid, cancelled or expired."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "description": "",
+            "item": [
+                {
+                    "name": "POST api\/v1\/webhooks\/payments\/stripe",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/webhooks\/payments\/stripe",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/webhooks\/payments\/stripe"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/payment-account: the connected account, or null.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payment-account",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payment-account",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Until it can take payments, CourtKu asks Stripe again each time, e.g. when the owner comes back from Stripe."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/payment-account\/onboarding: { \"data\": { \"url\": \"https:\/\/connect.stripe.com\/.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payment-account\/onboarding",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payment-account\/onboarding",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "..\" } }\nWhere the owner goes next: Stripe's own sign-up pages for the venue's account. The first time,\nthe account is made first. Each link works once and for a few minutes, so a new one is made each time."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/payment-account: CourtKu stops using the account, and players\ngo back to paying at the counter. The Stripe account itself stays the venue's. Refused while a\nplayer is paying, so their payment can still be confirmed.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payment-account",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payment-account",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/payment-settings  { \"payment_mode\": \"both\", \"hold_minutes\": 15 }",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payment-settings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payment-settings",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"payment_mode\":\"counter\",\"hold_minutes\":15}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/payments\/attention: online payments the owner should refund (FR-25),\nnewest first, until they are fully refunded:\n  - money that came in but couldn't confirm the booking (wrong amount, too late, after a cancel, paid twice);\n  - bookings paid online and cancelled afterwards (by the player before the cutoff, or by staff).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payments\/attention",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payments\/attention",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/payments\/{payment}\/refunds  { \"amount_sen\": 2000, \"reason\": \"Paid after the time ran out\" }\nPart refunds are fine; the total can never be more than was paid. Fully refunded = status refunded.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/payments\/:payment_id\/refunds",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/payments\/:payment_id\/refunds",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "payment_id",
+                                    "key": "payment_id",
+                                    "value": 2,
+                                    "description": "The ID of the payment."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"amount_sen\":16,\"reason\":\"n\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Venue setup (owners)",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/manage\/venues: the venue picker. Only venues this user belongs to.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues: list a new venue (FR-04).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"slug\":\"n\",\"state\":\"putrajaya\"}"
+                        },
+                        "description": "It starts as pending and stays hidden until an admin approves it."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}. The route checks VenuePolicy::view first.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}: save the profile (FR-06). Owners only (VenuePolicy::update).",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"slug\":\"n\",\"state\":\"terengganu\",\"description\":\"Animi quos velit et fugiat.\",\"address_line\":\"d\",\"city\":\"l\",\"postcode\":\"56425\",\"phone\":\"dljnikhwaykcmyuw\",\"facilities\":[\"changing_rooms\"]}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/settings: how players may book (FR-13). Owners only.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/settings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/settings",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"slot_minutes\":60,\"min_minutes\":1,\"max_minutes\":22,\"booking_window_days\":7,\"min_notice_minutes\":30,\"cancel_cutoff_hours\":24,\"refund_note\":\"z\",\"booking_emails\":false}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/hours",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/hours",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/hours",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/hours: replaces the whole week.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/hours",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/hours",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"periods\":[{\"weekday\":1,\"opens_at\":\"04:30\",\"closes_at\":\"04:30\"}]}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/closures: today's and future closures, soonest first.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/closures",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/closures",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/closures",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/closures",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/closures",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"starts_on\":\"2052-11-27\",\"ends_on\":\"2052-11-27\",\"reason\":\"n\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/closures\/{closure}\nThe route only finds closures of this venue (scopeBindings), so venue A's URL\ncan never remove venue B's closure.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/closures\/:closure_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/closures\/:closure_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "closure_id",
+                                    "key": "closure_id",
+                                    "value": 16,
+                                    "description": "The ID of the closure."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/courts: in the owner's chosen order.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/courts",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/courts",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/courts: the new court goes at the end of the list.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/courts",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/courts",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"is_indoor\":true,\"base_price_sen\":22,\"is_active\":false}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/courts\/order  { \"court_ids\": [7, 4, 5] }\nEvery court of the venue, each exactly once, in the new order.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/courts\/order",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/courts\/order",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"court_ids\":[16]}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/courts\/{court}: name, indoor, active and sports.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/courts\/:court_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/courts\/:court_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "court_id",
+                                    "key": "court_id",
+                                    "value": 5,
+                                    "description": "The ID of the court."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"is_indoor\":true,\"base_price_sen\":22,\"is_active\":false}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/courts\/{court}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/courts\/:court_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/courts\/:court_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "court_id",
+                                    "key": "court_id",
+                                    "value": 5,
+                                    "description": "The ID of the court."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/price-rules: all-courts rules first, then by start time.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/price-rules",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/price-rules",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/price-rules",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/price-rules",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/price-rules",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"court_id\":16,\"weekdays\":[1],\"starts_at\":\"04:30\",\"ends_at\":\"04:30\",\"price_sen\":8}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/price-rules\/{priceRule}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/price-rules\/:priceRule_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/price-rules\/:priceRule_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "priceRule_id",
+                                    "key": "priceRule_id",
+                                    "value": 3,
+                                    "description": "The ID of the priceRule."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"b\",\"court_id\":16,\"weekdays\":[1],\"starts_at\":\"04:30\",\"ends_at\":\"04:30\",\"price_sen\":8}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/price-rules\/{priceRule}: those hours go back to the normal price.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/price-rules\/:priceRule_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/price-rules\/:priceRule_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "priceRule_id",
+                                    "key": "priceRule_id",
+                                    "value": 3,
+                                    "description": "The ID of the priceRule."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/staff",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/staff",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/staff",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/staff-invites  { \"email\": \"aina@example.com\" }\nInviting the same email again sends a fresh link; the old one stops working.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/staff-invites",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/staff-invites",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/staff-invites\/{invite}: the link stops working.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/staff-invites\/:invite_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/staff-invites\/:invite_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "invite_id",
+                                    "key": "invite_id",
+                                    "value": 16,
+                                    "description": "The ID of the invite."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/staff\/{user}: they lose access straight away.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/staff\/:user",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/staff\/:user",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "user",
+                                    "key": "user",
+                                    "value": "564",
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/photos: in the owner's chosen order.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/photos",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/photos",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/photos: the new photo goes at the end.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/photos",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/photos",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "photo",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PUT \/api\/v1\/manage\/venues\/{venue}\/photos\/order  { \"photo_ids\": [5, 2, 3] }",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/photos\/order",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/photos\/order",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"photo_ids\":[16]}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/photos\/{photo}",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/photos\/:photo_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/photos\/:photo_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "photo_id",
+                                    "key": "photo_id",
+                                    "value": 2,
+                                    "description": "The ID of the photo."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Day schedule (staff)",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/schedule?date=2026-11-06 (today in Malaysia when left out)",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/schedule",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/schedule",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "times: the day's half hours, from opening to closing, after midnight too (ADR-015), plus any\nhalf hour a booking or block holds outside today's hours. courts: the active courts, and any\nother court with a booking or block that day. bookings: everything except cancelled and expired\nones (holds still waiting for payment included).\nblocks: times closed for repairs or a private event (FR-21)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/schedule\/version (FR-14)",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/schedule\/version",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/schedule\/version",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "A tiny answer the Schedule tab asks for every 10 seconds: a word that changes whenever a booking,\ncancel, block or setting at this venue is saved (AvailabilityCache, ADR-028). The page reloads the\nwhole schedule only when it changes, so the counter sees new online bookings within seconds."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/bookings",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/bookings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/bookings",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"court_id\":16,\"sport\":\"architecto\",\"starts_at\":\"2026-11-04T15:46:09\",\"minutes\":22,\"source\":\"walk_in\",\"customer_name\":\"g\",\"customer_phone\":\"architecto\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/manage\/venues\/{venue}\/blocks\n{ \"court_ids\": [6, 7], \"starts_at\": \"2026-11-06T18:00:00+08:00\", \"minutes\": 120, \"reason\": \"Floor repair\" }\nOne block per court, all or nothing: 409 SLOT_TAKEN (with the bookings in the way) when any\nof these half hours is already booked or blocked.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/blocks",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/blocks",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"court_ids\":[16],\"starts_at\":\"2026-11-04T15:46:09\",\"minutes\":22,\"reason\":\"g\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST .",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/check-in",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/check-in",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "booking_code",
+                                    "key": "booking_code",
+                                    "value": 31,
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "..\/bookings\/{code}\/check-in: the player arrived. From an hour before the start until it ends."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST .",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/no-show",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/no-show",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "booking_code",
+                                    "key": "booking_code",
+                                    "value": 31,
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "..\/bookings\/{code}\/no-show: the player didn't come. The time stays taken, as history."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST .",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/paid",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/paid",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "booking_code",
+                                    "key": "booking_code",
+                                    "value": 31,
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"method\":\"architecto\"}"
+                        },
+                        "description": "..\/bookings\/{code}\/paid  { \"method\": \"cash\" | \"qr\" | \"card\" }"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST .",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/cancel",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/bookings\/:booking_code\/cancel",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "booking_code",
+                                    "key": "booking_code",
+                                    "value": 31,
+                                    "description": ""
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"reason\":\"b\"}"
+                        },
+                        "description": "..\/bookings\/{code}\/cancel  { \"reason\": \"Rain\" }\nStaff and owners can cancel any confirmed booking, or one waiting for payment, with no cutoff\n(unlike players, FR-24).\nThe time is free for others straight away."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE \/api\/v1\/manage\/venues\/{venue}\/blocks\/{slotBlock}: the time can be booked again.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/blocks\/:slotBlock_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/blocks\/:slotBlock_id",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                },
+                                {
+                                    "id": "slotBlock_id",
+                                    "key": "slotBlock_id",
+                                    "value": 16,
+                                    "description": "The ID of the slotBlock."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Staff invites",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/invites\/{token}: what the invite is, before accepting.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/invites\/:token",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/invites\/:token",
+                            "variable": [
+                                {
+                                    "id": "token",
+                                    "key": "token",
+                                    "value": "5f2b8c1e9a7d4f6b",
+                                    "description": "The code from the invite email."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/invites\/{token}\/accept: the logged-in, verified user joins the venue.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/invites\/:token\/accept",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/invites\/:token\/accept",
+                            "variable": [
+                                {
+                                    "id": "token",
+                                    "key": "token",
+                                    "value": "5f2b8c1e9a7d4f6b",
+                                    "description": "The code from the invite email."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Reports (owners)",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/reports?from=2026-11-01&to=2026-11-30",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/reports",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/reports",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET \/api\/v1\/manage\/venues\/{venue}\/reports\/bookings.csv?from=2026-11-01&to=2026-11-30",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/manage\/venues\/:venue_id\/reports\/bookings.csv",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/manage\/venues\/:venue_id\/reports\/bookings.csv",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET \/api\/v1\/admin\/venues?status=pending: newest first, 25 per page.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/admin\/venues",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/admin\/venues"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"suspended\"}"
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/admin\/venues\/{venue}\/approve",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/admin\/venues\/:venue_id\/approve",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/admin\/venues\/:venue_id\/approve",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST \/api\/v1\/admin\/venues\/{venue}\/suspend",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/admin\/venues\/:venue_id\/suspend",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/admin\/venues\/:venue_id\/suspend",
+                            "variable": [
+                                {
+                                    "id": "venue_id",
+                                    "key": "venue_id",
+                                    "value": 1,
+                                    "description": "The ID of the venue."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET api\/v1\/admin\/stats",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/admin\/stats",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/admin\/stats"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Health",
+            "description": "",
+            "item": [
+                {
+                    "name": "GET api\/health",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/health",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/health"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "apikey",
+        "apikey": [
+            {
+                "key": "in",
+                "value": "header",
+                "type": "string"
+            },
+            {
+                "key": "key",
+                "value": "X-XSRF-TOKEN",
+                "type": "string"
+            }
+        ]
+    }
+}

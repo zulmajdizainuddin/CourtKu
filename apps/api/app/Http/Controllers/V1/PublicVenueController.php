@@ -17,6 +17,8 @@ use Illuminate\Validation\Rule;
 /**
  * What guests see, without logging in (FR-04, FR-06): only approved (active) venues.
  * A pending or suspended venue answers 404, exactly like a web address that doesn't exist.
+ *
+ * @group Venues (public)
  */
 class PublicVenueController extends Controller
 {
@@ -56,7 +58,11 @@ class PublicVenueController extends Controller
         return VenueCardResource::collection($venues);
     }
 
-    /** GET /api/v1/venues/{slug}: everything the venue's public page shows. */
+    /**
+     * GET /api/v1/venues/{slug}: everything the venue's public page shows.
+     *
+     * @urlParam venue_slug string required The venue's web address name (slug). Example: arena-demo
+     */
     public function show(Venue $venue): PublicVenueResource
     {
         $this->ensurePublic($venue);
@@ -64,7 +70,11 @@ class PublicVenueController extends Controller
         return new PublicVenueResource($venue);
     }
 
-    /** GET /api/v1/venues/{slug}/courts: the courts players can book. */
+    /**
+     * GET /api/v1/venues/{slug}/courts: the courts players can book.
+     *
+     * @urlParam venue_slug string required The venue's web address name (slug). Example: arena-demo
+     */
     public function courts(Venue $venue): AnonymousResourceCollection
     {
         $this->ensurePublic($venue);

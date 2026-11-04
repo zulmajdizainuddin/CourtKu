@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * A venue's weekly opening hours (FR-07). Owners change them; staff can read them.
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class OpeningHoursController extends Controller
 {

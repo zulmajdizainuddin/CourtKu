@@ -15,6 +15,10 @@ use Illuminate\Http\Response;
 
 /**
  * Days a venue is closed, e.g. Hari Raya (FR-07). Owners add and remove them; staff can read them.
+ *
+ * @group Venue setup (owners)
+ *
+ * @authenticated
  */
 class VenueClosureController extends Controller
 {

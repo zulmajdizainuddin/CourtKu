@@ -19,6 +19,10 @@ use Illuminate\Validation\Rule;
  * What staff and owners do with a booking at the counter (FR-28, plan's permission table):
  * check in, mark a no-show, mark it paid, or cancel it. Every change goes through
  * BookingStateMachine (row lock + audit log).
+ *
+ * @group Day schedule (staff)
+ *
+ * @authenticated
  */
 class BookingActionController extends Controller
 {

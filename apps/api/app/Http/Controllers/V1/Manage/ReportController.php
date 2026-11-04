@@ -18,6 +18,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  * The owner's reports (FR-32): totals for a range of days, and every booking as a CSV file.
  * Owners only (routes/api.php): it shows the venue's money.
+ *
+ * @group Reports (owners)
+ *
+ * @authenticated
  */
 class ReportController extends Controller
 {

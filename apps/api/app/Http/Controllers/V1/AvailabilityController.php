@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * What players see before booking, without logging in: free times and prices (FR-11, FR-12).
  * Only approved (active) venues; any other answers 404 (checked in the requests, before the input).
+ *
+ * @group Venues (public)
  */
 class AvailabilityController extends Controller
 {
@@ -25,6 +27,8 @@ class AvailabilityController extends Controller
      * GET /api/v1/venues/{slug}/availability?date=2026-11-06&sport=badminton
      * Every bookable court offering the sport, with each half hour players can still book
      * and its price. Half hours that have started, or are inside the venue's notice, are left out.
+     *
+     * @urlParam venue_slug string required The venue's web address name (slug). Example: arena-demo
      */
     public function show(AvailabilityRequest $request, Venue $venue): JsonResponse
     {
@@ -82,6 +86,8 @@ class AvailabilityController extends Controller
     /**
      * POST /api/v1/venues/{slug}/quote: the total for one booking, adding up each half hour.
      * The booking page shows this before the player books; M3 uses the same check to book.
+     *
+     * @urlParam venue_slug string required The venue's web address name (slug). Example: arena-demo
      */
     public function quote(QuoteRequest $request, Venue $venue): JsonResponse
     {

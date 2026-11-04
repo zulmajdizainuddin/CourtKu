@@ -30,6 +30,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  *   2. The owner goes to Stripe's own pages and gives their details to Stripe, not to CourtKu.
  *   3. They come back to the Payments tab, and CourtKu asks Stripe whether the account can take payments.
  * The owner never copies a key, and CourtKu never holds one of theirs.
+ *
+ * @group Payments
+ *
+ * @authenticated
  */
 class PaymentAccountController extends Controller
 {

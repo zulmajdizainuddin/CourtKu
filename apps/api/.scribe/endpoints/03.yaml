@@ -1,0 +1,323 @@
+name: 'Venues (public)'
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/venues
+    metadata:
+      custom: []
+      groupName: 'Venues (public)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        GET /api/v1/venues?sport=badminton&state=selangor&q=cheras&page=2: the venues guests can book,
+        for the list on the home page (ADR-031). Only approved venues with at least one bookable court.
+      description: 'Real venues come first, then the demo venues (ADR-030); 24 per page.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      sport:
+        custom: []
+        name: sport
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      state:
+        custom: []
+        name: state
+        description: ''
+        required: false
+        example: melaka
+        type: string
+        enumValues:
+          - johor
+          - kedah
+          - kelantan
+          - melaka
+          - negeri-sembilan
+          - pahang
+          - perak
+          - perlis
+          - pulau-pinang
+          - sabah
+          - sarawak
+          - selangor
+          - terengganu
+          - kuala-lumpur
+          - labuan
+          - putrajaya
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      q:
+        custom: []
+        name: q
+        description: 'Must not be greater than 60 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      sport: architecto
+      state: melaka
+      q: 'n'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/venues/{venue_slug}'
+    metadata:
+      custom: []
+      groupName: 'Venues (public)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "GET /api/v1/venues/{slug}: everything the venue's public page shows."
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_slug:
+        custom: []
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        required: true
+        example: arena-demo
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_slug: arena-demo
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/venues/{venue_slug}/courts'
+    metadata:
+      custom: []
+      groupName: 'Venues (public)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'GET /api/v1/venues/{slug}/courts: the courts players can book.'
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_slug:
+        custom: []
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        required: true
+        example: arena-demo
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_slug: arena-demo
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/venues/{venue_slug}/availability'
+    metadata:
+      custom: []
+      groupName: 'Venues (public)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        GET /api/v1/venues/{slug}/availability?date=2026-11-06&sport=badminton
+        Every bookable court offering the sport, with each half hour players can still book
+        and its price. Half hours that have started, or are inside the venue's notice, are left out.
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_slug:
+        custom: []
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        required: true
+        example: arena-demo
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_slug: arena-demo
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      date:
+        custom: []
+        name: date
+        description: 'Must be a valid date in the format <code>Y-m-d</code>.'
+        required: true
+        example: '2026-11-04'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sport:
+        custom: []
+        name: sport
+        description: 'Must match an existing stored value.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      date: '2026-11-04'
+      sport: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/venues/{venue_slug}/quote'
+    metadata:
+      custom: []
+      groupName: 'Venues (public)'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'POST /api/v1/venues/{slug}/quote: the total for one booking, adding up each half hour.'
+      description: 'The booking page shows this before the player books; M3 uses the same check to book.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      venue_slug:
+        custom: []
+        name: venue_slug
+        description: "The venue's web address name (slug)."
+        required: true
+        example: arena-demo
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      venue_slug: arena-demo
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      court_id:
+        custom: []
+        name: court_id
+        description: ''
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      starts_at:
+        custom: []
+        name: starts_at
+        description: 'Must be a valid date.'
+        required: true
+        example: '2026-11-04T15:46:09'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      minutes:
+        custom: []
+        name: minutes
+        description: 'Must be between 60 and 180.'
+        required: true
+        example: 61
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      court_id: 16
+      starts_at: '2026-11-04T15:46:09'
+      minutes: 61
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

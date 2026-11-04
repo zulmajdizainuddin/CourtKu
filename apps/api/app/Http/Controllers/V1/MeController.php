@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 /**
  * GET /api/v1/me: who is logged in right now.
  * The web app calls this on page load to know whether to show "Log in" or the user's name.
+ *
+ * @group Account and login
+ *
+ * @authenticated
  */
 class MeController extends Controller
 {

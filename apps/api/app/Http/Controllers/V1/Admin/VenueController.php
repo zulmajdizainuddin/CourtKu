@@ -13,6 +13,10 @@ use Illuminate\Validation\Rule;
 /**
  * The platform admin's venue list: approve new venues, suspend bad ones (FR-04, FR-33).
  * Every route here is behind the "admin" gate (routes/api.php).
+ *
+ * @group Admin
+ *
+ * @authenticated
  */
 class VenueController extends Controller
 {

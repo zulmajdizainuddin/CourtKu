@@ -16,6 +16,10 @@ use Illuminate\Http\JsonResponse;
 /**
  * GET /api/v1/admin/stats: platform totals for the admin (FR-33). Demo venues (venues.is_demo)
  * are left out, so the demo data never makes CourtKu look busier than it is.
+ *
+ * @group Admin
+ *
+ * @authenticated
  */
 class StatsController extends Controller
 {
