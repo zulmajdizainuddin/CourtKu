@@ -25,6 +25,7 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 ## Requests from outside
 
 - [x] **Stripe webhooks are signed.** `Stripe-Signature` (HMAC of time + body, 5 minutes tolerance) is checked before anything is read; bad ones get 401. The amount paid is checked against the booking. [ADR-006](adr/006-hosted-payment-page-webhook.md)
+- [x] **The browser tests' pretend Stripe can't be used on the live site.** `PretendGateway::enabled()` is false in production whatever `PAYMENT_GATEWAY` says, so payments go to Stripe and `/api/pretend-checkout/...` is 404; the test data (`E2eSeeder`) refuses to load there too. `tests/Feature/Payments/PretendGatewayTest.php`, [ADR-034](adr/034-browser-tests-on-every-pull-request.md)
 - [x] **Webhooks count once.** `webhook_events.event_key` is unique, and payments are processed with row locks.
 - [x] **The cron tick needs `X-Cron-Secret`** (403 without it, 404 when no secret is set). [ADR-022](adr/022-timed-jobs-without-a-scheduler.md)
 - [x] **Bookings can't be sent twice.** `Idempotency-Key` header, unique per user.

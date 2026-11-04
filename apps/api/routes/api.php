@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\PretendCheckoutController;
 use App\Http\Controllers\TickController;
 use App\Http\Controllers\V1\AccountController;
 use App\Http\Controllers\V1\Admin\StatsController;
@@ -32,6 +33,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health', HealthController::class);
 // The every-minute jobs, called by a cron service on hosting without a scheduler (ADR-022).
 Route::post('/tick', TickController::class)->middleware('throttle:10,1');
+
+// The browser tests' "pretend Stripe" page (ADR-034). 404 unless PAYMENT_GATEWAY=pretend, and always
+// 404 on the live site (PretendGateway::enabled()).
+Route::get('/pretend-checkout/{id}', [PretendCheckoutController::class, 'show'])->middleware('throttle:60,1');
+Route::get('/pretend-checkout/{id}/pay', [PretendCheckoutController::class, 'pay'])->middleware('throttle:60,1');
 
 Route::prefix('v1')->group(function () {
     // Stripe tells CourtKu about payments (ADR-006, ADR-024). No login: the signature proves it is Stripe.

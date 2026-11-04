@@ -42,3 +42,8 @@ next-env.d.ts
 
 # The example file is safe to share; real .env files are not.
 !.env.example
+
+# Playwright browser tests (npm run e2e): results and reports
+/test-results/
+/playwright-report/
+/blob-report/
