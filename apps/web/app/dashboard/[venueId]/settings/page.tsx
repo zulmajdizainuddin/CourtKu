@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FormAlert, SelectField } from "@/components/forms/form-field";
+import { FormAlert, SelectField, TextareaField } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VenuePage } from "@/components/venues/venue-page";
@@ -67,6 +67,7 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
     booking_window_days: venue.booking_window_days,
     min_notice_minutes: venue.min_notice_minutes,
     cancel_cutoff_hours: venue.cancel_cutoff_hours,
+    refund_note: venue.refund_note,
     booking_emails: venue.booking_emails,
   });
   const [saved, setSaved] = useState(false);
@@ -155,6 +156,15 @@ function SettingsForm({ venue }: { venue: ManageVenue }) {
         value={String(settings.cancel_cutoff_hours)}
         onChange={(e) => change({ cancel_cutoff_hours: Number(e.target.value) })}
       />
+      <TextareaField
+        label="Note on refunds (optional)"
+        name="refund_note"
+        rows={2}
+        maxLength={300}
+        hint="Shown under the cancellation rule before players pay, e.g. 'Rained out on an outdoor court? We move your booking.'"
+        value={settings.refund_note ?? ""}
+        onChange={(e) => change({ refund_note: e.target.value })}
+      />
       <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -187,6 +197,7 @@ function SettingsView({ venue }: { venue: ManageVenue }) {
     ["Book ahead", `${venue.booking_window_days} days`],
     ["Players can book", noticeLabel(venue.min_notice_minutes)],
     ["Players can cancel online", `Until ${venue.cancel_cutoff_hours} hours before`],
+    ["Note on refunds", venue.refund_note || "None"],
     ["Booking emails", venue.booking_emails ? "Owners and staff are emailed about player bookings" : "Off"],
   ];
   return (

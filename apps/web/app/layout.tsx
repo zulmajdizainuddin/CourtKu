@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Providers>
           <SiteHeader />
           <main className="flex flex-1 flex-col">{children}</main>
+          <SiteFooter />
         </Providers>
         {/* Vercel Web Analytics: page views and visitor counts, without cookies. Only sends data on Vercel. */}
         <Analytics />

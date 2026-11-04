@@ -35,12 +35,13 @@ use Illuminate\Support\Carbon;
  * @property int $booking_window_days
  * @property int $min_notice_minutes 0 = players can book right up to the start time
  * @property int $cancel_cutoff_hours players cancel online until this many hours before the start (FR-24)
+ * @property string|null $refund_note the owner's own words added to the refund policy players see before paying (FR-40)
  * @property bool $booking_emails owners and staff get an email for each player booking and player cancel (FR-27)
  * @property int $hold_minutes how long a player has to pay online before the time is freed (FR-16)
  * @property PaymentMode $payment_mode counter, online or both (FR-17)
  * @property VenuePaymentAccount|null $paymentAccount
  */
-#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'booking_emails', 'hold_minutes', 'payment_mode'])]
+#[Fillable(['name', 'slug', 'state', 'description', 'address_line', 'city', 'postcode', 'lat', 'lng', 'phone', 'facilities', 'slot_minutes', 'min_minutes', 'max_minutes', 'booking_window_days', 'min_notice_minutes', 'cancel_cutoff_hours', 'refund_note', 'booking_emails', 'hold_minutes', 'payment_mode'])]
 class Venue extends Model
 {
     use ClearsAvailabilityCache;

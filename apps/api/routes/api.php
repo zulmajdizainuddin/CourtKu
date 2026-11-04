@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\TickController;
+use App\Http\Controllers\V1\AccountController;
 use App\Http\Controllers\V1\Admin\StatsController;
 use App\Http\Controllers\V1\Admin\TestErrorController;
 use App\Http\Controllers\V1\Admin\VenueController as AdminVenueController;
@@ -49,6 +50,8 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', MeController::class);
+        // Delete my own account (NFR-07, ADR-033): anonymised, with the password asked again.
+        Route::delete('/me', [AccountController::class, 'destroy'])->middleware('throttle:5,1');
 
         // Players book online (FR-15): verified email first (FR-35), at most 10 tries a minute each.
         Route::post('/venues/{venue:slug}/bookings', [BookingController::class, 'store'])->middleware(['verified', 'throttle:10,1']);

@@ -54,6 +54,10 @@ class AppServiceProvider extends ServiceProvider
             if ($event->channel === 'mail' && $this->app->isProduction() && self::isExampleAddress($event->notifiable)) {
                 return false;
             }
+            // A deleted account is never emailed, anywhere (ADR-033).
+            if ($event->notifiable instanceof User && $event->notifiable->trashed()) {
+                return false;
+            }
         });
 
         // The platform admin approves and suspends venues (routes/api.php, "can:admin").

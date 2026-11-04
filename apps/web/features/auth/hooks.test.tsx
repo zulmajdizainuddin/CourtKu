@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, api } from "@/lib/api";
-import { type User, useLogin, useLogout, useMe } from "./hooks";
+import { type User, useDeleteAccount, useLogin, useLogout, useMe } from "./hooks";
 
 vi.mock("@/lib/api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/api")>()),
@@ -92,6 +92,22 @@ describe("a new person on the same browser", () => {
 
     expect(queryClient.getQueryData(["bookings", "CK-EF9BX"])).toBeUndefined();
     expect(queryClient.getQueryData(["manage", "venues", "9"])).toBeUndefined();
+    expect(queryClient.getQueryData(["me"])).toBeNull();
+  });
+
+  it("sends the password with a delete, and forgets everything afterwards like a logout", async () => {
+    vi.mocked(api).mockResolvedValue(undefined);
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(["me"], player);
+    queryClient.setQueryData(["bookings", "CK-EF9BX"], { code: "CK-EF9BX" });
+    const { result } = renderHook(() => useDeleteAccount(), {
+      wrapper: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>,
+    });
+
+    await result.current.mutateAsync("secret");
+
+    expect(api).toHaveBeenCalledWith("/api/v1/me", { method: "DELETE", body: { password: "secret" } });
+    expect(queryClient.getQueryData(["bookings", "CK-EF9BX"])).toBeUndefined();
     expect(queryClient.getQueryData(["me"])).toBeNull();
   });
 

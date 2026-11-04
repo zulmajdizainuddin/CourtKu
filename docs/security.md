@@ -30,6 +30,12 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 - [x] **Bookings can't be sent twice.** `Idempotency-Key` header, unique per user.
 - [x] **No double bookings.** One row per court per half hour with a unique index. [ADR-005](adr/005-slot-rows-unique-index.md)
 
+## Personal data (PDPA)
+
+- [x] **Only what booking needs:** name and email for an account; staff record a name and phone for counter and phone bookings. The [Privacy Notice](../apps/web/app/privacy/page.tsx) (`/privacy`) says what is collected, why, who sees it and for how long. [ADR-032](adr/032-legal-pages-and-refund-policy-before-payment.md)
+- [x] **Players can delete their account** (`DELETE /api/v1/me`, password asked again). It is anonymised, past bookings stay with the venue as "Deleted user", and it is never emailed again. [ADR-033](adr/033-deleting-an-account-anonymises-it.md)
+- [ ] Bahasa Melayu versions of the Terms and Privacy Notice, and a lawyer's check, before real venues are charged (M6).
+
 ## Rate limits (per visitor IP, or per user when logged in)
 
 | What | Limit |
@@ -40,6 +46,7 @@ What protects CourtKu, where it lives in the code, and what is still open. Revie
 | Connecting Stripe, staff invites, invite codes | 10 a minute |
 | Photo uploads | 10 a minute, max 4 MB, JPEG/PNG/WebP only |
 | Login / two-factor code | 5 a minute |
+| Deleting an account | 5 a minute |
 | Stripe webhook | 120 a minute |
 | Cron tick | 10 a minute |
 

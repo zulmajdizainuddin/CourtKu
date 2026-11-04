@@ -94,6 +94,21 @@ export function useLogout() {
   });
 }
 
+/**
+ * Deletes the logged-in user's own account (NFR-07, ADR-033), with their password typed again.
+ * The API logs this browser out, so everything loaded is forgotten, as on log out.
+ */
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (password: string) => api("/api/v1/me", { method: "DELETE", body: { password } }),
+    onSuccess: () => {
+      queryClient.clear();
+      queryClient.setQueryData(meKey, null);
+    },
+  });
+}
+
 export function useResendVerification() {
   return useMutation({
     mutationFn: () => api("/auth/email/verification-notification", { method: "POST" }),

@@ -50,6 +50,8 @@ class PublicVenueResource extends JsonResource
                 'booking_window_days' => $this->booking_window_days,
                 // FR-24: shown before booking, so players know the policy.
                 'cancel_cutoff_hours' => $this->cancel_cutoff_hours,
+                // FR-40: the owner's note added to the cancellation and refund policy.
+                'refund_note' => $this->refund_note,
                 // How players can pay (FR-17), and how long the court is held while they pay online (FR-16).
                 'pay_online' => $this->acceptsOnlinePayment(),
                 'pay_at_counter' => $this->acceptsCounterPayment(),
